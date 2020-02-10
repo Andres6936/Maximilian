@@ -182,7 +182,7 @@ namespace Maximilian
 	 */
 	class RtApi;
 
-	class RtAudio
+	class Audio
 	{
 	public:
 
@@ -311,7 +311,7 @@ namespace Maximilian
 		  the enumerated list values.  Note that there can be more than one
 		  API compiled for certain operating systems.
 		*/
-		static void getCompiledApi(std::vector <RtAudio::SupportedArchitectures>& apis) throw();
+		static void getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) throw();
 
 		//! The class constructor.
 		/*!
@@ -322,17 +322,17 @@ namespace Maximilian
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
 		*/
-		RtAudio(RtAudio::SupportedArchitectures api = Unspecified) throw();
+		Audio(Audio::SupportedArchitectures api = Unspecified) throw();
 
 		//! The destructor.
 		/*!
 		  If a stream is running or open, it will be stopped and closed
 		  automatically.
 		*/
-		~RtAudio() throw();
+		~Audio() throw();
 
 		//! Returns the audio API specifier for the current instance of RtAudio.
-		RtAudio::SupportedArchitectures getCurrentApi() throw();
+		Audio::SupportedArchitectures getCurrentApi() throw();
 
 		//! A public function that queries for the number of audio devices available.
 		/*!
@@ -353,7 +353,7 @@ namespace Maximilian
 		  current default input or output device, the corresponding
 		  "isDefault" member will have a value of "true".
 		*/
-		RtAudio::DeviceInfo getDeviceInfo(unsigned int device);
+		Audio::DeviceInfo getDeviceInfo(unsigned int device);
 
 		//! A function that returns the index of the default output device.
 		/*!
@@ -413,11 +413,11 @@ namespace Maximilian
 				 lowest allowable value is used.  The actual value used is
 				 returned via the structure argument.  The parameter is API dependent.
 		*/
-		void openStream(RtAudio::StreamParameters* outputParameters,
-				RtAudio::StreamParameters* inputParameters,
+		void openStream(Audio::StreamParameters* outputParameters,
+				Audio::StreamParameters* inputParameters,
 				RtAudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData = NULL, RtAudio::StreamOptions* options = NULL);
+				void* userData = NULL, Audio::StreamOptions* options = NULL);
 
 		//! A function that closes a stream and frees any associated stream memory.
 		/*!
@@ -489,7 +489,7 @@ namespace Maximilian
 
 	protected:
 
-		void openRtApi(RtAudio::SupportedArchitectures api);
+		void openRtApi(Audio::SupportedArchitectures api);
 
 		RtApi* rtapi_;
 	};
@@ -525,21 +525,21 @@ namespace Maximilian
 
 		virtual ~RtApi();
 
-		virtual RtAudio::SupportedArchitectures getCurrentApi() = 0;
+		virtual Audio::SupportedArchitectures getCurrentApi() = 0;
 
 		virtual unsigned int getDeviceCount() = 0;
 
-		virtual RtAudio::DeviceInfo getDeviceInfo(unsigned int device) = 0;
+		virtual Audio::DeviceInfo getDeviceInfo(unsigned int device) = 0;
 
 		virtual unsigned int getDefaultInputDevice();
 
 		virtual unsigned int getDefaultOutputDevice();
 
-		void openStream(RtAudio::StreamParameters* outputParameters,
-				RtAudio::StreamParameters* inputParameters,
+		void openStream(Audio::StreamParameters* outputParameters,
+				Audio::StreamParameters* inputParameters,
 				RtAudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData, RtAudio::StreamOptions* options);
+				void* userData, Audio::StreamOptions* options);
 
 		virtual void closeStream();
 
@@ -665,7 +665,7 @@ namespace Maximilian
 		virtual bool probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 				unsigned int firstChannel, unsigned int sampleRate,
 				RtAudioFormat format, unsigned int* bufferSize,
-				RtAudio::StreamOptions* options);
+				Audio::StreamOptions* options);
 
 		//! A protected function used to increment the stream time.
 		void tickStreamTime();
@@ -706,14 +706,14 @@ namespace Maximilian
 
 		~RtApiAlsa();
 
-		RtAudio::SupportedArchitectures getCurrentApi()
+		Audio::SupportedArchitectures getCurrentApi()
 		{
-			return RtAudio::Linux_Alsa;
+			return Audio::Linux_Alsa;
 		};
 
 		unsigned int getDeviceCount();
 
-		RtAudio::DeviceInfo getDeviceInfo(unsigned int device);
+		Audio::DeviceInfo getDeviceInfo(unsigned int device);
 
 		void closeStream();
 
@@ -731,14 +731,14 @@ namespace Maximilian
 
 	private:
 
-		std::vector <RtAudio::DeviceInfo> devices_;
+		std::vector <Audio::DeviceInfo> devices_;
 
 		void saveDeviceInfo();
 
 		bool probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 				unsigned int firstChannel, unsigned int sampleRate,
 				RtAudioFormat format, unsigned int* bufferSize,
-				RtAudio::StreamOptions* options);
+				Audio::StreamOptions* options);
 	};
 }
 
@@ -807,77 +807,77 @@ typedef int StreamMutex;
 //
 // **************************************************************** //
 
-inline Maximilian::RtAudio::SupportedArchitectures Maximilian::RtAudio::getCurrentApi() throw()
+inline Maximilian::Audio::SupportedArchitectures Maximilian::Audio::getCurrentApi() throw()
 {
 	return rtapi_->getCurrentApi();
 }
 
-inline unsigned int Maximilian::RtAudio::getDeviceCount() throw()
+inline unsigned int Maximilian::Audio::getDeviceCount() throw()
 {
 	return rtapi_->getDeviceCount();
 }
 
-inline Maximilian::RtAudio::DeviceInfo Maximilian::RtAudio::getDeviceInfo(unsigned int device)
+inline Maximilian::Audio::DeviceInfo Maximilian::Audio::getDeviceInfo(unsigned int device)
 {
 	return rtapi_->getDeviceInfo(device);
 }
 
-inline unsigned int Maximilian::RtAudio::getDefaultInputDevice() throw()
+inline unsigned int Maximilian::Audio::getDefaultInputDevice() throw()
 {
 	return rtapi_->getDefaultInputDevice();
 }
 
-inline unsigned int Maximilian::RtAudio::getDefaultOutputDevice() throw()
+inline unsigned int Maximilian::Audio::getDefaultOutputDevice() throw()
 {
 	return rtapi_->getDefaultOutputDevice();
 }
 
-inline void Maximilian::RtAudio::closeStream() throw()
+inline void Maximilian::Audio::closeStream() throw()
 {
 	return rtapi_->closeStream();
 }
 
-inline void Maximilian::RtAudio::startStream()
+inline void Maximilian::Audio::startStream()
 {
 	return rtapi_->startStream();
 }
 
-inline void Maximilian::RtAudio::stopStream()
+inline void Maximilian::Audio::stopStream()
 {
 	return rtapi_->stopStream();
 }
 
-inline void Maximilian::RtAudio::abortStream()
+inline void Maximilian::Audio::abortStream()
 {
 	return rtapi_->abortStream();
 }
 
-inline bool Maximilian::RtAudio::isStreamOpen() const throw()
+inline bool Maximilian::Audio::isStreamOpen() const throw()
 {
 	return rtapi_->isStreamOpen();
 }
 
-inline bool Maximilian::RtAudio::isStreamRunning() const throw()
+inline bool Maximilian::Audio::isStreamRunning() const throw()
 {
 	return rtapi_->isStreamRunning();
 }
 
-inline long Maximilian::RtAudio::getStreamLatency()
+inline long Maximilian::Audio::getStreamLatency()
 {
 	return rtapi_->getStreamLatency();
 }
 
-inline unsigned int Maximilian::RtAudio::getStreamSampleRate()
+inline unsigned int Maximilian::Audio::getStreamSampleRate()
 {
 	return rtapi_->getStreamSampleRate();
 };
 
-inline double Maximilian::RtAudio::getStreamTime()
+inline double Maximilian::Audio::getStreamTime()
 {
 	return rtapi_->getStreamTime();
 }
 
-inline void Maximilian::RtAudio::showWarnings(bool value) throw()
+inline void Maximilian::Audio::showWarnings(bool value) throw()
 {
 	rtapi_->showWarnings(value);
 }

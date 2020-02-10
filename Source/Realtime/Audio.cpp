@@ -79,7 +79,7 @@ const unsigned int RtApi::SAMPLE_RATES[] = {
 //
 // *************************************************** //
 
-void RtAudio::getCompiledApi(std::vector <Maximilian::RtAudio::SupportedArchitectures>& apis) throw()
+void Audio::getCompiledApi(std::vector <Maximilian::Audio::SupportedArchitectures>& apis) throw()
 {
 	apis.clear();
 
@@ -108,7 +108,7 @@ void RtAudio::getCompiledApi(std::vector <Maximilian::RtAudio::SupportedArchitec
 #endif
 }
 
-void RtAudio::openRtApi(RtAudio::SupportedArchitectures api)
+void Audio::openRtApi(Audio::SupportedArchitectures api)
 {
 #if defined(__UNIX_JACK__)
 																															if ( api == UNIX_JACK )
@@ -142,7 +142,7 @@ void RtAudio::openRtApi(RtAudio::SupportedArchitectures api)
 #endif
 }
 
-Maximilian::RtAudio::RtAudio(RtAudio::SupportedArchitectures api) throw()
+Maximilian::Audio::Audio(Audio::SupportedArchitectures api) throw()
 {
 	rtapi_ = 0;
 
@@ -160,7 +160,7 @@ Maximilian::RtAudio::RtAudio(RtAudio::SupportedArchitectures api) throw()
 
 	// Iterate through the compiled APIs and return as soon as we find
 	// one with at least one device or we reach the end of the list.
-	std::vector <RtAudio::SupportedArchitectures> apis;
+	std::vector <Audio::SupportedArchitectures> apis;
 	getCompiledApi(apis);
 	for (unsigned int i = 0; i < apis.size(); i++)
 	{
@@ -179,17 +179,17 @@ Maximilian::RtAudio::RtAudio(RtAudio::SupportedArchitectures api) throw()
 	std::cerr << "\nRtAudio: no compiled API support found ... critical error!!\n\n";
 }
 
-Maximilian::RtAudio::~RtAudio() throw()
+Maximilian::Audio::~Audio() throw()
 {
 	delete rtapi_;
 }
 
-void RtAudio::openStream(Maximilian::RtAudio::StreamParameters* outputParameters,
-		Maximilian::RtAudio::StreamParameters* inputParameters,
+void Audio::openStream(Maximilian::Audio::StreamParameters* outputParameters,
+		Maximilian::Audio::StreamParameters* inputParameters,
 		Maximilian::RtAudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
 		Maximilian::RtAudioCallback callback, void* userData,
-		Maximilian::RtAudio::StreamOptions* options)
+		Maximilian::Audio::StreamOptions* options)
 {
 	return rtapi_->openStream(outputParameters, inputParameters, format,
 			sampleRate, bufferFrames, callback,
@@ -219,12 +219,12 @@ Maximilian::RtApi::~RtApi()
 	MUTEX_DESTROY(&stream_.mutex);
 }
 
-void RtApi::openStream(RtAudio::StreamParameters* oParams,
-		RtAudio::StreamParameters* iParams,
+void RtApi::openStream(Audio::StreamParameters* oParams,
+		Audio::StreamParameters* iParams,
 		Maximilian::RtAudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
 		Maximilian::RtAudioCallback callback, void* userData,
-		RtAudio::StreamOptions* options)
+		Audio::StreamOptions* options)
 {
 	if (stream_.state != STREAM_CLOSED)
 	{
@@ -333,7 +333,7 @@ void RtApi::closeStream(void)
 bool RtApi::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 		unsigned int firstChannel, unsigned int sampleRate,
 		Maximilian::RtAudioFormat format, unsigned int* bufferSize,
-		RtAudio::StreamOptions* options)
+		Audio::StreamOptions* options)
 {
 	// MUST be implemented in subclasses!
 	return FAILURE;
@@ -5256,9 +5256,9 @@ unsigned int RtApiAlsa::getDeviceCount(void)
 	return nDevices;
 }
 
-Maximilian::RtAudio::DeviceInfo RtApiAlsa::getDeviceInfo(unsigned int device)
+Maximilian::Audio::DeviceInfo RtApiAlsa::getDeviceInfo(unsigned int device)
 {
-	Maximilian::RtAudio::DeviceInfo info;
+	Maximilian::Audio::DeviceInfo info;
 	info.probed = false;
 
 	unsigned nDevices = 0;
@@ -5595,7 +5595,7 @@ void RtApiAlsa::saveDeviceInfo(void)
 bool RtApiAlsa::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 		unsigned int firstChannel, unsigned int sampleRate,
 		Maximilian::RtAudioFormat format, unsigned int* bufferSize,
-		RtAudio::StreamOptions* options)
+		Audio::StreamOptions* options)
 {
 #if defined(__RTAUDIO_DEBUG__)
 																															snd_output_t *out;

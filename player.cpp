@@ -119,7 +119,7 @@ int main()
 		std::cout <<  "PortAudio error: "<< Pa_GetErrorText( err ) << std::endl;
 
 #elif defined(MAXIMILIAN_RT_AUDIO)
-	Maximilian::RtAudio dac(Maximilian::RtAudio::Windows_Ds);
+	Maximilian::Audio dac(Maximilian::Audio::Windows_Ds);
 	if (dac.getDeviceCount() < 1)
 	{
 		std::cout << "\nNo audio devices found!\n";
@@ -128,7 +128,7 @@ int main()
 		exit(0);
 	}
 
-	Maximilian::RtAudio::StreamParameters parameters;
+	Maximilian::Audio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
 	parameters.nChannels = Maximilian::Settings::CHANNELS;
 	parameters.firstChannel = 0;
