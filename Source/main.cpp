@@ -1,4 +1,4 @@
-#include "../Include/maximilian.h"
+#include "Maximilian.hpp"
 
 maxiOsc myCounter, myOsc, myCutoff;//
 

@@ -5,7 +5,7 @@
 // If you write it into an integer, it will round it off for you.
 // This creates a bunch of steps.
 
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 maxiOsc myCounter, mySquare;//these oscillators will help us count and play sound
 int CurrentCount;//we're going to put the current count in this variable so that we can use it more easily.

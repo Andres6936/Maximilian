@@ -1,4 +1,4 @@
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 maxiOsc myCounter, mySwitchableOsc, another;//these oscillators will help us count and make sound.
 int CurrentCount;//we're going to put the current count in this variable so that we can use it more easily.

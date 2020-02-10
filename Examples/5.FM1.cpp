@@ -6,7 +6,7 @@
 // So at any given point in time, the frequency of the carrier can increase by an amount equal to the current amp of the modulator.
 // This has some interesting effects.
 
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 maxiOsc mySine, myOtherSine;//Two oscillators
 

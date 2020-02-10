@@ -1,4 +1,4 @@
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 //Bizarelly, this sounds a little bit like Kraftwerk's 'Metropolis', although it isn't. Funny that.
 

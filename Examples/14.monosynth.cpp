@@ -1,4 +1,4 @@
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 //This shows how to use maximilian to build a monophonic synth
 

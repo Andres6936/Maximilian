@@ -49,7 +49,7 @@
 
 #include <string>
 #include <vector>
-#include "RtError.h"
+#include "Exception.h"
 
 /*! \typedef typedef unsigned long RtAudioFormat;
     \brief RtAudio data format type.
@@ -366,16 +366,16 @@ public:
     unsigned int getDeviceCount(void) throw();
 
     //! Return an RtAudio::DeviceInfo structure for a specified device number.
-    /*!
+	/*!
 
-      Any device integer between 0 and getDeviceCount() - 1 is valid.
-      If an invalid argument is provided, an RtError (type = INVALID_USE)
-      will be thrown.  If a device is busy or otherwise unavailable, the
-      structure member "probed" will have a value of "false" and all
-      other members are undefined.  If the specified device is the
-      current default input or output device, the corresponding
-      "isDefault" member will have a value of "true".
-    */
+	  Any device integer between 0 and getDeviceCount() - 1 is valid.
+	  If an invalid argument is provided, an Exception (type = INVALID_USE)
+	  will be thrown.  If a device is busy or otherwise unavailable, the
+	  structure member "probed" will have a value of "false" and all
+	  other members are undefined.  If the specified device is the
+	  current default input or output device, the corresponding
+	  "isDefault" member will have a value of "true".
+	*/
     RtAudio::DeviceInfo getDeviceInfo(unsigned int device);
 
     //! A function that returns the index of the default output device.
@@ -399,43 +399,43 @@ public:
     unsigned int getDefaultInputDevice(void) throw();
 
     //! A public function for opening a stream with the specified parameters.
-    /*!
-      An RtError (type = SYSTEM_ERROR) is thrown if a stream cannot be
-      opened with the specified parameters or an error occurs during
-      processing.  An RtError (type = INVALID_USE) is thrown if any
-      invalid device ID or channel number parameters are specified.
+	/*!
+	  An Exception (type = SYSTEM_ERROR) is thrown if a stream cannot be
+	  opened with the specified parameters or an error occurs during
+	  processing.  An Exception (type = INVALID_USE) is thrown if any
+	  invalid device ID or channel number parameters are specified.
 
-      \param outputParameters Specifies output stream parameters to use
-             when opening a stream, including a device ID, number of channels,
-             and starting channel number.  For input-only streams, this
-             argument should be NULL.  The device ID is an index value between
-             0 and getDeviceCount() - 1.
-      \param inputParameters Specifies input stream parameters to use
-             when opening a stream, including a device ID, number of channels,
-             and starting channel number.  For output-only streams, this
-             argument should be NULL.  The device ID is an index value between
-             0 and getDeviceCount() - 1.
-      \param format An RtAudioFormat specifying the desired sample data format.
-      \param sampleRate The desired sample rate (sample frames per second).
-      \param *bufferFrames A pointer to a value indicating the desired
-             internal buffer size in sample frames.  The actual value
-             used by the device is returned via the same pointer.  A
-             value of zero can be specified, in which case the lowest
-             allowable value is determined.
-      \param callback A client-defined function that will be invoked
-             when input data is available and/or output data is needed.
-      \param userData An optional pointer to data that can be accessed
-             from within the callback function.
-      \param options An optional pointer to a structure containing various
-             global stream options, including a list of OR'ed RtAudioStreamFlags
-             and a suggested number of stream buffers that can be used to
-             control stream latency.  More buffers typically result in more
-             robust performance, though at a cost of greater latency.  If a
-             value of zero is specified, a system-specific median value is
-             chosen.  If the RTAUDIO_MINIMIZE_LATENCY flag bit is set, the
-             lowest allowable value is used.  The actual value used is
-             returned via the structure argument.  The parameter is API dependent.
-    */
+	  \param outputParameters Specifies output stream parameters to use
+			 when opening a stream, including a device ID, number of channels,
+			 and starting channel number.  For input-only streams, this
+			 argument should be NULL.  The device ID is an index value between
+			 0 and getDeviceCount() - 1.
+	  \param inputParameters Specifies input stream parameters to use
+			 when opening a stream, including a device ID, number of channels,
+			 and starting channel number.  For output-only streams, this
+			 argument should be NULL.  The device ID is an index value between
+			 0 and getDeviceCount() - 1.
+	  \param format An RtAudioFormat specifying the desired sample data format.
+	  \param sampleRate The desired sample rate (sample frames per second).
+	  \param *bufferFrames A pointer to a value indicating the desired
+			 internal buffer size in sample frames.  The actual value
+			 used by the device is returned via the same pointer.  A
+			 value of zero can be specified, in which case the lowest
+			 allowable value is determined.
+	  \param callback A client-defined function that will be invoked
+			 when input data is available and/or output data is needed.
+	  \param userData An optional pointer to data that can be accessed
+			 from within the callback function.
+	  \param options An optional pointer to a structure containing various
+			 global stream options, including a list of OR'ed RtAudioStreamFlags
+			 and a suggested number of stream buffers that can be used to
+			 control stream latency.  More buffers typically result in more
+			 robust performance, though at a cost of greater latency.  If a
+			 value of zero is specified, a system-specific median value is
+			 chosen.  If the RTAUDIO_MINIMIZE_LATENCY flag bit is set, the
+			 lowest allowable value is used.  The actual value used is
+			 returned via the structure argument.  The parameter is API dependent.
+	*/
     void openStream(RtAudio::StreamParameters* outputParameters,
             RtAudio::StreamParameters* inputParameters,
             RtAudioFormat format, unsigned int sampleRate,
@@ -450,30 +450,30 @@ public:
     void closeStream(void) throw();
 
     //! A function that starts a stream.
-    /*!
-      An RtError (type = SYSTEM_ERROR) is thrown if an error occurs
-      during processing.  An RtError (type = INVALID_USE) is thrown if a
-      stream is not open.  A warning is issued if the stream is already
-      running.
-    */
+	/*!
+	  An Exception (type = SYSTEM_ERROR) is thrown if an error occurs
+	  during processing.  An Exception (type = INVALID_USE) is thrown if a
+	  stream is not open.  A warning is issued if the stream is already
+	  running.
+	*/
     void startStream(void);
 
     //! Stop a stream, allowing any samples remaining in the output queue to be played.
-    /*!
-      An RtError (type = SYSTEM_ERROR) is thrown if an error occurs
-      during processing.  An RtError (type = INVALID_USE) is thrown if a
-      stream is not open.  A warning is issued if the stream is already
-      stopped.
-    */
+	/*!
+	  An Exception (type = SYSTEM_ERROR) is thrown if an error occurs
+	  during processing.  An Exception (type = INVALID_USE) is thrown if a
+	  stream is not open.  A warning is issued if the stream is already
+	  stopped.
+	*/
     void stopStream(void);
 
     //! Stop a stream, discarding any samples remaining in the input/output queue.
-    /*!
-      An RtError (type = SYSTEM_ERROR) is thrown if an error occurs
-      during processing.  An RtError (type = INVALID_USE) is thrown if a
-      stream is not open.  A warning is issued if the stream is already
-      stopped.
-    */
+	/*!
+	  An Exception (type = SYSTEM_ERROR) is thrown if an error occurs
+	  during processing.  An Exception (type = INVALID_USE) is thrown if a
+	  stream is not open.  A warning is issued if the stream is already
+	  stopped.
+	*/
     void abortStream(void);
 
     //! Returns true if a stream is open and false if not.
@@ -483,28 +483,28 @@ public:
     bool isStreamRunning(void) const throw();
 
     //! Returns the number of elapsed seconds since the stream was started.
-    /*!
-      If a stream is not open, an RtError (type = INVALID_USE) will be thrown.
-    */
+	/*!
+	  If a stream is not open, an Exception (type = INVALID_USE) will be thrown.
+	*/
     double getStreamTime(void);
 
     //! Returns the internal stream latency in sample frames.
-    /*!
-      The stream latency refers to delay in audio input and/or output
-      caused by internal buffering by the audio system and/or hardware.
-      For duplex streams, the returned value will represent the sum of
-      the input and output latencies.  If a stream is not open, an
-      RtError (type = INVALID_USE) will be thrown.  If the API does not
-      report latency, the return value will be zero.
-    */
+	/*!
+	  The stream latency refers to delay in audio input and/or output
+	  caused by internal buffering by the audio system and/or hardware.
+	  For duplex streams, the returned value will represent the sum of
+	  the input and output latencies.  If a stream is not open, an
+	  Exception (type = INVALID_USE) will be thrown.  If the API does not
+	  report latency, the return value will be zero.
+	*/
     long getStreamLatency(void);
 
     //! Returns actual sample rate in use by the stream.
-    /*!
-      On some systems, the sample rate used may be slightly different
-      than that specified in the stream parameters.  If a stream is not
-      open, an RtError (type = INVALID_USE) will be thrown.
-    */
+	/*!
+	  On some systems, the sample rate used may be slightly different
+	  than that specified in the stream parameters.  If a stream is not
+	  open, an Exception (type = INVALID_USE) will be thrown.
+	*/
     unsigned int getStreamSampleRate(void);
 
     //! Specify whether warning messages should be printed to stderr.
@@ -736,14 +736,14 @@ protected:
     //! Protected common method to clear an RtApiStream structure.
     void clearStreamInfo();
 
-    /*!
-      Protected common method that throws an RtError (type =
-      INVALID_USE) if a stream is not open.
-    */
+	/*!
+	  Protected common method that throws an Exception (type =
+	  INVALID_USE) if a stream is not open.
+	*/
     void verifyStream(void);
 
-    //! Protected common error method to allow global control over error handling.
-    void error(RtError::Type type);
+	//! Protected common error method to allow global control over error handling.
+	void error(Exception::Type type);
 
     /*!
       Protected method used to perform format, channel number, and/or interleaving
@@ -1076,7 +1076,7 @@ class RtApiDummy: public RtApi
 {
 public:
 
-  RtApiDummy() { errorText_ = "RtApiDummy: This class provides no functionality."; error( RtError::WARNING ); };
+  RtApiDummy() { errorText_ = "RtApiDummy: This class provides no functionality."; error( Exception::WARNING ); };
   RtAudio::Api getCurrentApi( void ) { return RtAudio::RTAUDIO_DUMMY; };
   unsigned int getDeviceCount( void ) { return 0; };
   RtAudio::DeviceInfo getDeviceInfo( unsigned int device ) { RtAudio::DeviceInfo info; return info; };
@@ -1088,9 +1088,9 @@ public:
   private:
 
   bool probeDeviceOpen( unsigned int device, StreamMode mode, unsigned int channels, 
-                        unsigned int firstChannel, unsigned int sampleRate,
-                        RtAudioFormat format, unsigned int *bufferSize,
-                        RtAudio::StreamOptions *options ) { return false; };
+						unsigned int firstChannel, unsigned int sampleRate,
+						RtAudioFormat format, unsigned int *bufferSize,
+						RtAudio::StreamOptions *options ) { return false; };
 };
 
 #endif

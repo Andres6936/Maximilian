@@ -1,5 +1,5 @@
 
-#include "maximilian.h"
+#include "Maximilian.hpp"
 #include "libs/maxim.h"
 
 maxiOsc mySine, myPhasor; // This is the oscillator we will use to generate the test tone

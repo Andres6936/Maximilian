@@ -1,10 +1,10 @@
 /************************************************************************/
-/*! \class RtError
+/*! \class Exception
     \brief Exception handling class for RtAudio & RtMidi.
 
-    The RtError class is quite simple but it does allow errors to be
-    "caught" by RtError::Type. See the RtAudio and RtMidi
-    documentation to know which methods can throw an RtError.
+    The Exception class is quite simple but it does allow errors to be
+    "caught" by Exception::Type. See the RtAudio and RtMidi
+    documentation to know which methods can throw an Exception.
 
 */
 /************************************************************************/
@@ -16,10 +16,10 @@
 #include <iostream>
 #include <string>
 
-class RtError : public std::exception
+class Exception : public std::exception
 {
 public:
-	//! Defined RtError types.
+	//! Defined Exception types.
 	enum Type
 	{
 		WARNING,           /*!< A non-critical error. */
@@ -36,12 +36,12 @@ public:
 	};
 
 	//! The constructor.
-	RtError(const std::string& message, Type type = RtError::UNSPECIFIED) throw() : message_(message), type_(type)
+	Exception(const std::string& message, Type type = Exception::UNSPECIFIED) throw() : message_(message), type_(type)
 	{
 	}
 
 	//! The destructor.
-	virtual ~RtError(void) throw()
+	virtual ~Exception(void) throw()
 	{
 	}
 

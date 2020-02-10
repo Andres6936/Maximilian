@@ -1,4 +1,4 @@
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 //This shows how to use maximilian to do basic amplitude modulation.
 //It also shows what happens when you modulate waves with waves that have frequencies over 20 hz.

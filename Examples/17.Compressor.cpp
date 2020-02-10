@@ -1,4 +1,4 @@
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 maxiSample beats; //We give our sample a name. It's called beats this time. We could have loads of them, but they have to have different names.
 maxiDyn compressor; //this is a compressor

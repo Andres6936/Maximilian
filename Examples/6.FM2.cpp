@@ -1,6 +1,6 @@
 // Nothing much to say about this other than I like it.
 
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 maxiOsc mySine, myOtherSine, myLastSine, myPhasor;//Three oscillators
 

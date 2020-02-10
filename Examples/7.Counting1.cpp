@@ -1,6 +1,6 @@
 
-#include "maximilian.h"
-#include "RtAudio.h"
+#include "Maximilian.hpp"
+#include "Realtime/Audio.hpp"
 
 maxiOsc mySine; // This is the oscillator we will use to generate the test tone
 maxiClock myClock; // This will allow us to generate a clock signal and do things at specific times
@@ -92,7 +92,7 @@ int main()
 
 		dac.startStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 		exit(0);
@@ -107,7 +107,7 @@ int main()
 		// Stop the stream
 		dac.stopStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 	}

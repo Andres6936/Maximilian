@@ -1,5 +1,5 @@
-#include "maximilian.h"
-#include "RtAudio.h"
+#include "Maximilian.hpp"
+#include "Realtime/Audio.hpp"
 
 maxiSample beats; //We give our sample a name. It's called beats this time. We could have loads of them, but they have to have different names.
 
@@ -80,7 +80,7 @@ int main()
 
 		dac.startStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 		exit(0);
@@ -95,7 +95,7 @@ int main()
 		// Stop the stream
 		dac.stopStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 	}

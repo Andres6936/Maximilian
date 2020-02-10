@@ -1,4 +1,4 @@
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 maxiSample kick, snare; //we've got two sampleplayers
 

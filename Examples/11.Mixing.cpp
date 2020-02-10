@@ -1,4 +1,4 @@
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 maxiOsc myOsc, myAutoPanner;//
 double myStereoOutput[2];

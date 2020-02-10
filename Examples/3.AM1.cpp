@@ -1,5 +1,5 @@
-#include "maximilian.h"
-#include "RtAudio.h"
+#include "Maximilian.hpp"
+#include "Realtime/Audio.hpp"
 
 //This shows how to use maximilian to do basic amplitude modulation. Amplitude modulation is when you multiply waves together. In maximilian you just use the * inbetween the two waveforms.
 
@@ -81,7 +81,7 @@ int main()
 
 		dac.startStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 		exit(0);
@@ -96,7 +96,7 @@ int main()
 		// Stop the stream
 		dac.stopStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 	}

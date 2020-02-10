@@ -4,8 +4,8 @@
 // Sustain: This is the sustain level
 // Release: This is how long it takes to fade out.
 
-#include "maximilian.h"
-#include "RtAudio.h"
+#include "Maximilian.hpp"
+#include "Realtime/Audio.hpp"
 
 maxiOsc myCounter, mySwitchableOsc;//
 int CurrentCount;//
@@ -120,7 +120,7 @@ int main()
 
 		dac.startStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 		exit(0);
@@ -135,7 +135,7 @@ int main()
 		// Stop the stream
 		dac.stopStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 	}

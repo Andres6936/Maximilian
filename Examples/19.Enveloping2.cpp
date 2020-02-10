@@ -1,4 +1,4 @@
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 //this tutorial explains how to use the maxiEnv
 

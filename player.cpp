@@ -7,8 +7,7 @@
  *
  */
 
-#include "Include/player.h"
-#include "Include/maximilian.h"
+#include "Maximilian.hpp"
 #include <iostream>
 
 
@@ -20,7 +19,7 @@
 #include <dsound.h>
 #endif
 
-#include "Include/RtAudio.h"
+#include "Realtime/Audio.hpp"
 
 #endif
 
@@ -144,7 +143,7 @@ int main()
 
 		dac.startStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 		exit(0);
@@ -159,7 +158,7 @@ int main()
 		// Stop the stream
 		dac.stopStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 	}

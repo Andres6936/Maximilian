@@ -1,7 +1,7 @@
 //Using BPF equation from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 //Example contributed by Rebecca Fiebrink
 
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 float xs[3], ys[3];
 

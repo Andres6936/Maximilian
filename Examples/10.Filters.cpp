@@ -3,7 +3,7 @@
 // There are also resonant filters and a state variable filter.
 
 
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 maxiOsc myCounter, mySwitchableOsc;//
 int CurrentCount;//

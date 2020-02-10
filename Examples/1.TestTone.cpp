@@ -1,5 +1,5 @@
-#include "maximilian.h"
-#include "RtAudio.h"
+#include "Maximilian.hpp"
+#include "Realtime/Audio.hpp"
 
 //This shows how the fundamental building block of digital audio - the sine wave.
 //
@@ -73,7 +73,7 @@ int main()
 
 		dac.startStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 		exit(0);
@@ -88,7 +88,7 @@ int main()
 		// Stop the stream
 		dac.stopStream();
 	}
-	catch (RtError& e)
+	catch (Exception& e)
 	{
 		e.printMessage();
 	}

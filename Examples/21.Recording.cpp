@@ -1,4 +1,4 @@
-#include "maximilian.h"
+#include "Maximilian.hpp"
 
 // Here we define a double floating value that will contain our
 // frame of lovely maximilian generated audio
