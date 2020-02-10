@@ -39,7 +39,7 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 	for (i = 0; i < nBufferFrames; i++)
 	{
 		play(lastValues);
-		for (j = 0; j < Maximilian::Settings::channels; j++)
+		for (j = 0; j < Maximilian::Settings::CHANNELS; j++)
 		{
 			*buffer++ = lastValues[j];
 		}
@@ -62,12 +62,12 @@ int main()
 
 	RtAudio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
-	parameters.nChannels = Maximilian::Settings::channels;
+	parameters.nChannels = Maximilian::Settings::CHANNELS;
 	parameters.firstChannel = 0;
-	unsigned int sampleRate = Maximilian::Settings::sampleRate;
-	unsigned int bufferFrames = Maximilian::Settings::bufferSize;
+	unsigned int sampleRate = Maximilian::Settings::SAMPLE_RATE;
+	unsigned int bufferFrames = Maximilian::Settings::BUFFER_SIZE;
 	//double data[maxiSettings::channels];
-	vector <double> data(Maximilian::Settings::channels, 0);
+	vector <double> data(Maximilian::Settings::CHANNELS, 0);
 
 	try
 	{

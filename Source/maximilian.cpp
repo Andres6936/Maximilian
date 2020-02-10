@@ -32,30 +32,11 @@
  */
 
 #include "Maximilian.hpp"
-#include "math.h"
 
-/*  Maximilian can be configured to load ogg vorbis format files using the 
-*   loadOgg() method.
-*   Uncomment the following to include Sean Barrett's Ogg Vorbis decoder.
-*   If you're on windows, make sure to add the files std_vorbis.c and std_vorbis.h to your project*/
-
-//#define VORBIS
-
-#ifdef VORBIS
-																														extern "C" {
-    #include "stb_vorbis.h"
-}
-#endif
+using namespace Maximilian;
 
 //This used to be important for dealing with multichannel playback
 float chandiv = 1;
-
-int Maximilian::Settings::sampleRate = 44100;
-
-int Maximilian::Settings::channels = 2;
-
-int Maximilian::Settings::bufferSize = 1024;
-
 
 //this is a 514-point sinewave table that has many uses.
 double sineBuffer[514] = { 0, 0.012268, 0.024536, 0.036804, 0.049042, 0.06131, 0.073547, 0.085785, 0.097992, 0.1102,
@@ -274,13 +255,8 @@ void setup();//use this to do any initialisation if you want.
 
 void play(double* channels);//run dac!
 
-Maximilian::Oscilation::Oscilation()
-{
-	//When you create an oscillator, the constructor sets the phase of the oscillator to 0.
-	phase = 0.0;
-}
 
-double Maximilian::Oscilation::noise()
+double Oscilation::noise()
 {
 	//White Noise
 	//always the same unless you seed it.
@@ -289,30 +265,30 @@ double Maximilian::Oscilation::noise()
 	return (output);
 }
 
-void Maximilian::Oscilation::phaseReset(double phaseIn)
+void Oscilation::setPhase(double phaseIn)
 {
 	//This allows you to set the phase of the oscillator to anything you like.
 	phase = phaseIn;
 
 }
 
-double Maximilian::Oscilation::sinewave(double frequency)
+double Oscilation::sinewave(double _frequency)
 {
 	//This is a sinewave oscillator
 	output = sin(phase * (TWOPI));
 	if (phase >= 1.0)
 	{ phase -= 1.0; }
-	phase += (1. / (Settings::sampleRate / (frequency)));
+	phase += (1. / (Settings::SAMPLE_RATE / (_frequency)));
 	return (output);
 
 }
 
-double Maximilian::Oscilation::sinebuf4(double frequency)
+double Oscilation::sinebuf4(double _frequency)
 {
 	//This is a sinewave oscillator that uses 4 point interpolation on a 514 point buffer
 	double remainder;
 	double a, b, c, d, a1, a2, a3;
-	phase += 512. / (Maximilian::Settings::sampleRate / (frequency));
+	phase += 512. / (Maximilian::Settings::SAMPLE_RATE / (_frequency));
 	if (phase >= 511)
 	{ phase -= 512; }
 	remainder = phase - floor(phase);
@@ -341,11 +317,11 @@ double Maximilian::Oscilation::sinebuf4(double frequency)
 	return (output);
 }
 
-double Maximilian::Oscilation::sinebuf(double frequency)
+double Oscilation::sinebuf(double frequency)
 { //specify the frequency of the oscillator in Hz / cps etc.
 	//This is a sinewave oscillator that uses linear interpolation on a 514 point buffer
 	double remainder;
-	phase += 512. / (Maximilian::Settings::sampleRate / (frequency * chandiv));
+	phase += 512. / (Maximilian::Settings::SAMPLE_RATE / (frequency * chandiv));
 	if (phase >= 511)
 	{ phase -= 512; }
 	remainder = phase - floor(phase);
@@ -353,28 +329,28 @@ double Maximilian::Oscilation::sinebuf(double frequency)
 	return (output);
 }
 
-double Maximilian::Oscilation::coswave(double frequency)
+double Oscilation::coswave(double _frequency)
 {
 	//This is a cosine oscillator
 	output = cos(phase * (TWOPI));
 	if (phase >= 1.0)
 	{ phase -= 1.0; }
-	phase += (1. / (Maximilian::Settings::sampleRate / (frequency)));
+	phase += (1. / (Maximilian::Settings::SAMPLE_RATE / (_frequency)));
 	return (output);
 
 }
 
-double Maximilian::Oscilation::phasor(double frequency)
+double Oscilation::phasor(double frequency)
 {
 	//This produces a floating point linear ramp between 0 and 1 at the desired frequency
 	output = phase;
 	if (phase >= 1.0)
 	{ phase -= 1.0; }
-	phase += (1. / (Settings::sampleRate / (frequency)));
+	phase += (1. / (Settings::SAMPLE_RATE / (frequency)));
 	return (output);
 }
 
-double Maximilian::Oscilation::square(double frequency)
+double Oscilation::square(double frequency)
 {
 	//This is a square wave
 	if (phase < 0.5)
@@ -383,11 +359,11 @@ double Maximilian::Oscilation::square(double frequency)
 	{ output = 1; }
 	if (phase >= 1.0)
 	{ phase -= 1.0; }
-	phase += (1. / (Settings::sampleRate / (frequency)));
+	phase += (1. / (Settings::SAMPLE_RATE / (frequency)));
 	return (output);
 }
 
-double Maximilian::Oscilation::pulse(double frequency, double duty)
+double Oscilation::pulse(double frequency, double duty)
 {
 	//This is a pulse generator that creates a signal between -1 and 1.
 	if (duty < 0.)
@@ -396,7 +372,7 @@ double Maximilian::Oscilation::pulse(double frequency, double duty)
 	{ duty = 1; }
 	if (phase >= 1.0)
 	{ phase -= 1.0; }
-	phase += (1. / (Settings::sampleRate / (frequency)));
+	phase += (1. / (Settings::SAMPLE_RATE / (frequency)));
 	if (phase < duty)
 	{ output = -1.; }
 	if (phase > duty)
@@ -404,7 +380,7 @@ double Maximilian::Oscilation::pulse(double frequency, double duty)
 	return (output);
 }
 
-double Maximilian::Oscilation::phasor(double frequency, double startphase, double endphase)
+double Oscilation::phasor(double frequency, double startphase, double endphase)
 {
 	//This is a phasor that takes a value for the start and end of the ramp.
 	output = phase;
@@ -414,28 +390,28 @@ double Maximilian::Oscilation::phasor(double frequency, double startphase, doubl
 	}
 	if (phase >= endphase)
 	{ phase = startphase; }
-	phase += ((endphase - startphase) / (Maximilian::Settings::sampleRate / (frequency)));
+	phase += ((endphase - startphase) / (Maximilian::Settings::SAMPLE_RATE / (frequency)));
 	return (output);
 }
 
 
-double Maximilian::Oscilation::saw(double frequency)
+double Oscilation::saw(double frequency)
 {
 	//Sawtooth generator. This is like a phasor but goes between -1 and 1
 	output = phase;
 	if (phase >= 1.0)
 	{ phase -= 2.0; }
-	phase += (1. / (Maximilian::Settings::sampleRate / (frequency)));
+	phase += (1. / (Maximilian::Settings::SAMPLE_RATE / (frequency)));
 	return (output);
 
 }
 
-double Maximilian::Oscilation::sawn(double frequency)
+double Oscilation::sawn(double frequency)
 {
 	//Bandlimited sawtooth generator. Woohoo.
 	if (phase >= 0.5)
 	{ phase -= 1.0; }
-	phase += (1. / (Settings::sampleRate / (frequency)));
+	phase += (1. / (Settings::SAMPLE_RATE / (frequency)));
 	double temp = (8820.22 / frequency) * phase;
 	if (temp < -0.5)
 	{
@@ -453,18 +429,18 @@ double Maximilian::Oscilation::sawn(double frequency)
 
 }
 
-double Maximilian::Oscilation::rect(double frequency, double duty)
+double Oscilation::rect(double frequency, double duty)
 {
 
 	return (output);
 }
 
-double Maximilian::Oscilation::triangle(double frequency)
+double Oscilation::triangle(double frequency)
 {
 	//This is a triangle wave.
 	if (phase >= 1.0)
 	{ phase -= 1.0; }
-	phase += (1. / (Settings::sampleRate / (frequency)));
+	phase += (1. / (Settings::SAMPLE_RATE / (frequency)));
 	if (phase <= 0.5)
 	{
 		output = (phase - 0.25) * 4;
@@ -477,9 +453,68 @@ double Maximilian::Oscilation::triangle(double frequency)
 
 }
 
+// Getters
+
+double Oscilation::getFrequency() const
+{
+	return frequency;
+}
+
+double Oscilation::getPhase() const
+{
+	return phase;
+}
+
+double Oscilation::getStartphase() const
+{
+	return startphase;
+}
+
+double Oscilation::getEndphase() const
+{
+	return endphase;
+}
+
+double Oscilation::getOutput() const
+{
+	return output;
+}
+
+double Oscilation::getTri() const
+{
+	return tri;
+}
+
+// Setters
+
+void Oscilation::setFrequency(double _frequency)
+{
+	frequency = _frequency;
+}
+
+void Oscilation::setStartphase(double _startphase)
+{
+	startphase = _startphase;
+}
+
+void Oscilation::setEndphase(double _endphase)
+{
+	endphase = _endphase;
+}
+
+void Oscilation::setOutput(double _output)
+{
+	output = _output;
+}
+
+void Oscilation::setTri(double _tri)
+{
+	tri = _tri;
+}
+
 // don't use this nonsense. Use ramps instead.
 // ..er... I mean "This method is deprecated"
-double Maximilian::Envelope::line(int numberofsegments, double segments[1000])
+double Envelope::line(int numberofsegments, double segments[1000])
 {
 	//This is a basic multi-segment ramp generator that you can use for more or less anything.
 	//However, it's not that intuitive.
@@ -490,11 +525,11 @@ double Maximilian::Envelope::line(int numberofsegments, double segments[1000])
 		currentval = segments[valindex];
 		if (currentval - amplitude > 0.0000001 && valindex < numberofsegments)
 		{
-			amplitude += ((currentval - startVal) / (Maximilian::Settings::sampleRate / period));
+			amplitude += ((currentval - startVal) / (Maximilian::Settings::SAMPLE_RATE / period));
 		}
 		else if (currentval - amplitude < -0.0000001 && valindex < numberofsegments)
 		{
-			amplitude -= (((currentval - startVal) * (-1)) / (Settings::sampleRate / period));
+			amplitude -= (((currentval - startVal) * (-1)) / (Settings::SAMPLE_RATE / period));
 		}
 		else if (valindex > numberofsegments - 1)
 		{
@@ -517,7 +552,7 @@ double Maximilian::Envelope::line(int numberofsegments, double segments[1000])
 }
 
 //and this is also deprecated
-void Maximilian::Envelope::trigger(int index, double amp)
+void Envelope::trigger(int index, double amp)
 {
 	isPlaying = 1;//ok the envelope is being used now.
 	valindex = index;
@@ -525,7 +560,7 @@ void Maximilian::Envelope::trigger(int index, double amp)
 
 }
 
-void Maximilian::Envelope::trigger(bool noteOn)
+void Envelope::trigger(bool noteOn)
 {
 
 	if (noteOn)
@@ -535,7 +570,7 @@ void Maximilian::Envelope::trigger(bool noteOn)
 
 }
 
-double Maximilian::Envelope::ramp(double startVal, double endVal, double duration)
+double Envelope::ramp(double startVal, double endVal, double duration)
 {
 
 	if (trig != 0)
@@ -550,14 +585,14 @@ double Maximilian::Envelope::ramp(double startVal, double endVal, double duratio
 
 		if (startVal < endVal)
 		{
-			phase += ((endVal - startVal) / (Maximilian::Settings::sampleRate / (1. / duration)));
+			phase += ((endVal - startVal) / (Maximilian::Settings::SAMPLE_RATE / (1. / duration)));
 			if (phase >= endVal)
 			{ phase = endVal; }
 		}
 
 		if (startVal > endVal)
 		{
-			phase += ((endVal - startVal) / (Maximilian::Settings::sampleRate / (1. / duration)));
+			phase += ((endVal - startVal) / (Maximilian::Settings::SAMPLE_RATE / (1. / duration)));
 			if (phase <= endVal)
 			{ phase = endVal; }
 		}
@@ -574,7 +609,7 @@ double Maximilian::Envelope::ramp(double startVal, double endVal, double duratio
 }
 
 
-double Maximilian::Envelope::ramps(std::vector <double> rampsArray)
+double Envelope::ramps(std::vector <double> rampsArray)
 {
 
 	if (trig != 0)
@@ -591,7 +626,7 @@ double Maximilian::Envelope::ramps(std::vector <double> rampsArray)
 
 		if (valindex > 0 && rampsArray[valindex - 1] == rampsArray[valindex + 1])
 		{
-			period += (1 / (Settings::sampleRate / (1. / rampsArray[valindex])));
+			period += (1 / (Settings::SAMPLE_RATE / (1. / rampsArray[valindex])));
 			if (period >= 1)
 			{
 				phase = endVal;
@@ -608,7 +643,7 @@ double Maximilian::Envelope::ramps(std::vector <double> rampsArray)
 
 		if (valindex == 0 && output == endVal)
 		{
-			period += (1 / (Maximilian::Settings::sampleRate / (1. / rampsArray[valindex])));
+			period += (1 / (Maximilian::Settings::SAMPLE_RATE / (1. / rampsArray[valindex])));
 			if (period >= 1)
 			{
 				phase = endVal;
@@ -625,7 +660,7 @@ double Maximilian::Envelope::ramps(std::vector <double> rampsArray)
 
 		if (phase < endVal)
 		{
-			phase += ((endVal - startVal) / (Settings::sampleRate / (1. / rampsArray[valindex])));
+			phase += ((endVal - startVal) / (Settings::SAMPLE_RATE / (1. / rampsArray[valindex])));
 			if (phase >= endVal)
 			{
 				phase = endVal;
@@ -642,7 +677,7 @@ double Maximilian::Envelope::ramps(std::vector <double> rampsArray)
 
 		if (phase > endVal)
 		{
-			phase += ((endVal - startVal) / (Settings::sampleRate / (1. / rampsArray[valindex])));
+			phase += ((endVal - startVal) / (Settings::SAMPLE_RATE / (1. / rampsArray[valindex])));
 			if (phase <= endVal)
 			{
 				phase = endVal;
@@ -667,7 +702,7 @@ double Maximilian::Envelope::ramps(std::vector <double> rampsArray)
 	}
 }
 
-double Maximilian::Envelope::ar(double attack, double release)
+double Envelope::ar(double attack, double release)
 {
 
 	if (trig != 0)
@@ -679,7 +714,7 @@ double Maximilian::Envelope::ar(double attack, double release)
 
 	if (phase < 1 && releaseMode == false)
 	{
-		phase += ((1) / (Settings::sampleRate / (1. / attack)));
+		phase += ((1) / (Settings::SAMPLE_RATE / (1. / attack)));
 		if (phase >= 1)
 		{
 			phase = 1;
@@ -689,7 +724,7 @@ double Maximilian::Envelope::ar(double attack, double release)
 
 	if (releaseMode == true)
 	{
-		phase += ((-1) / (Settings::sampleRate / (1. / release)));
+		phase += ((-1) / (Settings::SAMPLE_RATE / (1. / release)));
 		if (phase <= 0)
 		{ phase = 0; }
 	}
@@ -698,7 +733,7 @@ double Maximilian::Envelope::ar(double attack, double release)
 }
 
 
-double Maximilian::Envelope::adsr(double attack, double decay, double sustain, double release)
+double Envelope::adsr(double attack, double decay, double sustain, double release)
 {
 
 	if (trig != 0 && !attackMode)
@@ -713,7 +748,7 @@ double Maximilian::Envelope::adsr(double attack, double decay, double sustain, d
 
 	if (attackMode)
 	{
-		phase += ((1) / (Maximilian::Settings::sampleRate / (1. / attack)));
+		phase += ((1) / (Maximilian::Settings::SAMPLE_RATE / (1. / attack)));
 
 		if (phase >= 1)
 		{
@@ -725,7 +760,7 @@ double Maximilian::Envelope::adsr(double attack, double decay, double sustain, d
 
 	if (decayMode)
 	{
-		phase += ((-1) / (Settings::sampleRate / (1. / decay)));
+		phase += ((-1) / (Settings::SAMPLE_RATE / (1. / decay)));
 		if (phase <= sustain)
 		{
 			phase = sustain;
@@ -751,7 +786,7 @@ double Maximilian::Envelope::adsr(double attack, double decay, double sustain, d
 
 	if (releaseMode)
 	{
-		phase += ((-sustain) / (Settings::sampleRate / (1. / release)));
+		phase += ((-sustain) / (Settings::SAMPLE_RATE / (1. / release)));
 		if (phase <= 0)
 		{
 			phase = 0;
@@ -762,15 +797,7 @@ double Maximilian::Envelope::adsr(double attack, double decay, double sustain, d
 	return phase;
 }
 
-
-//Delay with feedback
-Maximilian::DelayLine::DelayLine()
-{
-	memset(memory, 0, 88200 * sizeof(double));
-}
-
-
-double Maximilian::DelayLine::dl(double input, int size, double feedback)
+double DelayLine::dl(double input, int size, double feedback)
 {
 	if (phase >= size)
 	{
@@ -783,7 +810,7 @@ double Maximilian::DelayLine::dl(double input, int size, double feedback)
 
 }
 
-double Maximilian::DelayLine::dl(double input, int size, double feedback, int position)
+double DelayLine::dl(double input, int size, double feedback, int position)
 {
 	if (phase >= size)
 	{ phase = 0; }
@@ -796,15 +823,10 @@ double Maximilian::DelayLine::dl(double input, int size, double feedback, int po
 
 }
 
-Maximilian::FractionalDelay::FractionalDelay(void)
-{
-	memset(memory, 0, delaySize * sizeof(double));
-}
-
-double Maximilian::FractionalDelay::dl(double sig, double delayTime, double feedback)
+double FractionalDelay::dl(double sig, double delayTime, double feedback)
 {
 	// Set delay time
-	delayTime = fmin(fabs(delayTime), delaySize);
+	delayTime = fmin(fabs(delayTime), DELAY_SIZE);
 	int32_t delay = delayTime; // Truncated
 	double fractAmount = delayTime - delay; // Fractional remainder
 	double truncAmount = 1.0f - fractAmount; // Inverse fractional remainder
@@ -813,13 +835,13 @@ double Maximilian::FractionalDelay::dl(double sig, double delayTime, double feed
 	readPointer = writePointer - delay;
 	if (readPointer < 0)
 	{
-		readPointer += delaySize;
+		readPointer += DELAY_SIZE;
 	}
 
 	int readPointerFractPart = readPointer - 1;
 	if (readPointerFractPart < 0)
 	{
-		readPointerFractPart += delaySize;
+		readPointerFractPart += DELAY_SIZE;
 	}
 
 	// Get interpolated sample
@@ -829,9 +851,9 @@ double Maximilian::FractionalDelay::dl(double sig, double delayTime, double feed
 	memory[writePointer] = y * feedback + sig;
 
 	// Increment write pointer
-	if (++writePointer >= delaySize)
+	if (++writePointer >= DELAY_SIZE)
 	{
-		writePointer -= delaySize;
+		writePointer -= DELAY_SIZE;
 	}
 	return y;
 
@@ -839,7 +861,7 @@ double Maximilian::FractionalDelay::dl(double sig, double delayTime, double feed
 
 
 //I particularly like these. cutoff between 0 and 1
-double Maximilian::Filter::lopass(double input, double cutoff)
+double Filter::lopass(double input, double cutoff)
 {
 	output = outputs[0] + cutoff * (input - outputs[0]);
 	outputs[0] = output;
@@ -847,7 +869,7 @@ double Maximilian::Filter::lopass(double input, double cutoff)
 }
 
 //as above
-double Maximilian::Filter::hipass(double input, double cutoff)
+double Filter::hipass(double input, double cutoff)
 {
 	output = input - (outputs[0] + cutoff * (input - outputs[0]));
 	outputs[0] = output;
@@ -855,16 +877,16 @@ double Maximilian::Filter::hipass(double input, double cutoff)
 }
 
 //awesome. cuttof is freq in hz. res is between 1 and whatever. Watch out!
-double Maximilian::Filter::lores(double input, double cutoff1, double resonance)
+double Filter::lores(double input, double cutoff1, double resonance)
 {
 	cutoff = cutoff1;
 	if (cutoff < 10)
 	{ cutoff = 10; }
-	if (cutoff > (Settings::sampleRate))
-	{ cutoff = (Settings::sampleRate); }
+	if (cutoff > (Settings::SAMPLE_RATE))
+	{ cutoff = (Settings::SAMPLE_RATE); }
 	if (resonance < 1.)
 	{ resonance = 1.; }
-	z = cos(TWOPI * cutoff / Maximilian::Settings::sampleRate);
+	z = cos(TWOPI * cutoff / Settings::SAMPLE_RATE);
 	c = 2 - 2 * z;
 	double r = (sqrt(2.0) * sqrt(-pow((z - 1.0), 3.0)) + resonance * (z - 1)) / (resonance * (z - 1));
 	x = x + (input - y) * c;
@@ -875,16 +897,16 @@ double Maximilian::Filter::lores(double input, double cutoff1, double resonance)
 }
 
 //working hires filter
-double Maximilian::Filter::hires(double input, double cutoff1, double resonance)
+double Filter::hires(double input, double cutoff1, double resonance)
 {
 	cutoff = cutoff1;
 	if (cutoff < 10)
 	{ cutoff = 10; }
-	if (cutoff > (Settings::sampleRate))
-	{ cutoff = (Maximilian::Settings::sampleRate); }
+	if (cutoff > (Settings::SAMPLE_RATE))
+	{ cutoff = (Maximilian::Settings::SAMPLE_RATE); }
 	if (resonance < 1.)
 	{ resonance = 1.; }
-	z = cos(TWOPI * cutoff / Maximilian::Settings::sampleRate);
+	z = cos(TWOPI * cutoff / Settings::SAMPLE_RATE);
 	c = 2 - 2 * z;
 	double r = (sqrt(2.0) * sqrt(-pow((z - 1.0), 3.0)) + resonance * (z - 1)) / (resonance * (z - 1));
 	x = x + (input - y) * c;
@@ -895,14 +917,14 @@ double Maximilian::Filter::hires(double input, double cutoff1, double resonance)
 }
 
 //This works a bit. Needs attention.
-double Maximilian::Filter::bandpass(double input, double cutoff1, double resonance)
+double Filter::bandpass(double input, double cutoff1, double resonance)
 {
 	cutoff = cutoff1;
-	if (cutoff > (Maximilian::Settings::sampleRate * 0.5))
-	{ cutoff = (Maximilian::Settings::sampleRate * 0.5); }
+	if (cutoff > (Maximilian::Settings::SAMPLE_RATE * 0.5))
+	{ cutoff = (Maximilian::Settings::SAMPLE_RATE * 0.5); }
 	if (resonance >= 1.)
 	{ resonance = 0.999999; }
-	z = cos(TWOPI * cutoff / Maximilian::Settings::sampleRate);
+	z = cos(TWOPI * cutoff / Settings::SAMPLE_RATE);
 	inputs[0] = (1 - resonance) * (sqrt(resonance * (resonance - 4.0 * pow(z, 2.0) + 2.0) + 1));
 	inputs[1] = 2 * z * resonance;
 	inputs[2] = pow((resonance * -1), 2);
@@ -914,7 +936,7 @@ double Maximilian::Filter::bandpass(double input, double cutoff1, double resonan
 }
 
 //stereo bus
-double* Maximilian::Mixer::stereo(double input, double two[2], double x)
+double* Mixer::stereo(double input, double two[2], double x)
 {
 	if (x > 1)
 	{ x = 1; }
@@ -926,7 +948,7 @@ double* Maximilian::Mixer::stereo(double input, double two[2], double x)
 }
 
 //quad bus
-double* Maximilian::Mixer::quad(double input, double four[4], double x, double y)
+double* Mixer::quad(double input, double four[4], double x, double y)
 {
 	if (x > 1)
 	{ x = 1; }
@@ -944,7 +966,7 @@ double* Maximilian::Mixer::quad(double input, double four[4], double x, double y
 }
 
 //ambisonic bus
-double* Maximilian::Mixer::ambisonic(double input, double eight[8], double x, double y, double z)
+double* Mixer::ambisonic(double input, double eight[8], double x, double y, double z)
 {
 	if (x > 1)
 	{ x = 1; }
@@ -970,7 +992,7 @@ double* Maximilian::Mixer::ambisonic(double input, double eight[8], double x, do
 }
 
 //This is the maxiSample load function. It just calls read.
-bool Maximilian::Sample::load(string fileName, int channel)
+bool Sample::load(string fileName, int channel)
 {
 	myPath = fileName;
 	readChannel = channel;
@@ -978,7 +1000,7 @@ bool Maximilian::Sample::load(string fileName, int channel)
 }
 
 // This is for OGG loading
-bool Maximilian::Sample::loadOgg(string fileName, int channel)
+bool Sample::loadOgg(string fileName, int channel)
 {
 #ifdef VORBIS
 																															bool result;
@@ -1010,14 +1032,14 @@ bool Maximilian::Sample::loadOgg(string fileName, int channel)
 }
 
 //This sets the playback position to the start of a sample
-void Maximilian::Sample::trigger()
+void Sample::trigger()
 {
 	position = 0;
 	recordPosition = 0;
 }
 
 //This is the main read function.
-bool Maximilian::Sample::read()
+bool Sample::read()
 {
 	bool result;
 	ifstream inFile(myPath.c_str(), ios::in | ios::binary);
@@ -1108,7 +1130,7 @@ bool Maximilian::Sample::read()
 }
 
 //This plays back at the correct speed. Always loops.
-double Maximilian::Sample::play()
+double Sample::play()
 {
 	position++;
 	if ((long)position >= length)
@@ -1117,13 +1139,13 @@ double Maximilian::Sample::play()
 	return output;
 }
 
-void Maximilian::Sample::setPosition(double newPos)
+void Sample::setPosition(double newPos)
 {
 	position = Map::clamp <double>(newPos, 0.0, 1.0) * length;
 }
 
 //start end and points are between 0 and 1
-double Maximilian::Sample::playLoop(double start, double end)
+double Sample::playLoop(double start, double end)
 {
 	position++;
 	if (position < length * start)
@@ -1134,7 +1156,7 @@ double Maximilian::Sample::playLoop(double start, double end)
 	return output;
 }
 
-double Maximilian::Sample::playUntil(double end)
+double Sample::playUntil(double end)
 {
 	position++;
 	if ((long)position < length * end)
@@ -1150,7 +1172,7 @@ double Maximilian::Sample::playUntil(double end)
 
 
 //This plays back at the correct speed. Only plays once. To retrigger, you have to manually reset the position
-double Maximilian::Sample::playOnce()
+double Sample::playOnce()
 {
 	position++;
 	if ((long)position < length)
@@ -1166,9 +1188,9 @@ double Maximilian::Sample::playOnce()
 }
 
 //Same as above but takes a speed value specified as a ratio, with 1.0 as original speed
-double Maximilian::Sample::playOnce(double speed)
+double Sample::playOnce(double speed)
 {
-	position = position + ((speed * chandiv) / (Maximilian::Settings::sampleRate / mySampleRate));
+	position = position + ((speed * chandiv) / (Maximilian::Settings::SAMPLE_RATE / mySampleRate));
 	double remainder = position - (long)position;
 	if ((long)position < length)
 	{
@@ -1183,11 +1205,11 @@ double Maximilian::Sample::playOnce(double speed)
 }
 
 //As above but looping
-double Maximilian::Sample::play(double speed)
+double Sample::play(double speed)
 {
 	double remainder;
 	long a, b;
-	position = position + ((speed * chandiv) / (Maximilian::Settings::sampleRate / mySampleRate));
+	position = position + ((speed * chandiv) / (Maximilian::Settings::SAMPLE_RATE / mySampleRate));
 	if (speed >= 0)
 	{
 
@@ -1242,13 +1264,13 @@ double Maximilian::Sample::play(double speed)
 }
 
 //placeholder
-double Maximilian::Sample::play(double frequency, double start, double end)
+double Sample::play(double frequency, double start, double end)
 {
 	return play(frequency, start, end, position);
 }
 
 //This allows you to say how often a second you want a specific chunk of audio to play
-double Maximilian::Sample::play(double frequency, double start, double end, double& pos)
+double Sample::play(double frequency, double start, double end, double& pos)
 {
 	double remainder;
 	if (end >= length)
@@ -1264,7 +1286,7 @@ double Maximilian::Sample::play(double frequency, double start, double end, doub
 
 		if (pos >= end)
 		{ pos = start; }
-		pos += ((end - start) / ((Maximilian::Settings::sampleRate) / (frequency * chandiv)));
+		pos += ((end - start) / ((Maximilian::Settings::SAMPLE_RATE) / (frequency * chandiv)));
 		remainder = pos - floor(pos);
 		long posl = floor(pos);
 		if (posl + 1 < length)
@@ -1293,7 +1315,7 @@ double Maximilian::Sample::play(double frequency, double start, double end, doub
 		frequency *= -1.;
 		if (pos <= start)
 		{ pos = end; }
-		pos -= ((end - start) / (Maximilian::Settings::sampleRate / (frequency * chandiv)));
+		pos -= ((end - start) / (Maximilian::Settings::SAMPLE_RATE / (frequency * chandiv)));
 		remainder = pos - floor(pos);
 		long posl = floor(pos);
 		if (posl - 1 >= 0)
@@ -1322,7 +1344,7 @@ double Maximilian::Sample::play(double frequency, double start, double end, doub
 
 
 //Same as above. better cubic inerpolation. Cobbled together from various (pd externals, yehar, other places).
-double Maximilian::Sample::play4(double frequency, double start, double end)
+double Sample::play4(double frequency, double start, double end)
 {
 	double remainder;
 	double a, b, c, d, a1, a2, a3;
@@ -1334,7 +1356,7 @@ double Maximilian::Sample::play4(double frequency, double start, double end)
 		}
 		if (position >= end)
 		{ position = start; }
-		position += ((end - start) / (Settings::sampleRate / (frequency * chandiv)));
+		position += ((end - start) / (Settings::SAMPLE_RATE / (frequency * chandiv)));
 		remainder = position - floor(position);
 		if (position > 0)
 		{
@@ -1378,7 +1400,7 @@ double Maximilian::Sample::play4(double frequency, double start, double end)
 		frequency *= -1.;
 		if (position <= start)
 		{ position = end; }
-		position -= ((end - start) / (Settings::sampleRate / (frequency * chandiv)));
+		position -= ((end - start) / (Settings::SAMPLE_RATE / (frequency * chandiv)));
 		remainder = position - floor(position);
 		if (position > start && position < end - 1)
 		{
@@ -1423,7 +1445,7 @@ double Maximilian::Sample::play4(double frequency, double start, double end)
 
 
 //You don't need to worry about this stuff.
-double Maximilian::Sample::bufferPlay(unsigned char& bufferin, long length)
+double Sample::bufferPlay(unsigned char& bufferin, long length)
 {
 	double remainder;
 	short* buffer = (short*)&bufferin;
@@ -1436,12 +1458,12 @@ double Maximilian::Sample::bufferPlay(unsigned char& bufferin, long length)
 	return (output);
 }
 
-double Maximilian::Sample::bufferPlay(unsigned char& bufferin, double speed, long length)
+double Sample::bufferPlay(unsigned char& bufferin, double speed, long length)
 {
 	double remainder;
 	long a, b;
 	short* buffer = (short*)&bufferin;
-	position = position + ((speed * chandiv) / (Settings::sampleRate / mySampleRate));
+	position = position + ((speed * chandiv) / (Settings::SAMPLE_RATE / mySampleRate));
 	if (speed >= 0)
 	{
 
@@ -1495,7 +1517,7 @@ double Maximilian::Sample::bufferPlay(unsigned char& bufferin, double speed, lon
 	return (output);
 }
 
-double Maximilian::Sample::bufferPlay(unsigned char& bufferin, double frequency, double start, double end)
+double Sample::bufferPlay(unsigned char& bufferin, double frequency, double start, double end)
 {
 	double remainder;
 	length = end;
@@ -1510,7 +1532,7 @@ double Maximilian::Sample::bufferPlay(unsigned char& bufferin, double frequency,
 
 		if (position >= end)
 		{ position = start; }
-		position += ((end - start) / (Settings::sampleRate / (frequency * chandiv)));
+		position += ((end - start) / (Settings::SAMPLE_RATE / (frequency * chandiv)));
 		remainder = position - floor(position);
 		long pos = floor(position);
 		if (pos + 1 < length)
@@ -1539,7 +1561,7 @@ double Maximilian::Sample::bufferPlay(unsigned char& bufferin, double frequency,
 		frequency *= -1.;
 		if (position <= start)
 		{ position = end; }
-		position -= ((end - start) / (Maximilian::Settings::sampleRate / (frequency * chandiv)));
+		position -= ((end - start) / (Maximilian::Settings::SAMPLE_RATE / (frequency * chandiv)));
 		remainder = position - floor(position);
 		long pos = floor(position);
 		if (pos - 1 >= 0)
@@ -1567,7 +1589,7 @@ double Maximilian::Sample::bufferPlay(unsigned char& bufferin, double frequency,
 }
 
 //better cubic inerpolation. Cobbled together from various (pd externals, yehar, other places).
-double Maximilian::Sample::bufferPlay4(unsigned char& bufferin, double frequency, double start, double end)
+double Sample::bufferPlay4(unsigned char& bufferin, double frequency, double start, double end)
 {
 	double remainder;
 	double a, b, c, d, a1, a2, a3;
@@ -1580,7 +1602,7 @@ double Maximilian::Sample::bufferPlay4(unsigned char& bufferin, double frequency
 		}
 		if (position >= end)
 		{ position = start; }
-		position += ((end - start) / (Settings::sampleRate / (frequency * chandiv)));
+		position += ((end - start) / (Settings::SAMPLE_RATE / (frequency * chandiv)));
 		remainder = position - floor(position);
 		if (position > 0)
 		{
@@ -1624,7 +1646,7 @@ double Maximilian::Sample::bufferPlay4(unsigned char& bufferin, double frequency
 		frequency *= -1.;
 		if (position <= start)
 		{ position = end; }
-		position -= ((end - start) / (Settings::sampleRate / (frequency * chandiv)));
+		position -= ((end - start) / (Settings::SAMPLE_RATE / (frequency * chandiv)));
 		remainder = position - floor(position);
 		if (position > start && position < end - 1)
 		{
@@ -1668,12 +1690,12 @@ double Maximilian::Sample::bufferPlay4(unsigned char& bufferin, double frequency
 }
 
 
-long Maximilian::Sample::getLength()
+long Sample::getLength()
 {
 	return (length = myDataSize * 0.5);
 }
 
-void Maximilian::Sample::setLength(unsigned long numSamples)
+void Sample::setLength(unsigned long numSamples)
 {
 	cout << "Length: " << numSamples << endl;
 	short* newData = (short*)malloc(sizeof(short) * numSamples);
@@ -1689,17 +1711,17 @@ void Maximilian::Sample::setLength(unsigned long numSamples)
 	recordPosition = 0;
 }
 
-void Maximilian::Sample::clear()
+void Sample::clear()
 {
 	memset(temp, 0, myDataSize);
 }
 
-void Maximilian::Sample::reset()
+void Sample::reset()
 {
 	position = 0;
 }
 
-void Maximilian::Sample::normalise(float maxLevel)
+void Sample::normalise(float maxLevel)
 {
 	short maxValue = 0;
 	for (int i = 0; i < length; i++)
@@ -1716,7 +1738,7 @@ void Maximilian::Sample::normalise(float maxLevel)
 	}
 }
 
-void Maximilian::Sample::autoTrim(float alpha, float threshold, bool trimStart, bool trimEnd)
+void Sample::autoTrim(float alpha, float threshold, bool trimStart, bool trimEnd)
 {
 
 	int startMarker = 0;
@@ -1781,7 +1803,7 @@ void Maximilian::Sample::autoTrim(float alpha, float threshold, bool trimStart, 
  incrementing - consequently a long attack is something like 0.0001 and a long release is like 0.9999.
  Annoyingly, a short attack is 0.1, and a short release is 0.99. I'll sort this out laters */
 
-double Maximilian::Dyn::gate(double input, double threshold, long holdtime, double attack, double release)
+double Dyn::gate(double input, double threshold, long holdtime, double attack, double release)
 {
 
 	if (fabs(input) > threshold && attackphase != 1)
@@ -1827,7 +1849,7 @@ double Maximilian::Dyn::gate(double input, double threshold, long holdtime, doub
 }
 
 
-double Maximilian::Dyn::compressor(double input, double ratio, double threshold, double attack, double release)
+double Dyn::compressor(double input, double ratio, double threshold, double attack, double release)
 {
 
 	if (fabs(input) > threshold && attackphase != 1)
@@ -1867,7 +1889,7 @@ double Maximilian::Dyn::compressor(double input, double ratio, double threshold,
 	return output * (1 + log(ratio));
 }
 
-double Maximilian::Dyn::compress(double input)
+double Dyn::compress(double input)
 {
 
 	if (fabs(input) > threshold && attackphase != 1)
@@ -1911,7 +1933,7 @@ double Maximilian::Dyn::compress(double input)
 /* Lots of people struggle with the envelope generators so here's a new easy one.
  It takes mental numbers for attack and release tho. Basically, they're exponentials.
  I'll map them out later so that it's a bit more intuitive */
-double Maximilian::Env::ar(double input, double attack, double release, long holdtime, int trigger)
+double Env::ar(double input, double attack, double release, long holdtime, int trigger)
 {
 
 	if (trigger == 1 && attackphase != 1 && holdphase != 1)
@@ -2027,7 +2049,7 @@ Maximilian::Env::adsr(double input, double attack, double decay, double sustain,
 	return output;
 }
 
-double Maximilian::Env::adsr(double input, int trigger)
+double Env::adsr(double input, int trigger)
 {
 
 	if (trigger == 1 && attackphase != 1 && holdphase != 1 && decayphase != 1)
@@ -2091,77 +2113,77 @@ double Maximilian::Env::adsr(double input, int trigger)
 }
 
 
-void Maximilian::Env::setAttack(double attackMS)
+void Env::setAttack(double attackMS)
 {
-	attack = 1 - pow(0.01, 1.0 / (attackMS * Maximilian::Settings::sampleRate * 0.001));
+	attack = 1 - pow(0.01, 1.0 / (attackMS * Settings::SAMPLE_RATE * 0.001));
 }
 
-void Maximilian::Env::setRelease(double releaseMS)
+void Env::setRelease(double releaseMS)
 {
-	release = pow(0.01, 1.0 / (releaseMS * Settings::sampleRate * 0.001));
+	release = pow(0.01, 1.0 / (releaseMS * Settings::SAMPLE_RATE * 0.001));
 }
 
-void Maximilian::Env::setSustain(double sustainL)
+void Env::setSustain(double sustainL)
 {
 	sustain = sustainL;
 }
 
-void Maximilian::Env::setDecay(double decayMS)
+void Env::setDecay(double decayMS)
 {
-	decay = pow(0.01, 1.0 / (decayMS * Settings::sampleRate * 0.001));
+	decay = pow(0.01, 1.0 / (decayMS * Settings::SAMPLE_RATE * 0.001));
 }
 
-void Maximilian::Dyn::setAttack(double attackMS)
+void Dyn::setAttack(double attackMS)
 {
-	attack = pow(0.01, 1.0 / (attackMS * Maximilian::Settings::sampleRate * 0.001));
+	attack = pow(0.01, 1.0 / (attackMS * Settings::SAMPLE_RATE * 0.001));
 }
 
-void Maximilian::Dyn::setRelease(double releaseMS)
+void Dyn::setRelease(double releaseMS)
 {
-	release = pow(0.01, 1.0 / (releaseMS * Settings::sampleRate * 0.001));
+	release = pow(0.01, 1.0 / (releaseMS * Settings::SAMPLE_RATE * 0.001));
 }
 
-void Maximilian::Dyn::setThreshold(double thresholdI)
+void Dyn::setThreshold(double thresholdI)
 {
 	threshold = thresholdI;
 }
 
-void Maximilian::Dyn::setRatio(double ratioF)
+void Dyn::setRatio(double ratioF)
 {
 	ratio = ratioF;
 }
 
-double Maximilian::Convert::mtof(int midinote)
+double Convert::mtof(int midinote)
 {
 	return mtofarray[midinote];
 }
 
-int Maximilian::Convert::ftom(double frequency)
+int Convert::ftom(double frequency)
 {
 	double baseFrequency = 440;
 	return round(12 * log2(frequency / baseFrequency)) + 69;
 }
 
-double Maximilian::Convert::atodb(double amplitude)
+double Convert::atodb(double amplitude)
 {
 	return 20 * log10(amplitude);
 }
 
-double Maximilian::Convert::dbtoa(double decibels)
+double Convert::dbtoa(double decibels)
 {
 	return pow(10, (decibels * 0.5));
 }
 
 template < >
-void Maximilian::maxiEnvelopeFollower::setAttack(double attackMS)
+void maxiEnvelopeFollower::setAttack(double attackMS)
 {
-	attack = pow(0.01, 1.0 / (attackMS * Maximilian::Settings::sampleRate * 0.001));
+	attack = pow(0.01, 1.0 / (attackMS * Settings::SAMPLE_RATE * 0.001));
 }
 
 template < >
-void Maximilian::maxiEnvelopeFollower::setRelease(double releaseMS)
+void maxiEnvelopeFollower::setRelease(double releaseMS)
 {
-	release = pow(0.01, 1.0 / (releaseMS * Settings::sampleRate * 0.001));
+	release = pow(0.01, 1.0 / (releaseMS * Settings::SAMPLE_RATE * 0.001));
 }
 
 double pitchRatios[256] = { 0.0006517771980725, 0.0006905338959768, 0.0007315951515920, 0.0007750981021672,
@@ -2243,7 +2265,7 @@ Maximilian::maxiKick::maxiKick()
 
 };
 
-double Maximilian::maxiKick::play()
+double maxiKick::play()
 {
 
 	envOut = envelope.adsr(1., envelope.trigger);
@@ -2307,21 +2329,21 @@ double Maximilian::maxiKick::play()
 	}
 };
 
-void Maximilian::maxiKick::setRelease(double release)
+void maxiKick::setRelease(double release)
 {
 
 	envelope.setRelease(release);
 
 }
 
-void Maximilian::maxiKick::setPitch(double newPitch)
+void maxiKick::setPitch(double newPitch)
 {
 
 	pitch = newPitch;
 
 }
 
-void Maximilian::maxiKick::trigger()
+void maxiKick::trigger()
 {
 
 	envelope.trigger = 1;
@@ -2341,7 +2363,7 @@ Maximilian::maxiSnare::maxiSnare()
 
 };
 
-double Maximilian::maxiSnare::play()
+double maxiSnare::play()
 {
 
 	envOut = envelope.adsr(1., envelope.trigger);
@@ -2406,21 +2428,21 @@ double Maximilian::maxiSnare::play()
 
 };
 
-void Maximilian::maxiSnare::setRelease(double release)
+void maxiSnare::setRelease(double release)
 {
 
 	envelope.setRelease(release);
 
 }
 
-void Maximilian::maxiSnare::setPitch(double newPitch)
+void maxiSnare::setPitch(double newPitch)
 {
 
 	pitch = newPitch;
 
 }
 
-void Maximilian::maxiSnare::trigger()
+void maxiSnare::trigger()
 {
 
 	envelope.trigger = 1;
@@ -2442,7 +2464,7 @@ Maximilian::maxiHats::maxiHats()
 
 };
 
-double Maximilian::maxiHats::play()
+double maxiHats::play()
 {
 
 	envOut = envelope.adsr(1., envelope.trigger);
@@ -2507,21 +2529,21 @@ double Maximilian::maxiHats::play()
 
 };
 
-void Maximilian::maxiHats::setRelease(double release)
+void maxiHats::setRelease(double release)
 {
 
 	envelope.setRelease(release);
 
 }
 
-void Maximilian::maxiHats::setPitch(double newPitch)
+void maxiHats::setPitch(double newPitch)
 {
 
 	pitch = newPitch;
 
 }
 
-void Maximilian::maxiHats::trigger()
+void maxiHats::trigger()
 {
 
 	envelope.trigger = 1;
@@ -2542,7 +2564,7 @@ Maximilian::maxiClock::maxiClock()
 }
 
 
-void Maximilian::maxiClock::ticker()
+void maxiClock::ticker()
 {
 
 	tick = false;
@@ -2559,7 +2581,7 @@ void Maximilian::maxiClock::ticker()
 }
 
 
-void Maximilian::maxiClock::setTempo(double bpmIn)
+void maxiClock::setTempo(double bpmIn)
 {
 
 	bpm = bpmIn;
@@ -2567,7 +2589,7 @@ void Maximilian::maxiClock::setTempo(double bpmIn)
 }
 
 
-void Maximilian::maxiClock::setTicksPerBeat(int ticksPerBeat)
+void maxiClock::setTicksPerBeat(int ticksPerBeat)
 {
 
 	ticks = ticksPerBeat;
@@ -2599,14 +2621,14 @@ Maximilian::maxiSampler::maxiSampler()
 	}
 }
 
-void Maximilian::maxiSampler::setNumVoices(int numVoices)
+void maxiSampler::setNumVoices(int numVoices)
 {
 
 	voices = numVoices;
 
 }
 
-double Maximilian::maxiSampler::play()
+double maxiSampler::play()
 {
 
 	output = 0;
@@ -2620,7 +2642,7 @@ double Maximilian::maxiSampler::play()
 		{
 			outputs[i] = samples[i].play(
 					pitchRatios[(int)pitch[i] + originalPitch] *
-					((1. / samples[i].length) * Maximilian::Settings::sampleRate),
+					((1. / samples[i].length) * Settings::SAMPLE_RATE),
 					0, samples[i].length) * envOut[i];
 			output += outputs[i] / voices;
 
@@ -2637,7 +2659,7 @@ double Maximilian::maxiSampler::play()
 
 }
 
-void Maximilian::maxiSampler::load(string inFile, bool setall)
+void maxiSampler::load(string inFile, bool setall)
 {
 
 	if (setall)
@@ -2660,7 +2682,7 @@ void Maximilian::maxiSampler::load(string inFile, bool setall)
 
 }
 
-void Maximilian::maxiSampler::setPitch(double pitchIn, bool setall)
+void maxiSampler::setPitch(double pitchIn, bool setall)
 {
 
 	if (setall)
@@ -2682,7 +2704,7 @@ void Maximilian::maxiSampler::setPitch(double pitchIn, bool setall)
 
 }
 
-void Maximilian::maxiSampler::midiNoteOn(double pitchIn, double velocity, bool setall)
+void maxiSampler::midiNoteOn(double pitchIn, double velocity, bool setall)
 {
 
 	if (setall)
@@ -2705,7 +2727,7 @@ void Maximilian::maxiSampler::midiNoteOn(double pitchIn, double velocity, bool s
 
 }
 
-void Maximilian::maxiSampler::midiNoteOff(double pitchIn, double velocity, bool setall)
+void maxiSampler::midiNoteOff(double pitchIn, double velocity, bool setall)
 {
 
 
@@ -2723,7 +2745,7 @@ void Maximilian::maxiSampler::midiNoteOff(double pitchIn, double velocity, bool 
 }
 
 
-void Maximilian::maxiSampler::setAttack(double attackD, bool setall)
+void maxiSampler::setAttack(double attackD, bool setall)
 {
 
 	if (setall)
@@ -2748,7 +2770,7 @@ void Maximilian::maxiSampler::setAttack(double attackD, bool setall)
 
 }
 
-void Maximilian::maxiSampler::setDecay(double decayD, bool setall)
+void maxiSampler::setDecay(double decayD, bool setall)
 {
 
 	if (setall)
@@ -2773,7 +2795,7 @@ void Maximilian::maxiSampler::setDecay(double decayD, bool setall)
 
 }
 
-void Maximilian::maxiSampler::setSustain(double sustainD, bool setall)
+void maxiSampler::setSustain(double sustainD, bool setall)
 {
 
 	if (setall)
@@ -2798,7 +2820,7 @@ void Maximilian::maxiSampler::setSustain(double sustainD, bool setall)
 
 }
 
-void Maximilian::maxiSampler::setRelease(double releaseD, bool setall)
+void maxiSampler::setRelease(double releaseD, bool setall)
 {
 
 	if (setall)
@@ -2823,7 +2845,7 @@ void Maximilian::maxiSampler::setRelease(double releaseD, bool setall)
 
 }
 
-void Maximilian::maxiSampler::setPosition(double positionD, bool setall)
+void maxiSampler::setPosition(double positionD, bool setall)
 {
 
 	if (setall)
@@ -2848,7 +2870,7 @@ void Maximilian::maxiSampler::setPosition(double positionD, bool setall)
 
 }
 
-void Maximilian::maxiSampler::trigger()
+void maxiSampler::trigger()
 {
 
 	envelopes[currentVoice].trigger = 1;
@@ -2864,7 +2886,7 @@ void Maximilian::maxiSampler::trigger()
 ///
 ///*************************************************************
 Maximilian::maxiRecorder::maxiRecorder() :
-		bufferSize(Settings::sampleRate * 2),
+		bufferSize(Settings::SAMPLE_RATE * 2),
 		bufferQueueSize(3),
 		bufferIndex(0),
 		recordedAmountFrames(0),
@@ -2892,7 +2914,7 @@ Maximilian::maxiRecorder::~maxiRecorder()
 /// times in it's lifetime becasuse of destructor.
 ///
 ///*************************************************************
-void Maximilian::maxiRecorder::freeResources()
+void maxiRecorder::freeResources()
 {
 	if (savedBuffers.size() > 0)
 	{
@@ -2909,7 +2931,7 @@ void Maximilian::maxiRecorder::freeResources()
 /// Simply return if we are recording or not
 ///
 ///*************************************************************
-bool Maximilian::maxiRecorder::isRecording() const
+bool maxiRecorder::isRecording() const
 {
 	return doRecord;
 }
@@ -2919,7 +2941,7 @@ bool Maximilian::maxiRecorder::isRecording() const
 /// Set the filename (and path)
 ///
 ///*************************************************************
-void Maximilian::maxiRecorder::setup(std::string _filename)
+void maxiRecorder::setup(std::string _filename)
 {
 	filename = _filename;
 }
@@ -2942,14 +2964,14 @@ void Maximilian::maxiRecorder::setup(std::string _filename)
 ///*************************************************************
 #if defined(OS_IS_UNIX)
 
-void* Maximilian::maxiRecorder::update(void* _context)
+void* maxiRecorder::update(void* _context)
 {
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 	maxiRecorder* _this = static_cast<maxiRecorder*>(_context);
 	_this->threadRunning = true;
 	while (_this->doRecord)
 	{
-		usleep((useconds_t)(10000. / bufferSize / Maximilian::Settings::sampleRate));
+		usleep((useconds_t)(10000. / bufferSize / Settings::SAMPLE_RATE));
 		while (_this->bufferQueueSize > _this->bufferQueue.size())
 		{
 			_this->enqueueBuffer();
@@ -2984,7 +3006,7 @@ void* Maximilian::maxiRecorder::update(void* _context)
 /// will ensure there are enough buffers available in the queue.
 ///
 ///*************************************************************
-void Maximilian::maxiRecorder::startRecording()
+void maxiRecorder::startRecording()
 {
 	doRecord = true;
 	for (int i = 0; i < bufferQueueSize; ++i)
@@ -3015,7 +3037,7 @@ void Maximilian::maxiRecorder::startRecording()
 /// in update() and stops the Windows thread if necessary
 ///
 ///*************************************************************
-void Maximilian::maxiRecorder::stopRecording()
+void maxiRecorder::stopRecording()
 {
 #if defined(OS_IS_WIN)
 	CloseHandle(daemonHandle);
@@ -3039,12 +3061,12 @@ void Maximilian::maxiRecorder::stopRecording()
 ///
 ///*************************************************************
 template <typename T>
-void Maximilian::maxiRecorder::write(std::ofstream& _stream, const T& _t)
+void maxiRecorder::write(std::ofstream& _stream, const T& _t)
 {
 	_stream.write((const char*)&_t, sizeof(T));
 }
 
-void Maximilian::maxiRecorder::saveToWav()
+void maxiRecorder::saveToWav()
 {
 	if (isRecording())
 	{ stopRecording(); }
@@ -3065,8 +3087,8 @@ void Maximilian::maxiRecorder::saveToWav()
 		pcmDataInt[i] = (short)(pcmData[i] * 3276.7);
 	}
 
-	int sampleRate = Settings::sampleRate;
-	short channels = Maximilian::Settings::channels;
+	int sampleRate = Settings::SAMPLE_RATE;
+	short channels = Settings::CHANNELS;
 	int buffSize = int(pcmDataInt.size()) * 2;
 
 	std::ofstream stream(filename.c_str(), std::ios::binary);
@@ -3075,7 +3097,7 @@ void Maximilian::maxiRecorder::saveToWav()
 	{
 		/* Header */
 		stream.write("RIFF", 4);
-		write <int>(stream, 36 + buffSize);
+		write < int > (stream, 36 + buffSize);
 		stream.write("WAVE", 4);
 
 		/* Format Chunk */
@@ -3112,7 +3134,7 @@ void Maximilian::maxiRecorder::saveToWav()
 /// and work with.
 ///
 ///*************************************************************
-std::vector <double> Maximilian::maxiRecorder::getProcessedData()
+std::vector <double> maxiRecorder::getProcessedData()
 {
 	std::vector <double> userData;
 	int dataSize = int(savedBuffers.size()) * bufferSize;
@@ -3149,7 +3171,7 @@ std::vector <double> Maximilian::maxiRecorder::getProcessedData()
 /// / rtaudio's double
 ///
 ///*************************************************************
-void Maximilian::maxiRecorder::passData(double* _in, int _inBufferSize)
+void maxiRecorder::passData(double* _in, int _inBufferSize)
 {
 	for (int i = 0; i < _inBufferSize; ++i)
 	{
@@ -3164,7 +3186,7 @@ void Maximilian::maxiRecorder::passData(double* _in, int _inBufferSize)
 	}
 }
 
-void Maximilian::maxiRecorder::passData(float* _in, int _inBufferSize)
+void maxiRecorder::passData(float* _in, int _inBufferSize)
 {
 	for (int i = 0; i < _inBufferSize; ++i)
 	{
@@ -3185,7 +3207,7 @@ void Maximilian::maxiRecorder::passData(float* _in, int _inBufferSize)
 /// structures have the correct addresses.
 ///
 ///*************************************************************
-void Maximilian::maxiRecorder::enqueueBuffer()
+void maxiRecorder::enqueueBuffer()
 {
 	double* b = new double[bufferSize];
 	bufferQueue.push(b);

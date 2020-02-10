@@ -48,6 +48,7 @@
 #include <cmath>
 #include <cerrno>
 #include <queue>
+#include <array>
 #include <vector>
 
 #if !defined(_WIN32) && (defined(unix) || defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__)))
@@ -75,36 +76,34 @@ namespace Maximilian
 {
 	class Settings
 	{
-	public:
-		static int sampleRate;
-		static int channels;
-		static int bufferSize;
 
-		static void setup(int initSampleRate, int initChannels, int initBufferSize)
-		{
-			Settings::sampleRate = initSampleRate;
-			Settings::channels = initChannels;
-			Settings::bufferSize = initBufferSize;
-		}
+	public:
+
+		static constexpr unsigned short SAMPLE_RATE = 44'100;
+		static constexpr unsigned short CHANNELS = 2;
+		static constexpr unsigned short BUFFER_SIZE = 1'024;
 	};
 
 	class Oscilation
 	{
 
-		double frequency;
-		double phase;
-		double startphase;
-		double endphase;
-		double output;
-		double tri;
+	private:
+
+		double frequency = 0.0;
+		double phase = 0.0;
+		double startphase = 0.0;
+		double endphase = 0.0;
+		double output = 0.0;
+		double tri = 0.0;
 
 
 	public:
-		Oscilation();
 
-		double sinewave(double frequency);
+		Oscilation() = default;
 
-		double coswave(double frequency);
+		double sinewave(double _frequency);
+
+		double coswave(double _frequency);
 
 		double phasor(double frequency);
 
@@ -122,13 +121,39 @@ namespace Maximilian
 
 		double sinebuf(double frequency);
 
-		double sinebuf4(double frequency);
+		double sinebuf4(double _frequency);
 
 		double sawn(double frequency);
 
 		double rect(double frequency, double duty = 0.5);
 
-		void phaseReset(double phaseIn);
+		// Getters
+
+		double getFrequency() const;
+
+		double getPhase() const;
+
+		double getStartphase() const;
+
+		double getEndphase() const;
+
+		double getOutput() const;
+
+		double getTri() const;
+
+		// Setters
+
+		void setFrequency(double _frequency);
+
+		void setPhase(double phaseIn);
+
+		void setStartphase(double _startphase);
+
+		void setEndphase(double _endphase);
+
+		void setOutput(double _output);
+
+		void setTri(double _tri);
 
 	};
 
@@ -173,15 +198,21 @@ namespace Maximilian
 
 	class DelayLine
 	{
-		double frequency;
-		int phase;
-		double startphase;
-		double endphase;
-		double output;
-		double memory[88200];
+
+	private:
+
+		int phase = 0;
+
+		double frequency = 0.0;
+		double startphase = 0.0;
+		double endphase = 0.0;
+		double output = 0.0;
+
+		std::array <double, 88'200> memory{ };
 
 	public:
-		DelayLine();
+
+		DelayLine() = default;
 
 		double dl(double input, int size, double feedback);
 
@@ -192,36 +223,45 @@ namespace Maximilian
 
 	class FractionalDelay
 	{
-		static const int delaySize = 88200;
-		double memory[delaySize];
+
+	public:
+
+		static constexpr int DELAY_SIZE = 88'200;
+
+	private:
+
 		int writePointer = 0;
 		int readPointer = 0;
 
+		std::array <double, DELAY_SIZE> memory{ };
+
 	public:
-		FractionalDelay();
+
+		FractionalDelay() = default;
 
 		double dl(double sig, double delayTime, double feedback);
 	};
 
 	class Filter
 	{
-		double gain;
-		double input;
-		double output;
-		double inputs[10];
-		double outputs[10];
-		double cutoff1;
-		double x;//speed
-		double y;//pos
-		double z;//pole
-		double c;//filter coefficient
+		double gain = 0.0;
+		double input = 0.0;
+		double output = 0.0;
+		double cutoff = 0.0;
+		double cutoff1 = 0.0;
+		double resonance = 0.0;
+
+		double x = 0.0;//speed
+		double y = 0.0;//pos
+		double z = 0.0;//pole
+		double c = 0.0;//filter coefficient
+
+		std::array <double, 10> inputs{ };
+		std::array <double, 10> outputs{ };
 
 	public:
-		Filter() : x(0.0), y(0.0), z(0.0), c(0.0)
-		{
-		};
-		double cutoff;
-		double resonance;
+
+		Filter() = default;
 
 		double lores(double input, double cutoff1, double resonance);
 
@@ -334,7 +374,7 @@ namespace Maximilian
 
 		}
 
-		Sample() : temp(nullptr), position(0), recordPosition(0), myChannels(1), mySampleRate(Settings::sampleRate)
+		Sample() : temp(nullptr), position(0), recordPosition(0), myChannels(1), mySampleRate(Settings::SAMPLE_RATE)
 		{
 		};
 
@@ -347,7 +387,7 @@ namespace Maximilian
 			position = 0;
 			recordPosition = 0;
 			myChannels = source.myChannels;
-			mySampleRate = Settings::sampleRate;
+			mySampleRate = Settings::SAMPLE_RATE;
 			free(temp);
 			myDataSize = source.myDataSize;
 			temp = (short*)malloc(myDataSize * sizeof(char));
@@ -647,12 +687,12 @@ namespace Maximilian
 
 		void setAttack(T attackMS)
 		{
-			attack = pow(0.01, 1.0 / (attackMS * Settings::sampleRate * 0.001));
+			attack = pow(0.01, 1.0 / (attackMS * Settings::SAMPLE_RATE * 0.001));
 		}
 
 		void setRelease(T releaseMS)
 		{
-			release = pow(0.01, 1.0 / (releaseMS * Settings::sampleRate * 0.001));
+			release = pow(0.01, 1.0 / (releaseMS * Settings::SAMPLE_RATE * 0.001));
 		}
 
 		inline T play(T input)
@@ -770,7 +810,7 @@ namespace Maximilian
 		{
 			freq = _freq;
 			res = _res;
-			g = tan(PI * freq / Settings::sampleRate);
+			g = tan(PI * freq / Settings::SAMPLE_RATE);
 			damping = res == 0 ? 0 : 1.0 / res;
 			k = damping;
 			ginv = g / (1.0 + g * (g + k));
