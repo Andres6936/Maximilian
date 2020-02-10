@@ -1,7 +1,8 @@
 #include "Maximilian.hpp"
-#include "Realtime/Audio.hpp"
 
-Maximilian::Sample beats; //We give our sample a name. It's called beats this time. We could have loads of them, but they have to have different names.
+using namespace Maximilian;
+
+Sample beats; //We give our sample a name. It's called beats this time. We could have loads of them, but they have to have different names.
 
 void setup()
 {//some inits
@@ -25,7 +26,7 @@ void play(double* output)
 
 
 int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-		double streamTime, Maximilian::RtAudioStreamStatus status, void* userData)
+		double streamTime, RtAudioStreamStatus status, void* userData)
 {
 
 	unsigned int i, j;
@@ -43,7 +44,7 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 	for (i = 0; i < nBufferFrames; i++)
 	{
 		play(lastValues);
-		for (j = 0; j < Maximilian::Settings::CHANNELS; j++)
+		for (j = 0; j < Settings::CHANNELS; j++)
 		{
 			*buffer++ = lastValues[j];
 		}
@@ -55,30 +56,23 @@ int main()
 {
 	setup();
 
-	Maximilian::Audio dac(Maximilian::Audio::SupportedArchitectures::Windows_Ds);
-	if (dac.getDeviceCount() < 1)
-	{
-		std::cout << "\nNo audio devices found!\n";
-		char input;
-		std::cin.get(input);
-		exit(0);
-	}
+	Audio audio(Audio::SupportedArchitectures::Windows_Ds);
 
-	Maximilian::Audio::StreamParameters parameters;
-	parameters.deviceId = dac.getDefaultOutputDevice();
-	parameters.nChannels = Maximilian::Settings::CHANNELS;
+	Audio::StreamParameters parameters;
+	parameters.deviceId = audio.getDefaultOutputDevice();
+	parameters.nChannels = Settings::CHANNELS;
 	parameters.firstChannel = 0;
-	unsigned int sampleRate = Maximilian::Settings::SAMPLE_RATE;
-	unsigned int bufferFrames = Maximilian::Settings::BUFFER_SIZE;
+	unsigned int sampleRate = Settings::SAMPLE_RATE;
+	unsigned int bufferFrames = Settings::BUFFER_SIZE;
 	//double data[maxiSettings::channels];
-	vector <double> data(Maximilian::Settings::CHANNELS, 0);
+	vector <double> data(Settings::CHANNELS, 0);
 
 	try
 	{
-		dac.openStream(parameters, RTAUDIO_FLOAT64,
+		audio.openStream(parameters, RTAUDIO_FLOAT64,
 				sampleRate, &bufferFrames, &routing, (void*)&(data[0]));
 
-		dac.startStream();
+		audio.startStream();
 	}
 	catch (Exception& e)
 	{
@@ -93,15 +87,15 @@ int main()
 	try
 	{
 		// Stop the stream
-		dac.stopStream();
+		audio.stopStream();
 	}
 	catch (Exception& e)
 	{
 		e.printMessage();
 	}
 
-	if (dac.isStreamOpen())
-	{ dac.closeStream(); }
+	if (audio.isStreamOpen())
+	{ audio.closeStream(); }
 
 	return 0;
 }

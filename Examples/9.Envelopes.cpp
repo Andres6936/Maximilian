@@ -5,12 +5,13 @@
 // Release: This is how long it takes to fade out.
 
 #include "Maximilian.hpp"
-#include "Realtime/Audio.hpp"
 
-Maximilian::Oscilation myCounter, mySwitchableOsc;//
+using namespace Maximilian;
+
+Oscilation myCounter, mySwitchableOsc;//
 int CurrentCount;//
 double myOscOutput, myCurrentVolume;//
-Maximilian::Env myEnvelope;
+Env myEnvelope;
 
 
 void setup()
@@ -65,7 +66,7 @@ void play(double* output)
 
 
 int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-		double streamTime, Maximilian::RtAudioStreamStatus status, void* userData)
+		double streamTime, RtAudioStreamStatus status, void* userData)
 {
 
 	unsigned int i, j;
@@ -83,7 +84,7 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 	for (i = 0; i < nBufferFrames; i++)
 	{
 		play(lastValues);
-		for (j = 0; j < Maximilian::Settings::CHANNELS; j++)
+		for (j = 0; j < Settings::CHANNELS; j++)
 		{
 			*buffer++ = lastValues[j];
 		}
@@ -95,23 +96,16 @@ int main()
 {
 	setup();
 
-	Maximilian::Audio dac(Maximilian::Audio::SupportedArchitectures::Windows_Ds);
-	if (dac.getDeviceCount() < 1)
-	{
-		std::cout << "\nNo audio devices found!\n";
-		char input;
-		std::cin.get(input);
-		exit(0);
-	}
+	Audio dac(Audio::SupportedArchitectures::Windows_Ds);
 
-	Maximilian::Audio::StreamParameters parameters;
+	Audio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
-	parameters.nChannels = Maximilian::Settings::CHANNELS;
+	parameters.nChannels = Settings::CHANNELS;
 	parameters.firstChannel = 0;
-	unsigned int sampleRate = Maximilian::Settings::SAMPLE_RATE;
-	unsigned int bufferFrames = Maximilian::Settings::BUFFER_SIZE;
+	unsigned int sampleRate = Settings::SAMPLE_RATE;
+	unsigned int bufferFrames = Settings::BUFFER_SIZE;
 	//double data[maxiSettings::channels];
-	vector <double> data(Maximilian::Settings::CHANNELS, 0);
+	vector <double> data(Settings::CHANNELS, 0);
 
 	try
 	{
