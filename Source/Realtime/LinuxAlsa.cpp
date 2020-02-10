@@ -441,6 +441,9 @@ bool LinuxAlsa::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned i
   snd_output_stdio_attach(&out, stderr, 0);
 #endif
 
+	// Convert the StreamMode enum to int for use in arrays
+	int index = (int)mode;
+
 	// I'm not using the "plug" interface ... too much inconsistent behavior.
 
 	unsigned nDevices = 0;
@@ -566,11 +569,11 @@ foundDevice:
 		if (result < 0)
 		{
 			result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
-			stream_.deviceInterleaved[mode] = true;
+			stream_.deviceInterleaved[index] = true;
 		}
 		else
 		{
-			stream_.deviceInterleaved[mode] = false;
+			stream_.deviceInterleaved[index] = false;
 		}
 	}
 	else
@@ -580,11 +583,11 @@ foundDevice:
 		if (result < 0)
 		{
 			result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_NONINTERLEAVED);
-			stream_.deviceInterleaved[mode] = false;
+			stream_.deviceInterleaved[index] = false;
 		}
 		else
 		{
-			stream_.deviceInterleaved[mode] = true;
+			stream_.deviceInterleaved[index] = true;
 		}
 	}
 
@@ -628,7 +631,7 @@ foundDevice:
 
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[mode] = format;
+		stream_.deviceFormat[index] = format;
 		goto setFormat;
 	}
 
@@ -636,42 +639,42 @@ foundDevice:
 	deviceFormat = SND_PCM_FORMAT_FLOAT64;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[mode] = RTAUDIO_FLOAT64;
+		stream_.deviceFormat[index] = RTAUDIO_FLOAT64;
 		goto setFormat;
 	}
 
 	deviceFormat = SND_PCM_FORMAT_FLOAT;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[mode] = RTAUDIO_FLOAT32;
+		stream_.deviceFormat[index] = RTAUDIO_FLOAT32;
 		goto setFormat;
 	}
 
 	deviceFormat = SND_PCM_FORMAT_S32;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[mode] = RTAUDIO_SINT32;
+		stream_.deviceFormat[index] = RTAUDIO_SINT32;
 		goto setFormat;
 	}
 
 	deviceFormat = SND_PCM_FORMAT_S24;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[mode] = RTAUDIO_SINT24;
+		stream_.deviceFormat[index] = RTAUDIO_SINT24;
 		goto setFormat;
 	}
 
 	deviceFormat = SND_PCM_FORMAT_S16;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[mode] = RTAUDIO_SINT16;
+		stream_.deviceFormat[index] = RTAUDIO_SINT16;
 		goto setFormat;
 	}
 
 	deviceFormat = SND_PCM_FORMAT_S8;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[mode] = RTAUDIO_SINT8;
+		stream_.deviceFormat[index] = RTAUDIO_SINT8;
 		goto setFormat;
 	}
 
@@ -692,13 +695,13 @@ setFormat:
 	}
 
 	// Determine whether byte-swaping is necessary.
-	stream_.doByteSwap[mode] = false;
+	stream_.doByteSwap[index] = false;
 	if (deviceFormat != SND_PCM_FORMAT_S8)
 	{
 		result = snd_pcm_format_cpu_endian(deviceFormat);
 		if (result == 0)
 		{
-			stream_.doByteSwap[mode] = true;
+			stream_.doByteSwap[index] = true;
 		}
 		else if (result < 0)
 		{
@@ -723,7 +726,7 @@ setFormat:
 
 	// Determine the number of channels for this device.  We support a possible
 	// minimum device channel number > than the value requested by the user.
-	stream_.nUserChannels[mode] = channels;
+	stream_.nUserChannels[index] = channels;
 	unsigned int value;
 	result = snd_pcm_hw_params_get_channels_max(hw_params, &value);
 	unsigned int deviceChannels = value;
@@ -748,7 +751,7 @@ setFormat:
 	deviceChannels = value;
 	if (deviceChannels < channels + firstChannel)
 	{ deviceChannels = channels + firstChannel; }
-	stream_.nDeviceChannels[mode] = deviceChannels;
+	stream_.nDeviceChannels[index] = deviceChannels;
 
 	// Set the device channels.
 	result = snd_pcm_hw_params_set_channels(phandle, hw_params, deviceChannels);
@@ -855,19 +858,19 @@ setFormat:
 #endif
 
 	// Set flags for buffer conversion
-	stream_.doConvertBuffer[mode] = false;
-	if (stream_.userFormat != stream_.deviceFormat[mode])
+	stream_.doConvertBuffer[index] = false;
+	if (stream_.userFormat != stream_.deviceFormat[index])
 	{
-		stream_.doConvertBuffer[mode] = true;
+		stream_.doConvertBuffer[index] = true;
 	}
-	if (stream_.nUserChannels[mode] < stream_.nDeviceChannels[mode])
+	if (stream_.nUserChannels[index] < stream_.nDeviceChannels[index])
 	{
-		stream_.doConvertBuffer[mode] = true;
+		stream_.doConvertBuffer[index] = true;
 	}
-	if (stream_.userInterleaved != stream_.deviceInterleaved[mode] &&
-		stream_.nUserChannels[mode] > 1)
+	if (stream_.userInterleaved != stream_.deviceInterleaved[index] &&
+		stream_.nUserChannels[index] > 1)
 	{
-		stream_.doConvertBuffer[mode] = true;
+		stream_.doConvertBuffer[index] = true;
 	}
 
 	// Allocate the ApiHandle if necessary and then save.
@@ -898,23 +901,23 @@ setFormat:
 	{
 		apiInfo = (AlsaHandle*)stream_.apiHandle;
 	}
-	apiInfo->handles[mode] = phandle;
+	apiInfo->handles[index] = phandle;
 
 	// Allocate necessary internal buffers.
 	unsigned long bufferBytes;
-	bufferBytes = stream_.nUserChannels[mode] * *bufferSize * formatBytes(stream_.userFormat);
-	stream_.userBuffer[mode] = (char*)calloc(bufferBytes, 1);
-	if (stream_.userBuffer[mode] == NULL)
+	bufferBytes = stream_.nUserChannels[index] * *bufferSize * formatBytes(stream_.userFormat);
+	stream_.userBuffer[index] = (char*)calloc(bufferBytes, 1);
+	if (stream_.userBuffer[index] == NULL)
 	{
 		errorText_ = "RtApiAlsa::probeDeviceOpen: error allocating user buffer memory.";
 		goto error;
 	}
 
-	if (stream_.doConvertBuffer[mode])
+	if (stream_.doConvertBuffer[index])
 	{
 
 		bool makeBuffer = true;
-		bufferBytes = stream_.nDeviceChannels[mode] * formatBytes(stream_.deviceFormat[mode]);
+		bufferBytes = stream_.nDeviceChannels[index] * formatBytes(stream_.deviceFormat[index]);
 		if (mode == StreamMode::INPUT)
 		{
 			if (stream_.mode == StreamMode::OUTPUT && stream_.deviceBuffer)
@@ -941,11 +944,11 @@ setFormat:
 
 	stream_.sampleRate = sampleRate;
 	stream_.nBuffers = periods;
-	stream_.device[mode] = device;
+	stream_.device[index] = device;
 	stream_.state = StreamState::STREAM_STOPPED;
 
 	// Setup the buffer conversion information structure.
-	if (stream_.doConvertBuffer[mode])
+	if (stream_.doConvertBuffer[index])
 	{ setConvertInfo(mode, firstChannel); }
 
 	// Setup thread if necessary.
