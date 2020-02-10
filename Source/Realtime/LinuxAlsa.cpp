@@ -1,4 +1,5 @@
 #include "Realtime/LinuxAlsa.hpp"
+#include "Realtime/AudioStream.hpp"
 
 #include <alsa/asoundlib.h>
 #include <climits>
@@ -42,7 +43,7 @@ extern "C" void* alsaCallbackHandler(void* ptr)
 
 LinuxAlsa::~LinuxAlsa()
 {
-	if (stream_.state != STREAM_CLOSED)
+	if (stream_.state != StreamState::STREAM_CLOSED)
 	{ closeStream(); }
 }
 
@@ -507,13 +508,13 @@ foundDevice:
 	// The getDeviceInfo() function will not work for a device that is
 	// already open.  Thus, we'll probe the system before opening a
 	// stream and save the results for use by getDeviceInfo().
-	if (mode == OUTPUT || (mode == INPUT && stream_.mode != OUTPUT))
+	if (mode == StreamMode::OUTPUT || (mode == StreamMode::INPUT && stream_.mode != StreamMode::OUTPUT))
 	{ // only do once
 		this->saveDeviceInfo();
 	}
 
 	snd_pcm_stream_t stream;
-	if (mode == OUTPUT)
+	if (mode == StreamMode::OUTPUT)
 	{
 		stream = SND_PCM_STREAM_PLAYBACK;
 	}
@@ -527,7 +528,7 @@ foundDevice:
 	result = snd_pcm_open(&phandle, name, stream, openMode);
 	if (result < 0)
 	{
-		if (mode == OUTPUT)
+		if (mode == StreamMode::OUTPUT)
 		{
 			errorStream_ << "RtApiAlsa::probeDeviceOpen: pcm device (" << name << ") won't open for output.";
 		}
@@ -794,7 +795,7 @@ setFormat:
 
 	// If attempting to setup a duplex stream, the bufferSize parameter
 	// MUST be the same in both directions!
-	if (stream_.mode == OUTPUT && mode == INPUT && *bufferSize != stream_.bufferSize)
+	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT && *bufferSize != stream_.bufferSize)
 	{
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: system error setting buffer size for duplex stream on device ("
 					 << name << ").";
@@ -914,9 +915,9 @@ setFormat:
 
 		bool makeBuffer = true;
 		bufferBytes = stream_.nDeviceChannels[mode] * formatBytes(stream_.deviceFormat[mode]);
-		if (mode == INPUT)
+		if (mode == StreamMode::INPUT)
 		{
-			if (stream_.mode == OUTPUT && stream_.deviceBuffer)
+			if (stream_.mode == StreamMode::OUTPUT && stream_.deviceBuffer)
 			{
 				unsigned long bytesOut = stream_.nDeviceChannels[0] * formatBytes(stream_.deviceFormat[0]);
 				if (bufferBytes <= bytesOut)
@@ -941,17 +942,17 @@ setFormat:
 	stream_.sampleRate = sampleRate;
 	stream_.nBuffers = periods;
 	stream_.device[mode] = device;
-	stream_.state = STREAM_STOPPED;
+	stream_.state = StreamState::STREAM_STOPPED;
 
 	// Setup the buffer conversion information structure.
 	if (stream_.doConvertBuffer[mode])
 	{ setConvertInfo(mode, firstChannel); }
 
 	// Setup thread if necessary.
-	if (stream_.mode == OUTPUT && mode == INPUT)
+	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT)
 	{
 		// We had already set up an output stream.
-		stream_.mode = DUPLEX;
+		stream_.mode = StreamMode::DUPLEX;
 		// Link the streams if possible.
 		apiInfo->synchronized = false;
 		if (snd_pcm_link(apiInfo->handles[0], apiInfo->handles[1]) == 0)
@@ -1047,7 +1048,7 @@ error:
 
 void LinuxAlsa::closeStream()
 {
-	if (stream_.state == STREAM_CLOSED)
+	if (stream_.state == StreamState::STREAM_CLOSED)
 	{
 		errorText_ = "RtApiAlsa::closeStream(): no open stream to close!";
 		error(Exception::WARNING);
@@ -1057,7 +1058,7 @@ void LinuxAlsa::closeStream()
 	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
 	stream_.callbackInfo.isRunning = false;
 	pthread_mutex_lock(&stream_.mutex);
-	if (stream_.state == STREAM_STOPPED)
+	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
 		apiInfo->runnable = true;
 		pthread_cond_signal(&apiInfo->runnable_cv);
@@ -1065,14 +1066,14 @@ void LinuxAlsa::closeStream()
 	pthread_mutex_unlock(&stream_.mutex);
 	pthread_join(stream_.callbackInfo.thread, NULL);
 
-	if (stream_.state == STREAM_RUNNING)
+	if (stream_.state == StreamState::STREAM_RUNNING)
 	{
-		stream_.state = STREAM_STOPPED;
-		if (stream_.mode == OUTPUT || stream_.mode == DUPLEX)
+		stream_.state = StreamState::STREAM_STOPPED;
+		if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 		{
 			snd_pcm_drop(apiInfo->handles[0]);
 		}
-		if (stream_.mode == INPUT || stream_.mode == DUPLEX)
+		if (stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX)
 		{
 			snd_pcm_drop(apiInfo->handles[1]);
 		}
@@ -1103,8 +1104,8 @@ void LinuxAlsa::closeStream()
 		stream_.deviceBuffer = 0;
 	}
 
-	stream_.mode = UNINITIALIZED;
-	stream_.state = STREAM_CLOSED;
+	stream_.mode = StreamMode::UNINITIALIZED;
+	stream_.state = StreamState::STREAM_CLOSED;
 }
 
 void LinuxAlsa::startStream()
@@ -1112,7 +1113,7 @@ void LinuxAlsa::startStream()
 	// This method calls snd_pcm_prepare if the device isn't already in that state.
 
 	verifyStream();
-	if (stream_.state == STREAM_RUNNING)
+	if (stream_.state == StreamState::STREAM_RUNNING)
 	{
 		errorText_ = "RtApiAlsa::startStream(): the stream is already running!";
 		error(Exception::WARNING);
@@ -1125,7 +1126,7 @@ void LinuxAlsa::startStream()
 	snd_pcm_state_t state;
 	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
 	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
-	if (stream_.mode == OUTPUT || stream_.mode == DUPLEX)
+	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
 		state = snd_pcm_state(handle[0]);
 		if (state != SND_PCM_STATE_PREPARED)
@@ -1141,7 +1142,7 @@ void LinuxAlsa::startStream()
 		}
 	}
 
-	if ((stream_.mode == INPUT || stream_.mode == DUPLEX) && !apiInfo->synchronized)
+	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
 	{
 		state = snd_pcm_state(handle[1]);
 		if (state != SND_PCM_STATE_PREPARED)
@@ -1157,7 +1158,7 @@ void LinuxAlsa::startStream()
 		}
 	}
 
-	stream_.state = STREAM_RUNNING;
+	stream_.state = StreamState::STREAM_RUNNING;
 
 unlock:
 	apiInfo->runnable = true;
@@ -1172,14 +1173,14 @@ unlock:
 void LinuxAlsa::stopStream()
 {
 	verifyStream();
-	if (stream_.state == STREAM_STOPPED)
+	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
 		errorText_ = "RtApiAlsa::stopStream(): the stream is already stopped!";
 		error(Exception::WARNING);
 		return;
 	}
 
-	stream_.state = STREAM_STOPPED;
+	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_lock(&stream_.mutex);
 
 	//if ( stream_.state == STREAM_STOPPED ) {
@@ -1190,7 +1191,7 @@ void LinuxAlsa::stopStream()
 	int result = 0;
 	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
 	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
-	if (stream_.mode == OUTPUT || stream_.mode == DUPLEX)
+	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
 		if (apiInfo->synchronized)
 		{
@@ -1208,7 +1209,7 @@ void LinuxAlsa::stopStream()
 		}
 	}
 
-	if ((stream_.mode == INPUT || stream_.mode == DUPLEX) && !apiInfo->synchronized)
+	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
 	{
 		result = snd_pcm_drop(handle[1]);
 		if (result < 0)
@@ -1220,7 +1221,7 @@ void LinuxAlsa::stopStream()
 	}
 
 unlock:
-	stream_.state = STREAM_STOPPED;
+	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_unlock(&stream_.mutex);
 
 	if (result >= 0)
@@ -1231,14 +1232,14 @@ unlock:
 void LinuxAlsa::abortStream()
 {
 	verifyStream();
-	if (stream_.state == STREAM_STOPPED)
+	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
 		errorText_ = "RtApiAlsa::abortStream(): the stream is already stopped!";
 		error(Exception::WARNING);
 		return;
 	}
 
-	stream_.state = STREAM_STOPPED;
+	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_lock(&stream_.mutex);
 
 	//if ( stream_.state == STREAM_STOPPED ) {
@@ -1249,7 +1250,7 @@ void LinuxAlsa::abortStream()
 	int result = 0;
 	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
 	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
-	if (stream_.mode == OUTPUT || stream_.mode == DUPLEX)
+	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
 		result = snd_pcm_drop(handle[0]);
 		if (result < 0)
@@ -1260,7 +1261,7 @@ void LinuxAlsa::abortStream()
 		}
 	}
 
-	if ((stream_.mode == INPUT || stream_.mode == DUPLEX) && !apiInfo->synchronized)
+	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
 	{
 		result = snd_pcm_drop(handle[1]);
 		if (result < 0)
@@ -1272,7 +1273,7 @@ void LinuxAlsa::abortStream()
 	}
 
 unlock:
-	stream_.state = STREAM_STOPPED;
+	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_unlock(&stream_.mutex);
 
 	if (result >= 0)
@@ -1283,7 +1284,7 @@ unlock:
 void LinuxAlsa::callbackEvent()
 {
 	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
-	if (stream_.state == STREAM_STOPPED)
+	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
 		pthread_mutex_lock(&stream_.mutex);
 		while (!apiInfo->runnable)
@@ -1291,7 +1292,7 @@ void LinuxAlsa::callbackEvent()
 			pthread_cond_wait(&apiInfo->runnable_cv, &stream_.mutex);
 		}
 
-		if (stream_.state != STREAM_RUNNING)
+		if (stream_.state != StreamState::STREAM_RUNNING)
 		{
 			pthread_mutex_unlock(&stream_.mutex);
 			return;
@@ -1299,7 +1300,7 @@ void LinuxAlsa::callbackEvent()
 		pthread_mutex_unlock(&stream_.mutex);
 	}
 
-	if (stream_.state == STREAM_CLOSED)
+	if (stream_.state == StreamState::STREAM_CLOSED)
 	{
 		errorText_ = "RtApiAlsa::callbackEvent(): the stream is closed ... this shouldn't happen!";
 		error(Exception::WARNING);
@@ -1310,12 +1311,12 @@ void LinuxAlsa::callbackEvent()
 	RtAudioCallback callback = (RtAudioCallback)stream_.callbackInfo.callback;
 	double streamTime = getStreamTime();
 	RtAudioStreamStatus status = 0;
-	if (stream_.mode != INPUT && apiInfo->xrun[0] == true)
+	if (stream_.mode != StreamMode::INPUT && apiInfo->xrun[0] == true)
 	{
 		status |= RTAUDIO_OUTPUT_UNDERFLOW;
 		apiInfo->xrun[0] = false;
 	}
-	if (stream_.mode != OUTPUT && apiInfo->xrun[1] == true)
+	if (stream_.mode != StreamMode::OUTPUT && apiInfo->xrun[1] == true)
 	{
 		status |= RTAUDIO_INPUT_OVERFLOW;
 		apiInfo->xrun[1] = false;
@@ -1332,7 +1333,7 @@ void LinuxAlsa::callbackEvent()
 	pthread_mutex_lock(&stream_.mutex);
 
 	// The state might change while waiting on a mutex.
-	if (stream_.state == STREAM_STOPPED)
+	if (stream_.state == StreamState::STREAM_STOPPED)
 	{ goto unlock; }
 
 	int result;
@@ -1343,7 +1344,7 @@ void LinuxAlsa::callbackEvent()
 	RtAudioFormat format;
 	handle = (snd_pcm_t**)apiInfo->handles;
 
-	if (stream_.mode == INPUT || stream_.mode == DUPLEX)
+	if (stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX)
 	{
 
 		// Setup parameters.
@@ -1429,7 +1430,7 @@ void LinuxAlsa::callbackEvent()
 
 tryOutput:
 
-	if (stream_.mode == OUTPUT || stream_.mode == DUPLEX)
+	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
 
 		// Setup parameters and do buffer conversion if necessary.

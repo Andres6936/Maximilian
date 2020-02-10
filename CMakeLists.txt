@@ -15,7 +15,11 @@ ADD_DEFINITIONS(-D__LINUX_ALSA__)
 ADD_LIBRARY(Maximilian
         Source/main.cpp
         Source/maximilian.cpp
-        Source/Realtime/Audio.cpp Source/Realtime/AudioArchitecture.cpp Include/Realtime/AudioArchitecture.hpp Source/Realtime/LinuxAlsa.cpp Include/Realtime/LinuxAlsa.hpp)
+        Source/Realtime/Audio.cpp
+        Source/Realtime/AudioArchitecture.cpp
+        Source/Realtime/LinuxAlsa.cpp
+        Source/Realtime/AudioStream.cpp
+        Source/Realtime/ConvertInfo.cpp)
 
 TARGET_LINK_LIBRARIES(Maximilian PRIVATE pthread asound)
 # Link to Maximilian the library Levin
@@ -32,7 +36,7 @@ TARGET_LINK_LIBRARIES(TestTone PRIVATE Maximilian)
 ADD_EXECUTABLE(TwoTones Examples/2.TwoTones.cpp)
 TARGET_LINK_LIBRARIES(TwoTones PRIVATE Maximilian)
 
-ADD_EXECUTABLE(AM1 Examples/3.AM1.cpp)
+ADD_EXECUTABLE(AM1 Examples/3.AM1.cpp Include/Definition/AudioFormat.hpp)
 TARGET_LINK_LIBRARIES(AM1 PRIVATE Maximilian)
 
 ADD_EXECUTABLE(Counting1 Examples/7.Counting1.cpp)

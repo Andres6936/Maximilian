@@ -1,7 +1,8 @@
 #ifndef MAXIMILIAN_AUDIOARCHITECTURE_HPP
 #define MAXIMILIAN_AUDIOARCHITECTURE_HPP
 
-#include "Audio.hpp"
+#include "AudioStream.hpp"
+#include "ConvertInfo.hpp"
 
 namespace Maximilian
 {
@@ -61,12 +62,12 @@ namespace Maximilian
 
 		bool isStreamOpen() const
 		{
-			return stream_.state != STREAM_CLOSED;
+			return stream_.state != StreamState::STREAM_CLOSED;
 		};
 
 		bool isStreamRunning() const
 		{
-			return stream_.state == STREAM_RUNNING;
+			return stream_.state == StreamState::STREAM_RUNNING;
 		};
 
 		void showWarnings(bool value)
@@ -85,70 +86,6 @@ namespace Maximilian
 			FAILURE, SUCCESS
 		};
 
-		enum StreamState
-		{
-			STREAM_STOPPED,
-			STREAM_RUNNING,
-			STREAM_CLOSED = -50
-		};
-
-		enum StreamMode
-		{
-			OUTPUT,
-			INPUT,
-			DUPLEX,
-			UNINITIALIZED = -75
-		};
-
-		// A protected structure used for buffer conversion.
-		struct ConvertInfo
-		{
-			int channels;
-			int inJump, outJump;
-			RtAudioFormat inFormat, outFormat;
-			std::vector <int> inOffset;
-			std::vector <int> outOffset;
-		};
-
-		// A protected structure for audio streams.
-		struct RtApiStream
-		{
-			unsigned int device[2];    // Playback and record, respectively.
-			void* apiHandle;           // void pointer for API specific stream handle information
-			StreamMode mode;           // OUTPUT, INPUT, or DUPLEX.
-			StreamState state;         // STOPPED, RUNNING, or CLOSED
-			char* userBuffer[2];       // Playback and record, respectively.
-			char* deviceBuffer;
-			bool doConvertBuffer[2];   // Playback and record, respectively.
-			bool userInterleaved;
-			bool deviceInterleaved[2]; // Playback and record, respectively.
-			bool doByteSwap[2];        // Playback and record, respectively.
-			unsigned int sampleRate;
-			unsigned int bufferSize;
-			unsigned int nBuffers;
-			unsigned int nUserChannels[2];    // Playback and record, respectively.
-			unsigned int nDeviceChannels[2];  // Playback and record channels, respectively.
-			unsigned int channelOffset[2];    // Playback and record, respectively.
-			unsigned long latency[2];         // Playback and record, respectively.
-			RtAudioFormat userFormat;
-			RtAudioFormat deviceFormat[2];    // Playback and record, respectively.
-			StreamMutex mutex;
-			CallbackInfo callbackInfo;
-			ConvertInfo convertInfo[2];
-			double streamTime;         // Number of elapsed seconds since the stream started.
-
-#if defined(HAVE_GETTIMEOFDAY)
-			struct timeval lastTickTimestamp;
-#endif
-
-			RtApiStream()
-					: apiHandle(0), deviceBuffer(0)
-			{
-				device[0] = 11111;
-				device[1] = 11111;
-			}
-		};
-
 		typedef signed short Int16;
 		typedef signed int Int32;
 		typedef float Float32;
@@ -157,7 +94,7 @@ namespace Maximilian
 		std::ostringstream errorStream_;
 		std::string errorText_;
 		bool showWarnings_;
-		RtApiStream stream_;
+		AudioStream stream_;
 
 		/*!
 		  Protected, api-specific method that attempts to open a device
