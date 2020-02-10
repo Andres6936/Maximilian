@@ -1,8 +1,8 @@
 #include "Realtime/LinuxAlsa.hpp"
-#include "Realtime/AudioStream.hpp"
-#include "Realtime/CallbackInfo.hpp"
 
 #include <alsa/asoundlib.h>
+
+#include <array>
 #include <climits>
 
 using namespace Maximilian;
