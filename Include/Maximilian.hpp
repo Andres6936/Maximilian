@@ -30,6 +30,10 @@
  *
  */
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+
+
 #ifndef MAXIMILIAN_H
 #define MAXIMILIAN_H
 
@@ -69,7 +73,7 @@ using namespace std;
 
 namespace Maximilian
 {
-	class maxiSettings
+	class Settings
 	{
 	public:
 		static int sampleRate;
@@ -78,13 +82,13 @@ namespace Maximilian
 
 		static void setup(int initSampleRate, int initChannels, int initBufferSize)
 		{
-			maxiSettings::sampleRate = initSampleRate;
-			maxiSettings::channels = initChannels;
-			maxiSettings::bufferSize = initBufferSize;
+			Settings::sampleRate = initSampleRate;
+			Settings::channels = initChannels;
+			Settings::bufferSize = initBufferSize;
 		}
 	};
 
-	class maxiOsc
+	class Oscilation
 	{
 
 		double frequency;
@@ -96,7 +100,7 @@ namespace Maximilian
 
 
 	public:
-		maxiOsc();
+		Oscilation();
 
 		double sinewave(double frequency);
 
@@ -128,7 +132,7 @@ namespace Maximilian
 
 	};
 
-	class maxiEnvelope
+	class Envelope
 	{
 
 		double period = 0;
@@ -167,7 +171,7 @@ namespace Maximilian
 
 	};
 
-	class maxiDelayline
+	class DelayLine
 	{
 		double frequency;
 		int phase;
@@ -177,7 +181,7 @@ namespace Maximilian
 		double memory[88200];
 
 	public:
-		maxiDelayline();
+		DelayLine();
 
 		double dl(double input, int size, double feedback);
 
@@ -186,7 +190,7 @@ namespace Maximilian
 
 	};
 
-	class maxiFractionalDelay
+	class FractionalDelay
 	{
 		static const int delaySize = 88200;
 		double memory[delaySize];
@@ -194,12 +198,12 @@ namespace Maximilian
 		int readPointer = 0;
 
 	public:
-		maxiFractionalDelay(void);
+		FractionalDelay();
 
 		double dl(double sig, double delayTime, double feedback);
 	};
 
-	class maxiFilter
+	class Filter
 	{
 		double gain;
 		double input;
@@ -213,7 +217,7 @@ namespace Maximilian
 		double c;//filter coefficient
 
 	public:
-		maxiFilter() : x(0.0), y(0.0), z(0.0), c(0.0)
+		Filter() : x(0.0), y(0.0), z(0.0), c(0.0)
 		{
 		};
 		double cutoff;
@@ -231,7 +235,7 @@ namespace Maximilian
 
 	};
 
-	class maxiMix
+	class Mixer
 	{
 		double input;
 		double two[2];
@@ -253,18 +257,18 @@ namespace Maximilian
 	//lagging with an exponential moving average
 	//a lower alpha value gives a slower lag
 	template <class T>
-	class maxiLagExp
+	class LaggingExponential
 	{
 	public:
 		T alpha, alphaReciprocal;
 		T val;
 
-		maxiLagExp()
+		LaggingExponential()
 		{
 			init(0.5, 0.0);
 		};
 
-		maxiLagExp(T initAlpha, T initVal)
+		LaggingExponential(T initAlpha, T initVal)
 		{
 			init(initAlpha, initVal);
 		}
@@ -287,7 +291,7 @@ namespace Maximilian
 		}
 	};
 
-	class maxiSample
+	class Sample
 	{
 
 	private:
@@ -301,7 +305,7 @@ namespace Maximilian
 		double position, recordPosition;
 		double speed;
 		double output;
-		maxiLagExp <double> loopRecordLag;
+		LaggingExponential <double> loopRecordLag;
 
 	public:
 		int myDataSize;
@@ -321,7 +325,7 @@ namespace Maximilian
 
 		// get/set for the Path property
 
-		~maxiSample()
+		~Sample()
 		{
 			//		if (myData) free(myData);
 			if (temp)
@@ -330,11 +334,11 @@ namespace Maximilian
 
 		}
 
-		maxiSample() : temp(NULL), position(0), recordPosition(0), myChannels(1), mySampleRate(maxiSettings::sampleRate)
+		Sample() : temp(nullptr), position(0), recordPosition(0), myChannels(1), mySampleRate(Settings::sampleRate)
 		{
 		};
 
-		maxiSample& operator=(const maxiSample& source)
+		Sample& operator=(const Sample& source)
 		{
 			if (this == &source)
 			{
@@ -343,7 +347,7 @@ namespace Maximilian
 			position = 0;
 			recordPosition = 0;
 			myChannels = source.myChannels;
-			mySampleRate = maxiSettings::sampleRate;
+			mySampleRate = Settings::sampleRate;
 			free(temp);
 			myDataSize = source.myDataSize;
 			temp = (short*)malloc(myDataSize * sizeof(char));
@@ -462,7 +466,7 @@ namespace Maximilian
 				bool trimEnd = true); //alpha of lag filter (lower == slower reaction), threshold to mark start and end, < 32767
 	};
 
-	class maxiMap
+	class Map
 	{
 	public:
 		static double inline linlin(double val, double inMin, double inMax, double outMin, double outMax)
@@ -502,7 +506,7 @@ namespace Maximilian
 
 	};
 
-	class maxiDyn
+	class Dyn
 	{
 
 
@@ -539,7 +543,7 @@ namespace Maximilian
 		int attackphase, holdphase, releasephase;
 	};
 
-	class maxiEnv
+	class Env
 	{
 
 
@@ -573,7 +577,7 @@ namespace Maximilian
 		int attackphase, decayphase, sustainphase, holdphase, releasephase;
 	};
 
-	class convert
+	class Convert
 	{
 	public:
 		static double mtof(int midinote);
@@ -585,19 +589,19 @@ namespace Maximilian
 		static double dbtoa(double amplitude);
 	};
 
-	class maxiDistortion
+	class Distortion
 	{
 	public:
 		/*atan distortion, see http://www.musicdsp.org/showArchiveComment.php?ArchiveID=104*/
 		/*shape from 1 (soft clipping) to infinity (hard clipping)*/
-		double atanDist(const double in, const double shape);
+		double atanDist(double in, double shape);
 
-		double fastAtanDist(const double in, const double shape);
+		double fastAtanDist(double in, double shape);
 
 		double fastatan(double x);
 	};
 
-	class maxiFlanger
+	class Flanger
 	{
 	public:
 		//delay = delay time - ~800 sounds good
@@ -605,15 +609,15 @@ namespace Maximilian
 		//speed = lfo speed in Hz, 0.0001 - 10 sounds good
 		//depth = 0 - 1
 		double
-		flange(const double input, const unsigned int delay, const double feedback, const double speed,
-				const double depth);
+		flange(double input, unsigned int delay, double feedback, double speed,
+				double depth);
 
-		maxiDelayline dl;
-		maxiOsc lfo;
+		DelayLine dl;
+		Oscilation lfo;
 
 	};
 
-	class maxiChorus
+	class Chorus
 	{
 	public:
 		//delay = delay time - ~800 sounds good
@@ -621,12 +625,12 @@ namespace Maximilian
 		//speed = lfo speed in Hz, 0.0001 - 10 sounds good
 		//depth = 0 - 1
 		double
-		chorus(const double input, const unsigned int delay, const double feedback, const double speed,
-				const double depth);
+		chorus(double input, unsigned int delay, double feedback, double speed,
+				double depth);
 
-		maxiDelayline dl, dl2;
-		maxiOsc lfo;
-		maxiFilter lopass;
+		DelayLine dl, dl2;
+		Oscilation lfo;
+		Filter lopass;
 
 	};
 
@@ -643,12 +647,12 @@ namespace Maximilian
 
 		void setAttack(T attackMS)
 		{
-			attack = pow(0.01, 1.0 / (attackMS * maxiSettings::sampleRate * 0.001));
+			attack = pow(0.01, 1.0 / (attackMS * Settings::sampleRate * 0.001));
 		}
 
 		void setRelease(T releaseMS)
 		{
-			release = pow(0.01, 1.0 / (releaseMS * maxiSettings::sampleRate * 0.001));
+			release = pow(0.01, 1.0 / (releaseMS * Settings::sampleRate * 0.001));
 		}
 
 		inline T play(T input)
@@ -722,23 +726,23 @@ namespace Maximilian
 		 w = filter.setCutoff(param1).setResonance(param2).play(w, 0.0, 1.0, 0.0, 0.0);
 
 		 */
-	class maxiSVF
+	class StateVariableFilter
 	{
 	public:
-		maxiSVF() : v0z(0), v1(0), v2(0)
+		StateVariableFilter() : v0z(0), v1(0), v2(0)
 		{
 			setParams(1000, 1);
 		}
 
 		//20 < cutoff < 20000
-		inline maxiSVF& setCutoff(double cutoff)
+		inline StateVariableFilter& setCutoff(double cutoff)
 		{
 			setParams(cutoff, res);
 			return *this;
 		}
 
 		//from 0 upwards, starts to ring from 2-3ish, cracks a bit around 10
-		inline maxiSVF& setResonance(double q)
+		inline StateVariableFilter& setResonance(double q)
 		{
 			setParams(freq, q);
 			return *this;
@@ -766,7 +770,7 @@ namespace Maximilian
 		{
 			freq = _freq;
 			res = _res;
-			g = tan(PI * freq / maxiSettings::sampleRate);
+			g = tan(PI * freq / Settings::sampleRate);
 			damping = res == 0 ? 0 : 1.0 / res;
 			k = damping;
 			ginv = g / (1.0 + g * (g + k));
@@ -807,10 +811,10 @@ namespace Maximilian
 		double cutoff;
 		double resonance;
 		double gain = 1;
-		maxiOsc kick;
-		maxiEnv envelope;
-		maxiDistortion distort;
-		maxiFilter filter;
+		Oscilation kick;
+		Env envelope;
+		Distortion distort;
+		Filter filter;
 	};
 
 	class maxiSnare
@@ -838,11 +842,11 @@ namespace Maximilian
 		double cutoff;
 		double resonance;
 		double gain = 1;
-		maxiOsc tone;
-		maxiOsc noise;
-		maxiEnv envelope;
-		maxiDistortion distort;
-		maxiFilter filter;
+		Oscilation tone;
+		Oscilation noise;
+		Env envelope;
+		Distortion distort;
+		Filter filter;
 
 
 	};
@@ -873,11 +877,11 @@ namespace Maximilian
 		double cutoff;
 		double resonance;
 		double gain = 1;
-		maxiOsc tone;
-		maxiOsc noise;
-		maxiEnv envelope;
-		maxiDistortion distort;
-		maxiSVF filter;
+		Oscilation tone;
+		Oscilation noise;
+		Env envelope;
+		Distortion distort;
+		StateVariableFilter filter;
 
 
 	};
@@ -943,15 +947,15 @@ namespace Maximilian
 		double gain = 1;
 		int voices;
 		int currentVoice = 0;
-		convert mtof;
-		maxiOsc LFO1;
-		maxiOsc LFO2;
-		maxiOsc LFO3;
-		maxiOsc LFO4;
-		maxiSample samples[32];
-		maxiEnv envelopes[32];
-		maxiDistortion distort;
-		maxiSVF filters[32];
+		Convert mtof;
+		Oscilation LFO1;
+		Oscilation LFO2;
+		Oscilation LFO3;
+		Oscilation LFO4;
+		Sample samples[32];
+		Env envelopes[32];
+		Distortion distort;
+		StateVariableFilter filters[32];
 		bool sustain = true;
 
 
@@ -968,7 +972,7 @@ namespace Maximilian
 
 		void setTicksPerBeat(int ticksPerBeat);
 
-		maxiOsc timer;
+		Oscilation timer;
 		int currentCount;
 		int lastCount;
 		int playHead;
@@ -1039,19 +1043,19 @@ namespace Maximilian
 }
 
 
-inline double Maximilian::maxiDistortion::fastatan(double x)
+inline double Maximilian::Distortion::fastatan(double x)
 {
 	return (x / (1.0 + 0.28 * (x * x)));
 }
 
-inline double Maximilian::maxiDistortion::atanDist(const double in, const double shape)
+inline double Maximilian::Distortion::atanDist(const double in, const double shape)
 {
 	double out;
 	out = (1.0 / atan(shape)) * atan(in * shape);
 	return out;
 }
 
-inline double Maximilian::maxiDistortion::fastAtanDist(const double in, const double shape)
+inline double Maximilian::Distortion::fastAtanDist(const double in, const double shape)
 {
 	double out;
 	out = (1.0 / fastatan(shape)) * fastatan(in * shape);
@@ -1060,7 +1064,7 @@ inline double Maximilian::maxiDistortion::fastAtanDist(const double in, const do
 
 
 inline double
-Maximilian::maxiFlanger::flange(const double input, const unsigned int delay, const double feedback, const double speed,
+Maximilian::Flanger::flange(const double input, const unsigned int delay, const double feedback, const double speed,
 		const double depth)
 {
 	//todo: needs fixing
@@ -1073,7 +1077,7 @@ Maximilian::maxiFlanger::flange(const double input, const unsigned int delay, co
 }
 
 inline double
-Maximilian::maxiChorus::chorus(const double input, const unsigned int delay, const double feedback, const double speed,
+Maximilian::Chorus::chorus(const double input, const unsigned int delay, const double feedback, const double speed,
 		const double depth)
 {
 	//this needs fixing

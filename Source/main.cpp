@@ -1,8 +1,8 @@
 #include "Maximilian.hpp"
 
-Maximilian::maxiOsc myCounter, myOsc, myCutoff;//
+Maximilian::Oscilation myCounter, myOsc, myCutoff;//
 
-Maximilian::maxiFilter myFilter, anotherFilter;
+Maximilian::Filter myFilter, anotherFilter;
 
 int countIndex;
 
