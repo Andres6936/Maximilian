@@ -51,9 +51,9 @@ int main()
 {
 	setup();
 
-	Audio dac(Audio::SupportedArchitectures::Windows_Ds);
+	Audio audio(Audio::SupportedArchitectures::Windows_Ds);
 
-	if (dac.getDeviceCount() < 1)
+	if (audio.getDeviceCount() < 1)
 	{
 		std::cout << "\nNo audio devices found!\n";
 		char input;
@@ -62,7 +62,7 @@ int main()
 	}
 
 	Audio::StreamParameters parameters;
-	parameters.deviceId = dac.getDefaultOutputDevice();
+	parameters.deviceId = audio.getDefaultOutputDevice();
 	parameters.nChannels = Settings::CHANNELS;
 	parameters.firstChannel = 0;
 	unsigned int sampleRate = Settings::SAMPLE_RATE;
@@ -72,10 +72,10 @@ int main()
 
 	try
 	{
-		dac.openStream(parameters, RTAUDIO_FLOAT64,
+		audio.openStream(parameters, RTAUDIO_FLOAT64,
 				sampleRate, &bufferFrames, &routing, (void*)&(data[0]));
 
-		dac.startStream();
+		audio.startStream();
 	}
 	catch (Exception& e)
 	{
@@ -90,15 +90,15 @@ int main()
 	try
 	{
 		// Stop the stream
-		dac.stopStream();
+		audio.stopStream();
 	}
 	catch (Exception& e)
 	{
 		e.printMessage();
 	}
 
-	if (dac.isStreamOpen())
-	{ dac.closeStream(); }
+	if (audio.isStreamOpen())
+	{ audio.closeStream(); }
 
 	return 0;
 }
