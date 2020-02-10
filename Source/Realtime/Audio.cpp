@@ -94,7 +94,7 @@ void Audio::tryInitializeInstanceOfArchitecture(Audio::SupportedArchitectures _a
 	// to found an instance that content an device.
 
 	// Is necessary deleted the pointer several times if this it initialized
-	// in any called, and no have any device.
+	// in any called, and that no have an device valid.
 
 	// Deleted an nullptr no have effect or consequences.
 	delete audioArchitecture;
@@ -181,6 +181,8 @@ Audio::Audio(Audio::SupportedArchitectures _architecture)
 	// API-specific definitions are passed to the compiler. But just in
 	// case something weird happens, we'll print out an error message.
 	Levin::Error() << "No compiled API support found... Critical error." << Levin::endl;
+
+	throw Exception("AudioArchitectureNoCompiledException");
 }
 
 Audio::~Audio() throw()

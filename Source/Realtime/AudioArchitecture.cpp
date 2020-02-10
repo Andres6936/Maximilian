@@ -238,7 +238,7 @@ void AudioArchitecture::error(Exception::Type type)
 	}
 	else if (type != Exception::WARNING)
 	{
-		throw (Exception(errorText_, type));
+		throw Exception(errorText_);
 	}
 }
 

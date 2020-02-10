@@ -13,11 +13,13 @@
 #define RTERROR_H
 
 #include <exception>
-#include <iostream>
-#include <string>
+#include <string_view>
+
+#include <Levin/Log.h>
 
 class Exception : public std::exception
 {
+
 public:
 	//! Defined Exception types.
 	enum Type
@@ -35,43 +37,36 @@ public:
 		THREAD_ERROR       /*!< A thread error occured. */
 	};
 
-	//! The constructor.
-	Exception(const std::string& message, Type type = Exception::UNSPECIFIED) throw() : message_(message), type_(type)
+
+private:
+
+	std::string_view message;
+
+public:
+
+	explicit Exception(std::string_view _message)
 	{
+		message = _message;
 	}
 
-	//! The destructor.
-	virtual ~Exception(void) throw()
-	{
-	}
+	~Exception() override = default;
 
-	//! Prints thrown error message to stderr.
-	virtual void printMessage(void) const throw()
+	virtual void printMessage() const
 	{
-		std::cerr << '\n' << message_ << "\n\n";
-	}
-
-	//! Returns the thrown error message type.
-	virtual const Type& getType(void) const throw()
-	{
-		return type_;
+		Levin::Error() << "Exception: " << message.data() << Levin::endl;
 	}
 
 	//! Returns the thrown error message string.
-	virtual const std::string& getMessage(void) const throw()
+	[[nodiscard]] virtual std::string_view getMessage() const
 	{
-		return message_;
+		return message;
 	}
 
 	//! Returns the thrown error message as a c-style string.
-	virtual const char* what(void) const throw()
+	[[nodiscard]] const char* what() const noexcept override
 	{
-		return message_.c_str();
+		return message.data();
 	}
-
-protected:
-	std::string message_;
-	Type type_;
 };
 
 #endif
