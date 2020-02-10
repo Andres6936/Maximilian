@@ -50,50 +50,66 @@ LinuxAlsa::~LinuxAlsa()
 
 unsigned int LinuxAlsa::getDeviceCount()
 {
-	unsigned nDevices = 0;
-	int result, subdevice, card;
-	char name[64];
-	snd_ctl_t* handle;
+	unsigned numberOfDevices = 0;
 
 	// Count cards and devices
-	card = -1;
+	int card = -1;
 	snd_card_next(&card);
-	while (card >= 0)
+
+	snd_ctl_t* handle = nullptr;
+
+	if (card >= 0)
 	{
-		sprintf(name, "hw:%d", card);
-		result = snd_ctl_open(&handle, name, 0);
+		std::array <char, 64> name{ };
+
+		sprintf(name.data(), "hw:%d", card);
+
+		int result = snd_ctl_open(&handle, name.data(), 0);
+
 		if (result < 0)
 		{
-			errorStream_ << "RtApiAlsa::getDeviceCount: control open, card = " << card << ", " << snd_strerror(result)
-						 << ".";
-			errorText_ = errorStream_.str();
-			error(Exception::WARNING);
-			goto nextcard;
+			Levin::Warn() << "Linux Alsa: getDeviceCount, control open, card = " << card
+						  << ", " << snd_strerror(result) << "." << Levin::endl;
+
+			snd_ctl_close(handle);
+			// Free the cache for avoid memory leak
+			snd_config_update_free_global();
+			snd_card_next(&card);
+
+			// Return zero device in this point
+			return numberOfDevices;
 		}
-		subdevice = -1;
-		while (1)
+
+		int subDevice = -1;
+
+		while (true)
 		{
-			result = snd_ctl_pcm_next_device(handle, &subdevice);
+			result = snd_ctl_pcm_next_device(handle, &subDevice);
+
 			if (result < 0)
 			{
-				errorStream_ << "RtApiAlsa::getDeviceCount: control next device, card = " << card << ", "
-							 << snd_strerror(result) << ".";
-				errorText_ = errorStream_.str();
-				error(Exception::WARNING);
+				Levin::Warn() << "Linux Alsa: getDeviceCount, control next device, card = " << card
+							  << ", " << snd_strerror(result) << "." << Levin::endl;
 				break;
 			}
-			if (subdevice < 0)
+
+			if (subDevice < 0)
 			{
 				break;
 			}
-			nDevices++;
+
+			numberOfDevices++;
 		}
-	nextcard:
-		snd_ctl_close(handle);
-		snd_card_next(&card);
 	}
 
-	return nDevices;
+	if (handle != nullptr)
+	{
+		snd_ctl_close(handle);
+		// Free the cache for avoid memory leak
+		snd_config_update_free_global();
+	}
+
+	return numberOfDevices;
 }
 
 Audio::DeviceInfo LinuxAlsa::getDeviceInfo(unsigned int device)
