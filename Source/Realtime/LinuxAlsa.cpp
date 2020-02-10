@@ -162,7 +162,7 @@ foundDevice:
 
 	// If a stream is already open, we cannot probe the stream devices.
 	// Thus, use the saved results.
-	if (stream_.state != STREAM_CLOSED &&
+	if (stream_.state != StreamState::STREAM_CLOSED &&
 		(stream_.device[0] == device || stream_.device[1] == device))
 	{
 		if (device >= devices_.size())
