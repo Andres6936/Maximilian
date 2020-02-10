@@ -15,8 +15,8 @@ const unsigned int AudioArchitecture::SAMPLE_RATES[] = {
 
 Maximilian::AudioArchitecture::AudioArchitecture()
 {
-	stream_.state = STREAM_CLOSED;
-	stream_.mode = UNINITIALIZED;
+	stream_.state = StreamState::STREAM_CLOSED;
+	stream_.mode = StreamMode::UNINITIALIZED;
 	stream_.apiHandle = 0;
 	stream_.userBuffer[0] = 0;
 	stream_.userBuffer[1] = 0;
@@ -31,7 +31,7 @@ Maximilian::AudioArchitecture::~AudioArchitecture()
 
 void AudioArchitecture::assertThatStreamIsNotOpen()
 {
-	if (stream_.state != STREAM_CLOSED)
+	if (stream_.state != StreamState::STREAM_CLOSED)
 	{
 		Levin::Error() << "Assert: OpenStream, a stream is already open!" << Levin::endl;
 		throw "StreamAlreadyOpenException";
@@ -81,7 +81,7 @@ void AudioArchitecture::openStream(Audio::StreamParameters& oParams, RtAudioForm
 
 	bool result;
 
-	result = probeDeviceOpen(oParams.deviceId, OUTPUT, oParams.nChannels, oParams.firstChannel,
+	result = probeDeviceOpen(oParams.deviceId, StreamMode::OUTPUT, oParams.nChannels, oParams.firstChannel,
 			sampleRate, format, bufferFrames, options);
 
 	if (result == false)
@@ -92,7 +92,7 @@ void AudioArchitecture::openStream(Audio::StreamParameters& oParams, RtAudioForm
 
 	if (options)
 	{ options->numberOfBuffers = stream_.nBuffers; }
-	stream_.state = STREAM_STOPPED;
+	stream_.state = StreamState::STREAM_STOPPED;
 }
 
 void AudioArchitecture::openStream(
@@ -114,14 +114,14 @@ void AudioArchitecture::openStream(
 
 	bool result;
 
-	result = probeDeviceOpen(oParams.deviceId, OUTPUT, oParams.nChannels, oParams.firstChannel,
+	result = probeDeviceOpen(oParams.deviceId, StreamMode::OUTPUT, oParams.nChannels, oParams.firstChannel,
 			sampleRate, format, bufferFrames, options);
 
 	if (result == false)
 	{ error(Exception::SYSTEM_ERROR); }
 
 
-	result = probeDeviceOpen(iParams.deviceId, INPUT, iParams.nChannels, iParams.firstChannel,
+	result = probeDeviceOpen(iParams.deviceId, StreamMode::INPUT, iParams.nChannels, iParams.firstChannel,
 			sampleRate, format, bufferFrames, options);
 
 	if (result == false)
@@ -136,7 +136,7 @@ void AudioArchitecture::openStream(
 
 	if (options)
 	{ options->numberOfBuffers = stream_.nBuffers; }
-	stream_.state = STREAM_STOPPED;
+	stream_.state = StreamState::STREAM_STOPPED;
 }
 
 unsigned int AudioArchitecture::getDefaultInputDevice(void)
@@ -184,11 +184,11 @@ long AudioArchitecture::getStreamLatency(void)
 	verifyStream();
 
 	long totalLatency = 0;
-	if (stream_.mode == OUTPUT || stream_.mode == DUPLEX)
+	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
 		totalLatency = stream_.latency[0];
 	}
-	if (stream_.mode == INPUT || stream_.mode == DUPLEX)
+	if (stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX)
 	{
 		totalLatency += stream_.latency[1];
 	}
@@ -244,7 +244,7 @@ void AudioArchitecture::error(Exception::Type type)
 
 void AudioArchitecture::verifyStream()
 {
-	if (stream_.state == STREAM_CLOSED)
+	if (stream_.state == StreamState::STREAM_CLOSED)
 	{
 		errorText_ = "RtApi:: a stream is not open!";
 		error(Exception::INVALID_USE);
@@ -253,8 +253,8 @@ void AudioArchitecture::verifyStream()
 
 void AudioArchitecture::clearStreamInfo()
 {
-	stream_.mode = UNINITIALIZED;
-	stream_.state = STREAM_CLOSED;
+	stream_.mode = StreamMode::UNINITIALIZED;
+	stream_.state = StreamState::STREAM_CLOSED;
 	stream_.sampleRate = 0;
 	stream_.bufferSize = 0;
 	stream_.nBuffers = 0;
@@ -316,50 +316,52 @@ unsigned int AudioArchitecture::formatBytes(Maximilian::RtAudioFormat format)
 
 void AudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChannel)
 {
-	if (mode == INPUT)
+	int index = (int)mode;
+
+	if (mode == StreamMode::INPUT)
 	{ // convert device to user buffer
-		stream_.convertInfo[mode].inJump = stream_.nDeviceChannels[1];
-		stream_.convertInfo[mode].outJump = stream_.nUserChannels[1];
-		stream_.convertInfo[mode].inFormat = stream_.deviceFormat[1];
-		stream_.convertInfo[mode].outFormat = stream_.userFormat;
+		stream_.convertInfo[index].inJump = stream_.nDeviceChannels[1];
+		stream_.convertInfo[index].outJump = stream_.nUserChannels[1];
+		stream_.convertInfo[index].inFormat = stream_.deviceFormat[1];
+		stream_.convertInfo[index].outFormat = stream_.userFormat;
 	}
 	else
 	{ // convert user to device buffer
-		stream_.convertInfo[mode].inJump = stream_.nUserChannels[0];
-		stream_.convertInfo[mode].outJump = stream_.nDeviceChannels[0];
-		stream_.convertInfo[mode].inFormat = stream_.userFormat;
-		stream_.convertInfo[mode].outFormat = stream_.deviceFormat[0];
+		stream_.convertInfo[index].inJump = stream_.nUserChannels[0];
+		stream_.convertInfo[index].outJump = stream_.nDeviceChannels[0];
+		stream_.convertInfo[index].inFormat = stream_.userFormat;
+		stream_.convertInfo[index].outFormat = stream_.deviceFormat[0];
 	}
 
-	if (stream_.convertInfo[mode].inJump < stream_.convertInfo[mode].outJump)
+	if (stream_.convertInfo[index].inJump < stream_.convertInfo[index].outJump)
 	{
-		stream_.convertInfo[mode].channels = stream_.convertInfo[mode].inJump;
+		stream_.convertInfo[index].channels = stream_.convertInfo[index].inJump;
 	}
 	else
 	{
-		stream_.convertInfo[mode].channels = stream_.convertInfo[mode].outJump;
+		stream_.convertInfo[index].channels = stream_.convertInfo[index].outJump;
 	}
 
 	// Set up the interleave/deinterleave offsets.
-	if (stream_.deviceInterleaved[mode] != stream_.userInterleaved)
+	if (stream_.deviceInterleaved[index] != stream_.userInterleaved)
 	{
-		if ((mode == OUTPUT && stream_.deviceInterleaved[mode]) ||
-			(mode == INPUT && stream_.userInterleaved))
+		if ((mode == StreamMode::OUTPUT && stream_.deviceInterleaved[index]) ||
+			(mode == StreamMode::INPUT && stream_.userInterleaved))
 		{
-			for (int k = 0; k < stream_.convertInfo[mode].channels; k++)
+			for (int k = 0; k < stream_.convertInfo[index].channels; k++)
 			{
-				stream_.convertInfo[mode].inOffset.push_back(k * stream_.bufferSize);
-				stream_.convertInfo[mode].outOffset.push_back(k);
-				stream_.convertInfo[mode].inJump = 1;
+				stream_.convertInfo[index].inOffset.push_back(k * stream_.bufferSize);
+				stream_.convertInfo[index].outOffset.push_back(k);
+				stream_.convertInfo[index].inJump = 1;
 			}
 		}
 		else
 		{
-			for (int k = 0; k < stream_.convertInfo[mode].channels; k++)
+			for (int k = 0; k < stream_.convertInfo[index].channels; k++)
 			{
-				stream_.convertInfo[mode].inOffset.push_back(k);
-				stream_.convertInfo[mode].outOffset.push_back(k * stream_.bufferSize);
-				stream_.convertInfo[mode].outJump = 1;
+				stream_.convertInfo[index].inOffset.push_back(k);
+				stream_.convertInfo[index].outOffset.push_back(k * stream_.bufferSize);
+				stream_.convertInfo[index].outJump = 1;
 			}
 		}
 	}
@@ -367,20 +369,20 @@ void AudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChanne
 	{ // no (de)interleaving
 		if (stream_.userInterleaved)
 		{
-			for (int k = 0; k < stream_.convertInfo[mode].channels; k++)
+			for (int k = 0; k < stream_.convertInfo[index].channels; k++)
 			{
-				stream_.convertInfo[mode].inOffset.push_back(k);
-				stream_.convertInfo[mode].outOffset.push_back(k);
+				stream_.convertInfo[index].inOffset.push_back(k);
+				stream_.convertInfo[index].outOffset.push_back(k);
 			}
 		}
 		else
 		{
-			for (int k = 0; k < stream_.convertInfo[mode].channels; k++)
+			for (int k = 0; k < stream_.convertInfo[index].channels; k++)
 			{
-				stream_.convertInfo[mode].inOffset.push_back(k * stream_.bufferSize);
-				stream_.convertInfo[mode].outOffset.push_back(k * stream_.bufferSize);
-				stream_.convertInfo[mode].inJump = 1;
-				stream_.convertInfo[mode].outJump = 1;
+				stream_.convertInfo[index].inOffset.push_back(k * stream_.bufferSize);
+				stream_.convertInfo[index].outOffset.push_back(k * stream_.bufferSize);
+				stream_.convertInfo[index].inJump = 1;
+				stream_.convertInfo[index].outJump = 1;
 			}
 		}
 	}
@@ -388,37 +390,37 @@ void AudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChanne
 	// Add channel offset.
 	if (firstChannel > 0)
 	{
-		if (stream_.deviceInterleaved[mode])
+		if (stream_.deviceInterleaved[index])
 		{
-			if (mode == OUTPUT)
+			if (mode == StreamMode::OUTPUT)
 			{
-				for (int k = 0; k < stream_.convertInfo[mode].channels; k++)
+				for (int k = 0; k < stream_.convertInfo[index].channels; k++)
 				{
-					stream_.convertInfo[mode].outOffset[k] += firstChannel;
+					stream_.convertInfo[index].outOffset[k] += firstChannel;
 				}
 			}
 			else
 			{
-				for (int k = 0; k < stream_.convertInfo[mode].channels; k++)
+				for (int k = 0; k < stream_.convertInfo[index].channels; k++)
 				{
-					stream_.convertInfo[mode].inOffset[k] += firstChannel;
+					stream_.convertInfo[index].inOffset[k] += firstChannel;
 				}
 			}
 		}
 		else
 		{
-			if (mode == OUTPUT)
+			if (mode == StreamMode::OUTPUT)
 			{
-				for (int k = 0; k < stream_.convertInfo[mode].channels; k++)
+				for (int k = 0; k < stream_.convertInfo[index].channels; k++)
 				{
-					stream_.convertInfo[mode].outOffset[k] += (firstChannel * stream_.bufferSize);
+					stream_.convertInfo[index].outOffset[k] += (firstChannel * stream_.bufferSize);
 				}
 			}
 			else
 			{
-				for (int k = 0; k < stream_.convertInfo[mode].channels; k++)
+				for (int k = 0; k < stream_.convertInfo[index].channels; k++)
 				{
-					stream_.convertInfo[mode].inOffset[k] += (firstChannel * stream_.bufferSize);
+					stream_.convertInfo[index].inOffset[k] += (firstChannel * stream_.bufferSize);
 				}
 			}
 		}
@@ -432,7 +434,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 	// the lower three bytes of a 32-bit integer.
 
 	// Clear our device buffer when in/out duplex device channels are different
-	if (outBuffer == stream_.deviceBuffer && stream_.mode == DUPLEX &&
+	if (outBuffer == stream_.deviceBuffer && stream_.mode == StreamMode::DUPLEX &&
 		(stream_.nDeviceChannels[0] < stream_.nDeviceChannels[1]))
 	{
 		memset(outBuffer, 0, stream_.bufferSize * info.outJump * formatBytes(info.outFormat));
