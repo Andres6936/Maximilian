@@ -6,7 +6,6 @@
 
 #include "Maximilian.hpp"
 #include "Realtime/Audio.hpp"
-#include "Audio.hpp"
 
 Maximilian::Oscilation myCounter, mySwitchableOsc;//
 int CurrentCount;//
@@ -116,7 +115,7 @@ int main()
 
 	try
 	{
-		dac.openStream(&parameters, NULL, RTAUDIO_FLOAT64,
+		dac.openStream(parameters, RTAUDIO_FLOAT64,
 				sampleRate, &bufferFrames, &routing, (void*)&(data[0]));
 
 		dac.startStream();

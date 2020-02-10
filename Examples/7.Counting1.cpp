@@ -1,7 +1,5 @@
-
 #include "Maximilian.hpp"
 #include "Realtime/Audio.hpp"
-#include "Audio.hpp"
 
 Maximilian::Oscilation mySine; // This is the oscillator we will use to generate the test tone
 Maximilian::maxiClock myClock; // This will allow us to generate a clock signal and do things at specific times
@@ -88,7 +86,7 @@ int main()
 
 	try
 	{
-		dac.openStream(&parameters, NULL, RTAUDIO_FLOAT64,
+		dac.openStream(parameters, RTAUDIO_FLOAT64,
 				sampleRate, &bufferFrames, &routing, (void*)&(data[0]));
 
 		dac.startStream();

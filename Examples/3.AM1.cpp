@@ -76,7 +76,7 @@ int main()
 
 	try
 	{
-		dac.openStream(&parameters, NULL, RTAUDIO_FLOAT64,
+		dac.openStream(parameters, RTAUDIO_FLOAT64,
 				sampleRate, &bufferFrames, &routing, (void*)&(data[0]));
 
 		dac.startStream();
