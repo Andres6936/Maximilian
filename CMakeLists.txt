@@ -9,7 +9,7 @@ ADD_DEFINITIONS(-D__LINUX_ALSA__)
 ADD_LIBRARY(Maximilian
         Source/main.cpp
         Source/maximilian.cpp
-        Source/Audio.cpp)
+        Source/Realtime/Audio.cpp)
 
 TARGET_LINK_LIBRARIES(Maximilian PRIVATE pthread asound)
 
