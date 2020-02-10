@@ -1,6 +1,7 @@
 #ifndef MAXIMILIAN_AUDIOARCHITECTURE_HPP
 #define MAXIMILIAN_AUDIOARCHITECTURE_HPP
 
+#include "Audio.hpp"
 #include "AudioStream.hpp"
 #include "ConvertInfo.hpp"
 

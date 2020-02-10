@@ -66,6 +66,9 @@
 #include <process.h>
 #endif
 
+#include "Realtime/Audio.hpp"
+#include "Definition/AudioFormat.hpp"
+
 using namespace std;
 #ifndef PI
 #define PI  3.1415926535897932384626433832795

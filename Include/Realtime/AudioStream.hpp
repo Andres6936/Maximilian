@@ -1,8 +1,8 @@
 #ifndef MAXIMILIAN_AUDIOSTREAM_HPP
 #define MAXIMILIAN_AUDIOSTREAM_HPP
 
-#include "Audio.hpp"
 #include "ConvertInfo.hpp"
+#include "CallbackInfo.hpp"
 #include "Definition/AudioFormat.hpp"
 
 namespace Maximilian
@@ -52,7 +52,7 @@ namespace Maximilian
 		unsigned long latency[2];         // Playback and record, respectively.
 		AudioFormat userFormat;
 		AudioFormat deviceFormat[2];    // Playback and record, respectively.
-		StreamMutex mutex;
+		pthread_mutex_t mutex;
 		CallbackInfo callbackInfo;
 		ConvertInfo convertInfo[2];
 		double streamTime;         // Number of elapsed seconds since the stream started.

@@ -1,5 +1,6 @@
 #include "Realtime/LinuxAlsa.hpp"
 #include "Realtime/AudioStream.hpp"
+#include "Realtime/CallbackInfo.hpp"
 
 #include <alsa/asoundlib.h>
 #include <climits>

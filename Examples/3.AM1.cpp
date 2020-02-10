@@ -1,9 +1,10 @@
 #include "Maximilian.hpp"
-#include "Realtime/Audio.hpp"
+
+using namespace Maximilian;
 
 //This shows how to use maximilian to do basic amplitude modulation. Amplitude modulation is when you multiply waves together. In maximilian you just use the * inbetween the two waveforms.
 
-Maximilian::Oscilation mySine, myOtherSine;//Two oscillators. They can be called anything. They can be any of the available waveforms. These ones will be sinewaves
+Oscilation mySine, myOtherSine;//Two oscillators. They can be called anything. They can be any of the available waveforms. These ones will be sinewaves
 
 void setup()
 {//some inits
@@ -26,7 +27,7 @@ void play(double* output)
 
 
 int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-		double streamTime, Maximilian::RtAudioStreamStatus status, void* userData)
+		double streamTime, RtAudioStreamStatus status, void* userData)
 {
 
 	unsigned int i, j;
@@ -44,7 +45,7 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 	for (i = 0; i < nBufferFrames; i++)
 	{
 		play(lastValues);
-		for (j = 0; j < Maximilian::Settings::CHANNELS; j++)
+		for (j = 0; j < Settings::CHANNELS; j++)
 		{
 			*buffer++ = lastValues[j];
 		}
@@ -56,7 +57,7 @@ int main()
 {
 	setup();
 
-	Maximilian::Audio dac(Maximilian::Audio::SupportedArchitectures::Windows_Ds);
+	Audio dac(Audio::SupportedArchitectures::Windows_Ds);
 	if (dac.getDeviceCount() < 1)
 	{
 		std::cout << "\nNo audio devices found!\n";
@@ -65,14 +66,14 @@ int main()
 		exit(0);
 	}
 
-	Maximilian::Audio::StreamParameters parameters;
+	Audio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
-	parameters.nChannels = Maximilian::Settings::CHANNELS;
+	parameters.nChannels = Settings::CHANNELS;
 	parameters.firstChannel = 0;
-	unsigned int sampleRate = Maximilian::Settings::SAMPLE_RATE;
-	unsigned int bufferFrames = Maximilian::Settings::BUFFER_SIZE;
+	unsigned int sampleRate = Settings::SAMPLE_RATE;
+	unsigned int bufferFrames = Settings::BUFFER_SIZE;
 	//double data[maxiSettings::channels];
-	vector <double> data(Maximilian::Settings::CHANNELS, 0);
+	vector <double> data(Settings::CHANNELS, 0);
 
 	try
 	{

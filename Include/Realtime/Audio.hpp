@@ -480,30 +480,6 @@ namespace Maximilian
 
 		AudioArchitecture* rtapi_;
 	};
-
-	typedef pthread_t ThreadHandle;
-
-	typedef pthread_mutex_t StreamMutex;
-
-	// This global structure type is used to pass callback information
-	// between the private RtAudio stream structure and global callback
-	// handling functions.
-	struct CallbackInfo
-	{
-		void* object;    // Used as a "this" pointer.
-		ThreadHandle thread;
-		void* callback;
-		void* userData;
-		void* apiInfo;   // void pointer for API specific callback information
-		bool isRunning;
-
-		// Default constructor.
-		CallbackInfo()
-				: object(0), callback(0), userData(0), apiInfo(0), isRunning(false)
-		{
-		}
-	};
-
 }
 
 static const Maximilian::RtAudioStreamFlags RTAUDIO_NONINTERLEAVED = 0x1;    // Use non-interleaved buffers (default = interleaved).

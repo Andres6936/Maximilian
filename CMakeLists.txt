@@ -19,7 +19,7 @@ ADD_LIBRARY(Maximilian
         Source/Realtime/AudioArchitecture.cpp
         Source/Realtime/LinuxAlsa.cpp
         Source/Realtime/AudioStream.cpp
-        Source/Realtime/ConvertInfo.cpp)
+        Source/Realtime/ConvertInfo.cpp Source/Realtime/CallbackInfo.cpp Include/Realtime/CallbackInfo.hpp)
 
 TARGET_LINK_LIBRARIES(Maximilian PRIVATE pthread asound)
 # Link to Maximilian the library Levin
