@@ -6,7 +6,7 @@ SET(CMAKE_CXX_STANDARD 14)
 INCLUDE_DIRECTORIES(Include)
 
 # Added the library Levin for purpose of log
-INCLUDE_DIRECTORIES(Library/Levin)
+INCLUDE_DIRECTORIES(Library)
 # Here find the .a, .so, .dll, .lib
 LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/Library)
 

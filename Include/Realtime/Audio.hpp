@@ -322,7 +322,7 @@ namespace Maximilian
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
 		*/
-		Audio(Audio::SupportedArchitectures api = Unspecified) throw();
+		explicit Audio(Audio::SupportedArchitectures api = Unspecified) throw();
 
 		//! The destructor.
 		/*!
@@ -413,8 +413,13 @@ namespace Maximilian
 				 lowest allowable value is used.  The actual value used is
 				 returned via the structure argument.  The parameter is API dependent.
 		*/
-		void openStream(Audio::StreamParameters* outputParameters,
-				Audio::StreamParameters* inputParameters,
+		void openStream(StreamParameters& outputParameters,
+				StreamParameters& inputParameters,
+				RtAudioFormat format, unsigned int sampleRate,
+				unsigned int* bufferFrames, RtAudioCallback callback,
+				void* userData = NULL, Audio::StreamOptions* options = NULL);
+
+		void openStream(StreamParameters& outputParameters,
 				RtAudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData = NULL, Audio::StreamOptions* options = NULL);
@@ -519,6 +524,17 @@ namespace Maximilian
 
 	class RtApi
 	{
+
+	private:
+
+		void assertThatStreamIsNotOpen();
+
+		void assertThatDeviceParameterIsNotInvalid(const Audio::StreamParameters& _parameters);
+
+		static void assertThatChannelsAreGreaterThatOne(const Audio::StreamParameters& _parameters);
+
+		void assertThatTheFormatOfBytesIsGreaterThatZero(const RtAudioFormat _format);
+
 	public:
 
 		RtApi();
@@ -535,8 +551,13 @@ namespace Maximilian
 
 		virtual unsigned int getDefaultOutputDevice();
 
-		void openStream(Audio::StreamParameters* outputParameters,
-				Audio::StreamParameters* inputParameters,
+		void openStream(Audio::StreamParameters& oParams,
+				RtAudioFormat format, unsigned int sampleRate,
+				unsigned int* bufferFrames, RtAudioCallback callback,
+				void* userData, Audio::StreamOptions* options);
+
+		void openStream(Audio::StreamParameters& oParams,
+				Audio::StreamParameters& iParams,
 				RtAudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData, Audio::StreamOptions* options);

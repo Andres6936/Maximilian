@@ -68,11 +68,11 @@ int main()
 	unsigned int sampleRate = Settings::SAMPLE_RATE;
 	unsigned int bufferFrames = Settings::BUFFER_SIZE;
 	//double data[maxiSettings::channels];
-	vector <double> data(Settings::CHANNELS, 0);
+	std::vector <double> data(Settings::CHANNELS, 0);
 
 	try
 	{
-		dac.openStream(&parameters, NULL, RTAUDIO_FLOAT64,
+		dac.openStream(parameters, RTAUDIO_FLOAT64,
 				sampleRate, &bufferFrames, &routing, (void*)&(data[0]));
 
 		dac.startStream();

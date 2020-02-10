@@ -42,6 +42,8 @@
 
 #include "Realtime/Audio.hpp"
 
+#include <Levin/Log.h>
+
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -184,14 +186,27 @@ Maximilian::Audio::~Audio() throw()
 	delete rtapi_;
 }
 
-void Audio::openStream(Maximilian::Audio::StreamParameters* outputParameters,
-		Maximilian::Audio::StreamParameters* inputParameters,
-		Maximilian::RtAudioFormat format, unsigned int sampleRate,
+void Audio::openStream(
+		StreamParameters& outputParameters,
+		StreamParameters& inputParameters,
+		RtAudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
-		Maximilian::RtAudioCallback callback, void* userData,
-		Maximilian::Audio::StreamOptions* options)
+		RtAudioCallback callback, void* userData,
+		StreamOptions* options)
 {
 	return rtapi_->openStream(outputParameters, inputParameters, format,
+			sampleRate, bufferFrames, callback,
+			userData, options);
+}
+
+void Audio::openStream(
+		StreamParameters& outputParameters,
+		RtAudioFormat format, unsigned int sampleRate,
+		unsigned int* bufferFrames,
+		RtAudioCallback callback, void* userData,
+		StreamOptions* options)
+{
+	return rtapi_->openStream(outputParameters, format,
 			sampleRate, bufferFrames, callback,
 			userData, options);
 }
@@ -219,89 +234,106 @@ Maximilian::RtApi::~RtApi()
 	MUTEX_DESTROY(&stream_.mutex);
 }
 
-void RtApi::openStream(Audio::StreamParameters* oParams,
-		Audio::StreamParameters* iParams,
+void RtApi::assertThatStreamIsNotOpen()
+{
+	if (stream_.state != STREAM_CLOSED)
+	{
+		Levin::Error() << "Assert: OpenStream, a stream is already open!" << Levin::endl;
+		throw "StreamAlreadyOpenException";
+	}
+}
+
+
+void RtApi::assertThatDeviceParameterIsNotInvalid(const Audio::StreamParameters& _parameters)
+{
+	if (_parameters.deviceId >= getDeviceCount())
+	{
+		Levin::Error() << "Assert: OpenStream, the device parameter value"
+						  " is invalid." << Levin::endl;
+		throw "DeviceParameterIsInvalidException";
+	}
+}
+
+void RtApi::assertThatChannelsAreGreaterThatOne(const Audio::StreamParameters& _parameters)
+{
+	if (_parameters.nChannels < 1)
+	{
+		Levin::Error() << "Assert: OpenStream, StreamParameters structure cannot "
+						  "have an nChannels value less than one." << Levin::endl;
+		throw "StreamChannelsIsLessThatOneException";
+	}
+}
+
+void RtApi::assertThatTheFormatOfBytesIsGreaterThatZero(const RtAudioFormat _format)
+{
+	if (formatBytes(_format) == 0)
+	{
+		Levin::Error() << "Assert: OpenStream, 'format' parameter "
+						  "value is undefined." << Levin::endl;
+		throw "FormatValueIsUndefinedException";
+	}
+}
+
+void RtApi::openStream(Audio::StreamParameters& oParams, RtAudioFormat format, unsigned int sampleRate,
+		unsigned int* bufferFrames, RtAudioCallback callback, void* userData, Audio::StreamOptions* options)
+{
+	assertThatStreamIsNotOpen();
+	assertThatChannelsAreGreaterThatOne(oParams);
+	assertThatDeviceParameterIsNotInvalid(oParams);
+	assertThatTheFormatOfBytesIsGreaterThatZero(format);
+
+	clearStreamInfo();
+
+	bool result;
+
+	result = probeDeviceOpen(oParams.deviceId, OUTPUT, oParams.nChannels, oParams.firstChannel,
+			sampleRate, format, bufferFrames, options);
+
+	if (result == false)
+	{ error(Exception::SYSTEM_ERROR); }
+
+	stream_.callbackInfo.callback = (void*)callback;
+	stream_.callbackInfo.userData = userData;
+
+	if (options)
+	{ options->numberOfBuffers = stream_.nBuffers; }
+	stream_.state = STREAM_STOPPED;
+}
+
+void RtApi::openStream(
+		Audio::StreamParameters& oParams,
+		Audio::StreamParameters& iParams,
 		Maximilian::RtAudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
 		Maximilian::RtAudioCallback callback, void* userData,
 		Audio::StreamOptions* options)
 {
-	if (stream_.state != STREAM_CLOSED)
-	{
-		errorText_ = "RtApi::openStream: a stream is already open!";
-		error(Exception::INVALID_USE);
-	}
-
-	if (oParams && oParams->nChannels < 1)
-	{
-		errorText_ = "RtApi::openStream: a non-NULL output StreamParameters structure cannot have an nChannels value less than one.";
-		error(Exception::INVALID_USE);
-	}
-
-	if (iParams && iParams->nChannels < 1)
-	{
-		errorText_ = "RtApi::openStream: a non-NULL input StreamParameters structure cannot have an nChannels value less than one.";
-		error(Exception::INVALID_USE);
-	}
-
-	if (oParams == NULL && iParams == NULL)
-	{
-		errorText_ = "RtApi::openStream: input and output StreamParameters structures are both NULL!";
-		error(Exception::INVALID_USE);
-	}
-
-	if (formatBytes(format) == 0)
-	{
-		errorText_ = "RtApi::openStream: 'format' parameter value is undefined.";
-		error(Exception::INVALID_USE);
-	}
-
-	unsigned int nDevices = getDeviceCount();
-	unsigned int oChannels = 0;
-	if (oParams)
-	{
-		oChannels = oParams->nChannels;
-		if (oParams->deviceId >= nDevices)
-		{
-			errorText_ = "RtApi::openStream: output device parameter value is invalid.";
-			error(Exception::INVALID_USE);
-		}
-	}
-
-	unsigned int iChannels = 0;
-	if (iParams)
-	{
-		iChannels = iParams->nChannels;
-		if (iParams->deviceId >= nDevices)
-		{
-			errorText_ = "RtApi::openStream: input device parameter value is invalid.";
-			error(Exception::INVALID_USE);
-		}
-	}
+	assertThatStreamIsNotOpen();
+	assertThatChannelsAreGreaterThatOne(oParams);
+	assertThatDeviceParameterIsNotInvalid(oParams);
+	assertThatChannelsAreGreaterThatOne(iParams);
+	assertThatDeviceParameterIsNotInvalid(iParams);
+	assertThatTheFormatOfBytesIsGreaterThatZero(format);
 
 	clearStreamInfo();
+
 	bool result;
 
-	if (oChannels > 0)
+	result = probeDeviceOpen(oParams.deviceId, OUTPUT, oParams.nChannels, oParams.firstChannel,
+			sampleRate, format, bufferFrames, options);
+
+	if (result == false)
+	{ error(Exception::SYSTEM_ERROR); }
+
+
+	result = probeDeviceOpen(iParams.deviceId, INPUT, iParams.nChannels, iParams.firstChannel,
+			sampleRate, format, bufferFrames, options);
+
+	if (result == false)
 	{
-
-		result = probeDeviceOpen(oParams->deviceId, OUTPUT, oChannels, oParams->firstChannel,
-				sampleRate, format, bufferFrames, options);
-		if (result == false)
-		{ error(Exception::SYSTEM_ERROR); }
-	}
-
-	if (iChannels > 0)
-	{
-
-		result = probeDeviceOpen(iParams->deviceId, INPUT, iChannels, iParams->firstChannel,
-				sampleRate, format, bufferFrames, options);
-		if (result == false)
-		{
-			if (oChannels > 0)
-			{ closeStream(); }
-			error(Exception::SYSTEM_ERROR);
-		}
+		if (oParams.nChannels > 0)
+		{ closeStream(); }
+		error(Exception::SYSTEM_ERROR);
 	}
 
 	stream_.callbackInfo.callback = (void*)callback;
@@ -8446,13 +8478,3 @@ void RtApi::byteSwapBuffer(char* buffer, unsigned int samples, RtAudioFormat for
 		}
 	}
 }
-
-// Indentation settings for Vim and Emacs
-//
-// Local Variables:
-// c-basic-offset: 2
-// indent-tabs-mode: nil
-// End:
-//
-// vim: et sts=2 sw=2
-
