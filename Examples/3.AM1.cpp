@@ -26,7 +26,7 @@ void play(double* output)
 
 
 int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-		double streamTime, RtAudioStreamStatus status, void* userData)
+		double streamTime, Maximilian::RtAudioStreamStatus status, void* userData)
 {
 
 	unsigned int i, j;
@@ -56,7 +56,7 @@ int main()
 {
 	setup();
 
-	RtAudio dac(RtAudio::WINDOWS_DS);
+	Maximilian::RtAudio dac(Maximilian::RtAudio::WINDOWS_DS);
 	if (dac.getDeviceCount() < 1)
 	{
 		std::cout << "\nNo audio devices found!\n";
@@ -65,7 +65,7 @@ int main()
 		exit(0);
 	}
 
-	RtAudio::StreamParameters parameters;
+	Maximilian::RtAudio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
 	parameters.nChannels = Maximilian::Settings::CHANNELS;
 	parameters.firstChannel = 0;

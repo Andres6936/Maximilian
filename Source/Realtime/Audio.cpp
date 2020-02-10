@@ -47,9 +47,9 @@
 #include <climits>
 
 // Static variable definitions.
-const unsigned int RtApi::MAX_SAMPLE_RATES = 14;
+const unsigned int Maximilian::RtApi::MAX_SAMPLE_RATES = 14;
 
-const unsigned int RtApi::SAMPLE_RATES[] = {
+const unsigned int Maximilian::RtApi::SAMPLE_RATES[] = {
 		4000, 5512, 8000, 9600, 11025, 16000, 22050,
 		32000, 44100, 48000, 88200, 96000, 176400, 192000
 };
@@ -76,7 +76,7 @@ const unsigned int RtApi::SAMPLE_RATES[] = {
 //
 // *************************************************** //
 
-void RtAudio::getCompiledApi(std::vector <RtAudio::Api>& apis) throw()
+void Maximilian::RtAudio::getCompiledApi(std::vector <Maximilian::RtAudio::Api>& apis) throw()
 {
 	apis.clear();
 
@@ -105,7 +105,7 @@ void RtAudio::getCompiledApi(std::vector <RtAudio::Api>& apis) throw()
 #endif
 }
 
-void RtAudio::openRtApi(RtAudio::Api api)
+void Maximilian::RtAudio::openRtApi(RtAudio::Api api)
 {
 #if defined(__UNIX_JACK__)
 																															if ( api == UNIX_JACK )
@@ -114,7 +114,7 @@ void RtAudio::openRtApi(RtAudio::Api api)
 #if defined(__LINUX_ALSA__)
 	if (api == LINUX_ALSA)
 	{
-		rtapi_ = new RtApiAlsa();
+		rtapi_ = new Maximilian::RtApiAlsa();
 	}
 #endif
 #if defined(__LINUX_OSS__)
@@ -139,7 +139,7 @@ void RtAudio::openRtApi(RtAudio::Api api)
 #endif
 }
 
-RtAudio::RtAudio(RtAudio::Api api) throw()
+Maximilian::RtAudio::RtAudio(RtAudio::Api api) throw()
 {
 	rtapi_ = 0;
 
@@ -176,17 +176,17 @@ RtAudio::RtAudio(RtAudio::Api api) throw()
 	std::cerr << "\nRtAudio: no compiled API support found ... critical error!!\n\n";
 }
 
-RtAudio::~RtAudio() throw()
+Maximilian::RtAudio::~RtAudio() throw()
 {
 	delete rtapi_;
 }
 
-void RtAudio::openStream(RtAudio::StreamParameters* outputParameters,
-		RtAudio::StreamParameters* inputParameters,
-		RtAudioFormat format, unsigned int sampleRate,
+void Maximilian::RtAudio::openStream(Maximilian::RtAudio::StreamParameters* outputParameters,
+		Maximilian::RtAudio::StreamParameters* inputParameters,
+		Maximilian::RtAudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
-		RtAudioCallback callback, void* userData,
-		RtAudio::StreamOptions* options)
+		Maximilian::RtAudioCallback callback, void* userData,
+		Maximilian::RtAudio::StreamOptions* options)
 {
 	return rtapi_->openStream(outputParameters, inputParameters, format,
 			sampleRate, bufferFrames, callback,
@@ -200,7 +200,7 @@ void RtAudio::openStream(RtAudio::StreamParameters* outputParameters,
 //
 // *************************************************** //
 
-RtApi::RtApi()
+Maximilian::RtApi::RtApi()
 {
 	stream_.state = STREAM_CLOSED;
 	stream_.mode = UNINITIALIZED;
@@ -211,16 +211,16 @@ RtApi::RtApi()
 	showWarnings_ = true;
 }
 
-RtApi::~RtApi()
+Maximilian::RtApi::~RtApi()
 {
 	MUTEX_DESTROY(&stream_.mutex);
 }
 
-void RtApi::openStream(RtAudio::StreamParameters* oParams,
+void Maximilian::RtApi::openStream(RtAudio::StreamParameters* oParams,
 		RtAudio::StreamParameters* iParams,
-		RtAudioFormat format, unsigned int sampleRate,
+		Maximilian::RtAudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
-		RtAudioCallback callback, void* userData,
+		Maximilian::RtAudioCallback callback, void* userData,
 		RtAudio::StreamOptions* options)
 {
 	if (stream_.state != STREAM_CLOSED)
@@ -309,34 +309,34 @@ void RtApi::openStream(RtAudio::StreamParameters* oParams,
 	stream_.state = STREAM_STOPPED;
 }
 
-unsigned int RtApi::getDefaultInputDevice(void)
+unsigned int Maximilian::RtApi::getDefaultInputDevice(void)
 {
 	// Should be implemented in subclasses if possible.
 	return 0;
 }
 
-unsigned int RtApi::getDefaultOutputDevice(void)
+unsigned int Maximilian::RtApi::getDefaultOutputDevice(void)
 {
 	// Should be implemented in subclasses if possible.
 	return 0;
 }
 
-void RtApi::closeStream(void)
+void Maximilian::RtApi::closeStream(void)
 {
 	// MUST be implemented in subclasses!
 	return;
 }
 
-bool RtApi::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
+bool Maximilian::RtApi::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 		unsigned int firstChannel, unsigned int sampleRate,
-		RtAudioFormat format, unsigned int* bufferSize,
+		Maximilian::RtAudioFormat format, unsigned int* bufferSize,
 		RtAudio::StreamOptions* options)
 {
 	// MUST be implemented in subclasses!
 	return FAILURE;
 }
 
-void RtApi::tickStreamTime(void)
+void Maximilian::RtApi::tickStreamTime(void)
 {
 	// Subclasses that do not provide their own implementation of
 	// getStreamTime should call this function once per buffer I/O to
@@ -349,7 +349,7 @@ void RtApi::tickStreamTime(void)
 #endif
 }
 
-long RtApi::getStreamLatency(void)
+long Maximilian::RtApi::getStreamLatency(void)
 {
 	verifyStream();
 
@@ -366,7 +366,7 @@ long RtApi::getStreamLatency(void)
 	return totalLatency;
 }
 
-double RtApi::getStreamTime(void)
+double Maximilian::RtApi::getStreamTime(void)
 {
 	verifyStream();
 
@@ -389,7 +389,7 @@ double RtApi::getStreamTime(void)
 #endif
 }
 
-unsigned int RtApi::getStreamSampleRate(void)
+unsigned int Maximilian::RtApi::getStreamSampleRate(void)
 {
 	verifyStream();
 
@@ -5195,18 +5195,18 @@ struct AlsaHandle
 
 extern "C" void* alsaCallbackHandler(void* ptr);
 
-RtApiAlsa::RtApiAlsa()
+Maximilian::RtApiAlsa::RtApiAlsa()
 {
 	// Nothing to do here.
 }
 
-RtApiAlsa::~RtApiAlsa()
+Maximilian::RtApiAlsa::~RtApiAlsa()
 {
 	if (stream_.state != STREAM_CLOSED)
 	{ closeStream(); }
 }
 
-unsigned int RtApiAlsa::getDeviceCount(void)
+unsigned int Maximilian::RtApiAlsa::getDeviceCount(void)
 {
 	unsigned nDevices = 0;
 	int result, subdevice, card;
@@ -5254,9 +5254,9 @@ unsigned int RtApiAlsa::getDeviceCount(void)
 	return nDevices;
 }
 
-RtAudio::DeviceInfo RtApiAlsa::getDeviceInfo(unsigned int device)
+Maximilian::RtAudio::DeviceInfo Maximilian::RtApiAlsa::getDeviceInfo(unsigned int device)
 {
-	RtAudio::DeviceInfo info;
+	Maximilian::RtAudio::DeviceInfo info;
 	info.probed = false;
 
 	unsigned nDevices = 0;
@@ -5578,7 +5578,7 @@ probeParameters:
 	return info;
 }
 
-void RtApiAlsa::saveDeviceInfo(void)
+void Maximilian::RtApiAlsa::saveDeviceInfo(void)
 {
 	devices_.clear();
 
@@ -5590,9 +5590,9 @@ void RtApiAlsa::saveDeviceInfo(void)
 	}
 }
 
-bool RtApiAlsa::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
+bool Maximilian::RtApiAlsa::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 		unsigned int firstChannel, unsigned int sampleRate,
-		RtAudioFormat format, unsigned int* bufferSize,
+		Maximilian::RtAudioFormat format, unsigned int* bufferSize,
 		RtAudio::StreamOptions* options)
 {
 #if defined(__RTAUDIO_DEBUG__)
@@ -6189,7 +6189,7 @@ error:
 	return FAILURE;
 }
 
-void RtApiAlsa::closeStream()
+void Maximilian::RtApiAlsa::closeStream()
 {
 	if (stream_.state == STREAM_CLOSED)
 	{
@@ -6252,7 +6252,7 @@ void RtApiAlsa::closeStream()
 	stream_.state = STREAM_CLOSED;
 }
 
-void RtApiAlsa::startStream()
+void Maximilian::RtApiAlsa::startStream()
 {
 	// This method calls snd_pcm_prepare if the device isn't already in that state.
 
@@ -6314,7 +6314,7 @@ unlock:
 	error(Exception::SYSTEM_ERROR);
 }
 
-void RtApiAlsa::stopStream()
+void Maximilian::RtApiAlsa::stopStream()
 {
 	verifyStream();
 	if (stream_.state == STREAM_STOPPED)
@@ -6373,7 +6373,7 @@ unlock:
 	error(Exception::SYSTEM_ERROR);
 }
 
-void RtApiAlsa::abortStream()
+void Maximilian::RtApiAlsa::abortStream()
 {
 	verifyStream();
 	if (stream_.state == STREAM_STOPPED)
@@ -6425,7 +6425,7 @@ unlock:
 	error(Exception::SYSTEM_ERROR);
 }
 
-void RtApiAlsa::callbackEvent()
+void Maximilian::RtApiAlsa::callbackEvent()
 {
 	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
 	if (stream_.state == STREAM_STOPPED)
@@ -6452,9 +6452,9 @@ void RtApiAlsa::callbackEvent()
 	}
 
 	int doStopStream = 0;
-	RtAudioCallback callback = (RtAudioCallback)stream_.callbackInfo.callback;
+	Maximilian::RtAudioCallback callback = (Maximilian::RtAudioCallback)stream_.callbackInfo.callback;
 	double streamTime = getStreamTime();
-	RtAudioStreamStatus status = 0;
+	Maximilian::RtAudioStreamStatus status = 0;
 	if (stream_.mode != INPUT && apiInfo->xrun[0] == true)
 	{
 		status |= RTAUDIO_OUTPUT_UNDERFLOW;
@@ -6485,7 +6485,7 @@ void RtApiAlsa::callbackEvent()
 	int channels;
 	snd_pcm_t** handle;
 	snd_pcm_sframes_t frames;
-	RtAudioFormat format;
+	Maximilian::RtAudioFormat format;
 	handle = (snd_pcm_t**)apiInfo->handles;
 
 	if (stream_.mode == INPUT || stream_.mode == DUPLEX)
@@ -6663,8 +6663,8 @@ unlock:
 
 extern "C" void* alsaCallbackHandler(void* ptr)
 {
-	CallbackInfo* info = (CallbackInfo*)ptr;
-	RtApiAlsa* object = (RtApiAlsa*)info->object;
+	Maximilian::CallbackInfo* info = (Maximilian::CallbackInfo*)ptr;
+	Maximilian::RtApiAlsa* object = (Maximilian::RtApiAlsa*)info->object;
 	bool* isRunning = &info->isRunning;
 
 	while (*isRunning == true)
@@ -7623,7 +7623,7 @@ extern "C" void *ossCallbackHandler( void *ptr )
 
 // This method can be modified to control the behavior of error
 // message printing.
-void RtApi::error(Exception::Type type)
+void Maximilian::RtApi::error(Exception::Type type)
 {
 	errorStream_.str(""); // clear the ostringstream
 	if (type == Exception::WARNING && showWarnings_ == true)
@@ -7636,7 +7636,7 @@ void RtApi::error(Exception::Type type)
 	}
 }
 
-void RtApi::verifyStream()
+void Maximilian::RtApi::verifyStream()
 {
 	if (stream_.state == STREAM_CLOSED)
 	{
@@ -7645,7 +7645,7 @@ void RtApi::verifyStream()
 	}
 }
 
-void RtApi::clearStreamInfo()
+void Maximilian::RtApi::clearStreamInfo()
 {
 	stream_.mode = UNINITIALIZED;
 	stream_.state = STREAM_CLOSED;
@@ -7682,7 +7682,7 @@ void RtApi::clearStreamInfo()
 	}
 }
 
-unsigned int RtApi::formatBytes(RtAudioFormat format)
+unsigned int Maximilian::RtApi::formatBytes(Maximilian::RtAudioFormat format)
 {
 	if (format == RTAUDIO_SINT16)
 	{
@@ -7708,7 +7708,7 @@ unsigned int RtApi::formatBytes(RtAudioFormat format)
 	return 0;
 }
 
-void RtApi::setConvertInfo(StreamMode mode, unsigned int firstChannel)
+void Maximilian::RtApi::setConvertInfo(StreamMode mode, unsigned int firstChannel)
 {
 	if (mode == INPUT)
 	{ // convert device to user buffer
@@ -7819,7 +7819,7 @@ void RtApi::setConvertInfo(StreamMode mode, unsigned int firstChannel)
 	}
 }
 
-void RtApi::convertBuffer(char* outBuffer, char* inBuffer, ConvertInfo& info)
+void Maximilian::RtApi::convertBuffer(char* outBuffer, char* inBuffer, ConvertInfo& info)
 {
 	// This function does format conversion, input/output channel compensation, and
 	// data interleaving/deinterleaving.  24-bit integers are assumed to occupy
@@ -8372,7 +8372,7 @@ void RtApi::convertBuffer(char* outBuffer, char* inBuffer, ConvertInfo& info)
 //static inline uint32_t bswap_32(uint32_t x) { return (bswap_16(x&0xffff)<<16) | (bswap_16(x>>16)); }
 //static inline uint64_t bswap_64(uint64_t x) { return (((unsigned long long)bswap_32(x&0xffffffffull))<<32) | (bswap_32(x>>32)); }
 
-void RtApi::byteSwapBuffer(char* buffer, unsigned int samples, RtAudioFormat format)
+void Maximilian::RtApi::byteSwapBuffer(char* buffer, unsigned int samples, Maximilian::RtAudioFormat format)
 {
 	register char val;
 	register char* ptr;

@@ -20,6 +20,7 @@
 #endif
 
 #include "Realtime/Audio.hpp"
+#include "Audio.hpp"
 
 #endif
 
@@ -38,7 +39,7 @@ int routing(const void *inputBuffer,
 #elif defined(MAXIMILIAN_RT_AUDIO)
 
 int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-		double streamTime, RtAudioStreamStatus status, void* userData)
+		double streamTime, Maximilian::RtAudioStreamStatus status, void* userData)
 {
 #endif
 
@@ -118,7 +119,7 @@ int main()
 		std::cout <<  "PortAudio error: "<< Pa_GetErrorText( err ) << std::endl;
 
 #elif defined(MAXIMILIAN_RT_AUDIO)
-	RtAudio dac(RtAudio::WINDOWS_DS);
+	Maximilian::RtAudio dac(Maximilian::RtAudio::WINDOWS_DS);
 	if (dac.getDeviceCount() < 1)
 	{
 		std::cout << "\nNo audio devices found!\n";
@@ -127,7 +128,7 @@ int main()
 		exit(0);
 	}
 
-	RtAudio::StreamParameters parameters;
+	Maximilian::RtAudio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
 	parameters.nChannels = Maximilian::Settings::CHANNELS;
 	parameters.firstChannel = 0;

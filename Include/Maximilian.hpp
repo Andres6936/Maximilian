@@ -299,7 +299,9 @@ namespace Maximilian
 	template <class T>
 	class LaggingExponential
 	{
+
 	public:
+
 		T alpha, alphaReciprocal;
 		T val;
 
