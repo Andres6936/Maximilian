@@ -18,9 +18,11 @@ namespace Maximilian
 
 	public:
 
-		int channels;
-		int inJump, outJump;
-		RtAudioFormat inFormat, outFormat;
+		int channels = 0;
+		int inJump = 0;
+		int outJump = 0;
+		AudioFormat outFormat;
+		AudioFormat inFormat;
 		std::vector <int> inOffset;
 		std::vector <int> outOffset;
 

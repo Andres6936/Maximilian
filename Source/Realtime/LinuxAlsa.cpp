@@ -433,7 +433,7 @@ void LinuxAlsa::saveDeviceInfo()
 
 bool LinuxAlsa::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 		unsigned int firstChannel, unsigned int sampleRate,
-		RtAudioFormat format, unsigned int* bufferSize,
+		AudioFormat format, unsigned int* bufferSize,
 		Audio::StreamOptions* options)
 {
 #if defined(__RTAUDIO_DEBUG__)
@@ -1344,7 +1344,7 @@ void LinuxAlsa::callbackEvent()
 	int channels;
 	snd_pcm_t** handle;
 	snd_pcm_sframes_t frames;
-	RtAudioFormat format;
+	AudioFormat format;
 	handle = (snd_pcm_t**)apiInfo->handles;
 
 	if (stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX)

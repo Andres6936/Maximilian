@@ -59,7 +59,7 @@ void AudioArchitecture::assertThatChannelsAreGreaterThatOne(const Audio::StreamP
 	}
 }
 
-void AudioArchitecture::assertThatTheFormatOfBytesIsGreaterThatZero(const RtAudioFormat _format)
+void AudioArchitecture::assertThatTheFormatOfBytesIsGreaterThatZero(const AudioFormat _format)
 {
 	if (formatBytes(_format) == 0)
 	{
@@ -69,7 +69,7 @@ void AudioArchitecture::assertThatTheFormatOfBytesIsGreaterThatZero(const RtAudi
 	}
 }
 
-void AudioArchitecture::openStream(Audio::StreamParameters& oParams, RtAudioFormat format, unsigned int sampleRate,
+void AudioArchitecture::openStream(Audio::StreamParameters& oParams, AudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames, RtAudioCallback callback, void* userData, Audio::StreamOptions* options)
 {
 	assertThatStreamIsNotOpen();
@@ -98,7 +98,7 @@ void AudioArchitecture::openStream(Audio::StreamParameters& oParams, RtAudioForm
 void AudioArchitecture::openStream(
 		Audio::StreamParameters& oParams,
 		Audio::StreamParameters& iParams,
-		Maximilian::RtAudioFormat format, unsigned int sampleRate,
+		Maximilian::AudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
 		Maximilian::RtAudioCallback callback, void* userData,
 		Audio::StreamOptions* options)
@@ -159,7 +159,7 @@ void AudioArchitecture::closeStream(void)
 
 bool AudioArchitecture::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 		unsigned int firstChannel, unsigned int sampleRate,
-		Maximilian::RtAudioFormat format, unsigned int* bufferSize,
+		Maximilian::AudioFormat format, unsigned int* bufferSize,
 		Audio::StreamOptions* options)
 {
 	// MUST be implemented in subclasses!
@@ -288,7 +288,7 @@ void AudioArchitecture::clearStreamInfo()
 	}
 }
 
-unsigned int AudioArchitecture::formatBytes(Maximilian::RtAudioFormat format)
+unsigned int AudioArchitecture::formatBytes(Maximilian::AudioFormat format)
 {
 	if (format == RTAUDIO_SINT16)
 	{
@@ -980,7 +980,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 //static inline uint32_t bswap_32(uint32_t x) { return (bswap_16(x&0xffff)<<16) | (bswap_16(x>>16)); }
 //static inline uint64_t bswap_64(uint64_t x) { return (((unsigned long long)bswap_32(x&0xffffffffull))<<32) | (bswap_32(x>>32)); }
 
-void AudioArchitecture::byteSwapBuffer(char* buffer, unsigned int samples, RtAudioFormat format)
+void AudioArchitecture::byteSwapBuffer(char* buffer, unsigned int samples, AudioFormat format)
 {
 	register char val;
 	register char* ptr;

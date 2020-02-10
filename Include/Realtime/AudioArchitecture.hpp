@@ -13,7 +13,7 @@ namespace Maximilian
 
 		void assertThatStreamIsNotOpen();
 
-		void assertThatTheFormatOfBytesIsGreaterThatZero(RtAudioFormat _format);
+		void assertThatTheFormatOfBytesIsGreaterThatZero(AudioFormat _format);
 
 		void assertThatDeviceParameterIsNotInvalid(const Audio::StreamParameters& _parameters);
 
@@ -36,13 +36,13 @@ namespace Maximilian
 		virtual Audio::DeviceInfo getDeviceInfo(unsigned int device) = 0;
 
 		void openStream(Audio::StreamParameters& oParams,
-				RtAudioFormat format, unsigned int sampleRate,
+				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData, Audio::StreamOptions* options);
 
 		void openStream(Audio::StreamParameters& oParams,
 				Audio::StreamParameters& iParams,
-				RtAudioFormat format, unsigned int sampleRate,
+				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData, Audio::StreamOptions* options);
 
@@ -105,7 +105,7 @@ namespace Maximilian
 		*/
 		virtual bool probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 				unsigned int firstChannel, unsigned int sampleRate,
-				RtAudioFormat format, unsigned int* bufferSize,
+				AudioFormat format, unsigned int* bufferSize,
 				Audio::StreamOptions* options);
 
 		//! A protected function used to increment the stream time.
@@ -130,10 +130,10 @@ namespace Maximilian
 		void convertBuffer(char* outBuffer, char* inBuffer, ConvertInfo& info);
 
 		//! Protected common method used to perform byte-swapping on buffers.
-		void byteSwapBuffer(char* buffer, unsigned int samples, RtAudioFormat format);
+		void byteSwapBuffer(char* buffer, unsigned int samples, AudioFormat format);
 
 		//! Protected common method that returns the number of bytes for a given format.
-		unsigned int formatBytes(RtAudioFormat format);
+		unsigned int formatBytes(AudioFormat format);
 
 		//! Protected common method that sets up the parameters for buffer conversion.
 		void setConvertInfo(StreamMode mode, unsigned int firstChannel);

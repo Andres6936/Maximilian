@@ -192,7 +192,7 @@ namespace Maximilian
 			bool isDefaultOutput;         /*!< true if this is the default output device. */
 			bool isDefaultInput;          /*!< true if this is the default input device. */
 			std::vector <unsigned int> sampleRates; /*!< Supported sample rates (queried from list of standard rates). */
-			RtAudioFormat nativeFormats;  /*!< Bit mask of supported data formats. */
+			AudioFormat nativeFormats;  /*!< Bit mask of supported data formats. */
 
 			// Default constructor.
 			DeviceInfo()
@@ -397,12 +397,12 @@ namespace Maximilian
 		*/
 		void openStream(StreamParameters& outputParameters,
 				StreamParameters& inputParameters,
-				RtAudioFormat format, unsigned int sampleRate,
+				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData = NULL, Audio::StreamOptions* options = NULL);
 
 		void openStream(StreamParameters& outputParameters,
-				RtAudioFormat format, unsigned int sampleRate,
+				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData = NULL, Audio::StreamOptions* options = NULL);
 
@@ -505,13 +505,6 @@ namespace Maximilian
 	};
 
 }
-
-static const Maximilian::RtAudioFormat RTAUDIO_SINT8 = 0x1;    // 8-bit signed integer.
-static const Maximilian::RtAudioFormat RTAUDIO_SINT16 = 0x2;   // 16-bit signed integer.
-static const Maximilian::RtAudioFormat RTAUDIO_SINT24 = 0x4;   // Lower 3 bytes of 32-bit signed integer.
-static const Maximilian::RtAudioFormat RTAUDIO_SINT32 = 0x8;   // 32-bit signed integer.
-static const Maximilian::RtAudioFormat RTAUDIO_FLOAT32 = 0x10; // Normalized between plus/minus 1.0.
-static const Maximilian::RtAudioFormat RTAUDIO_FLOAT64 = 0x20; // Normalized between plus/minus 1.0.
 
 static const Maximilian::RtAudioStreamFlags RTAUDIO_NONINTERLEAVED = 0x1;    // Use non-interleaved buffers (default = interleaved).
 static const Maximilian::RtAudioStreamFlags RTAUDIO_MINIMIZE_LATENCY = 0x2;  // Attempt to set stream parameters for lowest possible latency.

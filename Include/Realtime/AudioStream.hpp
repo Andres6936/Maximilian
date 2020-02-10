@@ -50,8 +50,8 @@ namespace Maximilian
 		unsigned int nDeviceChannels[2];  // Playback and record channels, respectively.
 		unsigned int channelOffset[2];    // Playback and record, respectively.
 		unsigned long latency[2];         // Playback and record, respectively.
-		RtAudioFormat userFormat;
-		RtAudioFormat deviceFormat[2];    // Playback and record, respectively.
+		AudioFormat userFormat;
+		AudioFormat deviceFormat[2];    // Playback and record, respectively.
 		StreamMutex mutex;
 		CallbackInfo callbackInfo;
 		ConvertInfo convertInfo[2];

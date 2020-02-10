@@ -157,7 +157,7 @@ Maximilian::Audio::~Audio() throw()
 void Audio::openStream(
 		StreamParameters& outputParameters,
 		StreamParameters& inputParameters,
-		RtAudioFormat format, unsigned int sampleRate,
+		AudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
 		RtAudioCallback callback, void* userData,
 		StreamOptions* options)
@@ -169,7 +169,7 @@ void Audio::openStream(
 
 void Audio::openStream(
 		StreamParameters& outputParameters,
-		RtAudioFormat format, unsigned int sampleRate,
+		AudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
 		RtAudioCallback callback, void* userData,
 		StreamOptions* options)
