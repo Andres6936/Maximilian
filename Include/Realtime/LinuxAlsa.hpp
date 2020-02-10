@@ -4,32 +4,35 @@
 #include "Audio.hpp"
 #include "AudioArchitecture.hpp"
 
+#include <vector>
+
 namespace Maximilian
 {
 	class LinuxAlsa : public AudioArchitecture
 	{
+
 	public:
 
-		LinuxAlsa();
+		LinuxAlsa() = default;
 
-		~LinuxAlsa();
+		~LinuxAlsa() override;
 
-		Audio::SupportedArchitectures getCurrentApi()
+		Audio::SupportedArchitectures getCurrentApi() override
 		{
 			return Audio::Linux_Alsa;
 		};
 
-		unsigned int getDeviceCount();
+		unsigned int getDeviceCount() override;
 
-		Audio::DeviceInfo getDeviceInfo(unsigned int device);
+		Audio::DeviceInfo getDeviceInfo(unsigned int device) override;
 
-		void closeStream();
+		void closeStream() override;
 
-		void startStream();
+		void startStream() override;
 
-		void stopStream();
+		void stopStream() override;
 
-		void abortStream();
+		void abortStream() override;
 
 		// This function is intended for internal use only.  It must be
 		// public because it is called by the internal callback handler,
@@ -46,7 +49,7 @@ namespace Maximilian
 		bool probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 				unsigned int firstChannel, unsigned int sampleRate,
 				RtAudioFormat format, unsigned int* bufferSize,
-				Audio::StreamOptions* options);
+				Audio::StreamOptions* options) override;
 	};
 }
 

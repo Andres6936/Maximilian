@@ -5,9 +5,6 @@
 
 using namespace Maximilian;
 
-#define MUTEX_LOCK(A)       pthread_mutex_lock(A)
-#define MUTEX_UNLOCK(A)     pthread_mutex_unlock(A)
-
 // A structure to hold various information related to the ALSA API
 // implementation.
 struct AlsaHandle
@@ -26,13 +23,11 @@ struct AlsaHandle
 	}
 };
 
-extern "C" void* alsaCallbackHandler(void* ptr);
-
 
 extern "C" void* alsaCallbackHandler(void* ptr)
 {
-	Maximilian::CallbackInfo* info = (Maximilian::CallbackInfo*)ptr;
-	Maximilian::LinuxAlsa* object = (Maximilian::LinuxAlsa*)info->object;
+	CallbackInfo* info = (CallbackInfo*)ptr;
+	LinuxAlsa* object = (LinuxAlsa*)info->object;
 	bool* isRunning = &info->isRunning;
 
 	while (*isRunning == true)
@@ -41,21 +36,17 @@ extern "C" void* alsaCallbackHandler(void* ptr)
 		object->callbackEvent();
 	}
 
-	pthread_exit(NULL);
+	pthread_exit(nullptr);
 }
 
-Maximilian::LinuxAlsa::LinuxAlsa()
-{
-	// Nothing to do here.
-}
 
-Maximilian::LinuxAlsa::~LinuxAlsa()
+LinuxAlsa::~LinuxAlsa()
 {
 	if (stream_.state != STREAM_CLOSED)
 	{ closeStream(); }
 }
 
-unsigned int LinuxAlsa::getDeviceCount(void)
+unsigned int LinuxAlsa::getDeviceCount()
 {
 	unsigned nDevices = 0;
 	int result, subdevice, card;
@@ -103,9 +94,9 @@ unsigned int LinuxAlsa::getDeviceCount(void)
 	return nDevices;
 }
 
-Maximilian::Audio::DeviceInfo LinuxAlsa::getDeviceInfo(unsigned int device)
+Audio::DeviceInfo LinuxAlsa::getDeviceInfo(unsigned int device)
 {
-	Maximilian::Audio::DeviceInfo info;
+	Audio::DeviceInfo info;
 	info.probed = false;
 
 	unsigned nDevices = 0;
@@ -129,7 +120,7 @@ Maximilian::Audio::DeviceInfo LinuxAlsa::getDeviceInfo(unsigned int device)
 			goto nextcard;
 		}
 		subdevice = -1;
-		while (1)
+		while (true)
 		{
 			result = snd_ctl_pcm_next_device(chandle, &subdevice);
 			if (result < 0)
@@ -427,7 +418,7 @@ probeParameters:
 	return info;
 }
 
-void LinuxAlsa::saveDeviceInfo(void)
+void LinuxAlsa::saveDeviceInfo()
 {
 	devices_.clear();
 
@@ -441,7 +432,7 @@ void LinuxAlsa::saveDeviceInfo(void)
 
 bool LinuxAlsa::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 		unsigned int firstChannel, unsigned int sampleRate,
-		Maximilian::RtAudioFormat format, unsigned int* bufferSize,
+		RtAudioFormat format, unsigned int* bufferSize,
 		Audio::StreamOptions* options)
 {
 #if defined(__RTAUDIO_DEBUG__)
@@ -1037,12 +1028,11 @@ error:
 		stream_.apiHandle = 0;
 	}
 
-	for (int i = 0; i < 2; i++)
+	for (auto& i : stream_.userBuffer)
 	{
-		if (stream_.userBuffer[i])
+		if (i)
 		{
-			free(stream_.userBuffer[i]);
-			stream_.userBuffer[i] = 0;
+			free(i);
 		}
 	}
 
@@ -1066,13 +1056,13 @@ void LinuxAlsa::closeStream()
 
 	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
 	stream_.callbackInfo.isRunning = false;
-	MUTEX_LOCK(&stream_.mutex);
+	pthread_mutex_lock(&stream_.mutex);
 	if (stream_.state == STREAM_STOPPED)
 	{
 		apiInfo->runnable = true;
 		pthread_cond_signal(&apiInfo->runnable_cv);
 	}
-	MUTEX_UNLOCK(&stream_.mutex);
+	pthread_mutex_unlock(&stream_.mutex);
 	pthread_join(stream_.callbackInfo.thread, NULL);
 
 	if (stream_.state == STREAM_RUNNING)
@@ -1099,12 +1089,11 @@ void LinuxAlsa::closeStream()
 		stream_.apiHandle = 0;
 	}
 
-	for (int i = 0; i < 2; i++)
+	for (auto& i : stream_.userBuffer)
 	{
-		if (stream_.userBuffer[i])
+		if (i)
 		{
-			free(stream_.userBuffer[i]);
-			stream_.userBuffer[i] = 0;
+			free(i);
 		}
 	}
 
@@ -1130,7 +1119,7 @@ void LinuxAlsa::startStream()
 		return;
 	}
 
-	MUTEX_LOCK(&stream_.mutex);
+	pthread_mutex_lock(&stream_.mutex);
 
 	int result = 0;
 	snd_pcm_state_t state;
@@ -1173,7 +1162,7 @@ void LinuxAlsa::startStream()
 unlock:
 	apiInfo->runnable = true;
 	pthread_cond_signal(&apiInfo->runnable_cv);
-	MUTEX_UNLOCK(&stream_.mutex);
+	pthread_mutex_unlock(&stream_.mutex);
 
 	if (result >= 0)
 	{ return; }
@@ -1191,7 +1180,7 @@ void LinuxAlsa::stopStream()
 	}
 
 	stream_.state = STREAM_STOPPED;
-	MUTEX_LOCK(&stream_.mutex);
+	pthread_mutex_lock(&stream_.mutex);
 
 	//if ( stream_.state == STREAM_STOPPED ) {
 	//  MUTEX_UNLOCK( &stream_.mutex );
@@ -1232,7 +1221,7 @@ void LinuxAlsa::stopStream()
 
 unlock:
 	stream_.state = STREAM_STOPPED;
-	MUTEX_UNLOCK(&stream_.mutex);
+	pthread_mutex_unlock(&stream_.mutex);
 
 	if (result >= 0)
 	{ return; }
@@ -1250,7 +1239,7 @@ void LinuxAlsa::abortStream()
 	}
 
 	stream_.state = STREAM_STOPPED;
-	MUTEX_LOCK(&stream_.mutex);
+	pthread_mutex_lock(&stream_.mutex);
 
 	//if ( stream_.state == STREAM_STOPPED ) {
 	//  MUTEX_UNLOCK( &stream_.mutex );
@@ -1284,7 +1273,7 @@ void LinuxAlsa::abortStream()
 
 unlock:
 	stream_.state = STREAM_STOPPED;
-	MUTEX_UNLOCK(&stream_.mutex);
+	pthread_mutex_unlock(&stream_.mutex);
 
 	if (result >= 0)
 	{ return; }
@@ -1296,7 +1285,7 @@ void LinuxAlsa::callbackEvent()
 	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
 	if (stream_.state == STREAM_STOPPED)
 	{
-		MUTEX_LOCK(&stream_.mutex);
+		pthread_mutex_lock(&stream_.mutex);
 		while (!apiInfo->runnable)
 		{
 			pthread_cond_wait(&apiInfo->runnable_cv, &stream_.mutex);
@@ -1304,10 +1293,10 @@ void LinuxAlsa::callbackEvent()
 
 		if (stream_.state != STREAM_RUNNING)
 		{
-			MUTEX_UNLOCK(&stream_.mutex);
+			pthread_mutex_unlock(&stream_.mutex);
 			return;
 		}
-		MUTEX_UNLOCK(&stream_.mutex);
+		pthread_mutex_unlock(&stream_.mutex);
 	}
 
 	if (stream_.state == STREAM_CLOSED)
@@ -1318,9 +1307,9 @@ void LinuxAlsa::callbackEvent()
 	}
 
 	int doStopStream = 0;
-	Maximilian::RtAudioCallback callback = (Maximilian::RtAudioCallback)stream_.callbackInfo.callback;
+	RtAudioCallback callback = (RtAudioCallback)stream_.callbackInfo.callback;
 	double streamTime = getStreamTime();
-	Maximilian::RtAudioStreamStatus status = 0;
+	RtAudioStreamStatus status = 0;
 	if (stream_.mode != INPUT && apiInfo->xrun[0] == true)
 	{
 		status |= RTAUDIO_OUTPUT_UNDERFLOW;
@@ -1340,7 +1329,7 @@ void LinuxAlsa::callbackEvent()
 		return;
 	}
 
-	MUTEX_LOCK(&stream_.mutex);
+	pthread_mutex_lock(&stream_.mutex);
 
 	// The state might change while waiting on a mutex.
 	if (stream_.state == STREAM_STOPPED)
@@ -1351,7 +1340,7 @@ void LinuxAlsa::callbackEvent()
 	int channels;
 	snd_pcm_t** handle;
 	snd_pcm_sframes_t frames;
-	Maximilian::RtAudioFormat format;
+	RtAudioFormat format;
 	handle = (snd_pcm_t**)apiInfo->handles;
 
 	if (stream_.mode == INPUT || stream_.mode == DUPLEX)
@@ -1520,7 +1509,7 @@ tryOutput:
 	}
 
 unlock:
-	MUTEX_UNLOCK(&stream_.mutex);
+	pthread_mutex_unlock(&stream_.mutex);
 
 	AudioArchitecture::tickStreamTime();
 	if (doStopStream == 1)
