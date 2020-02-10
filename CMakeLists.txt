@@ -15,7 +15,7 @@ ADD_DEFINITIONS(-D__LINUX_ALSA__)
 ADD_LIBRARY(Maximilian
         Source/main.cpp
         Source/maximilian.cpp
-        Source/Realtime/Audio.cpp)
+        Source/Realtime/Audio.cpp Source/Realtime/AudioArchitecture.cpp Include/Realtime/AudioArchitecture.hpp Source/Realtime/LinuxAlsa.cpp Include/Realtime/LinuxAlsa.hpp)
 
 TARGET_LINK_LIBRARIES(Maximilian PRIVATE pthread asound)
 # Link to Maximilian the library Levin
