@@ -90,6 +90,16 @@ void Audio::getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) th
 
 void Audio::tryInitializeInstanceOfArchitecture(Audio::SupportedArchitectures _architecture)
 {
+	// This methods is design for be called several times of way consecutive
+	// to found an instance that content an device.
+
+	// Is necessary deleted the pointer several times if this it initialized
+	// in any called, and no have any device.
+
+	// Deleted an nullptr no have effect or consequences.
+	delete audioArchitecture;
+
+
 #if defined(__UNIX_JACK__)
 																															if ( api == UNIX_JACK )
     rtapi_ = new RtApiJack();
@@ -153,8 +163,9 @@ Audio::Audio(Audio::SupportedArchitectures _architecture)
 
 		if (audioArchitecture->getDeviceCount() >= 1)
 		{
-			Levin::Info() << "Number of devices is: " << audioArchitecture->getDeviceCount()
-						  << "." << Levin::endl;
+			// Only need of an Audio Architecture with a number
+			// of device greater to one, when we found it architecture
+			// and initialize, we can exit of for loop.
 			break;
 		}
 	}
