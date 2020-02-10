@@ -47,13 +47,6 @@
 
 using namespace Maximilian;
 
-
-// *************************************************** //
-//
-// RtAudio definitions.
-//
-// *************************************************** //
-
 void Audio::getCompiledApi(std::vector <Maximilian::Audio::SupportedArchitectures>& apis) throw()
 {
 	apis.clear();
@@ -135,11 +128,13 @@ Maximilian::Audio::Audio(Audio::SupportedArchitectures api) throw()
 
 	// Iterate through the compiled APIs and return as soon as we find
 	// one with at least one device or we reach the end of the list.
-	std::vector <Audio::SupportedArchitectures> apis;
-	getCompiledApi(apis);
-	for (unsigned int i = 0; i < apis.size(); i++)
+	std::vector <Audio::SupportedArchitectures> supportedArchitectures;
+	getCompiledApi(supportedArchitectures);
+
+	for (auto& architecture : supportedArchitectures)
 	{
-		openRtApi(apis[i]);
+		openRtApi(architecture);
+
 		if (rtapi_->getDeviceCount())
 		{ break; }
 	}
