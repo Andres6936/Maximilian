@@ -114,65 +114,58 @@ unsigned int LinuxAlsa::getDeviceCount()
 
 Audio::DeviceInfo LinuxAlsa::getDeviceInfo(unsigned int device)
 {
+	if (device >= getDeviceCount())
+	{
+		throw Exception("DeviceInvalidException");
+	}
+
 	Audio::DeviceInfo info;
 	info.probed = false;
 
-	unsigned nDevices = 0;
-	int result, subdevice, card;
-	char name[64];
-	snd_ctl_t* chandle;
+	unsigned numberOfDevices = 0;
+	int result;
+	int subDevice;
+
+	std::array <char, 64> name{ };
+
+	snd_ctl_t* handle;
 
 	// Count cards and devices
-	card = -1;
+	int card = -1;
 	snd_card_next(&card);
-	while (card >= 0)
+
+	if (card >= 0)
 	{
-		sprintf(name, "hw:%d", card);
-		result = snd_ctl_open(&chandle, name, SND_CTL_NONBLOCK);
-		if (result < 0)
-		{
-			errorStream_ << "RtApiAlsa::getDeviceInfo: control open, card = " << card << ", " << snd_strerror(result)
-						 << ".";
-			errorText_ = errorStream_.str();
-			error(Exception::WARNING);
-			goto nextcard;
-		}
-		subdevice = -1;
+		sprintf(name.data(), "hw:%d", card);
+		snd_ctl_open(&handle, name.data(), SND_CTL_NONBLOCK);
+
+		subDevice = -1;
+
 		while (true)
 		{
-			result = snd_ctl_pcm_next_device(chandle, &subdevice);
+			result = snd_ctl_pcm_next_device(handle, &subDevice);
+
 			if (result < 0)
 			{
-				errorStream_ << "RtApiAlsa::getDeviceInfo: control next device, card = " << card << ", "
-							 << snd_strerror(result) << ".";
-				errorText_ = errorStream_.str();
-				error(Exception::WARNING);
+				Levin::Warn() << "Linux Alsa: getDeviceCount, control next device, card = " << card
+							  << ", " << snd_strerror(result) << "." << Levin::endl;
 				break;
 			}
-			if (subdevice < 0)
-			{ break; }
-			if (nDevices == device)
+
+			if (subDevice < 0)
 			{
-				sprintf(name, "hw:%d,%d", card, subdevice);
+				break;
+			}
+
+			if (numberOfDevices == device)
+			{
+				sprintf(name.data(), "hw:%d,%d", card, subDevice);
 				goto foundDevice;
 			}
-			nDevices++;
+
+			numberOfDevices++;
 		}
-	nextcard:
-		snd_ctl_close(chandle);
-		snd_card_next(&card);
-	}
 
-	if (nDevices == 0)
-	{
-		errorText_ = "RtApiAlsa::getDeviceInfo: no devices found!";
-		error(Exception::INVALID_USE);
-	}
-
-	if (device >= nDevices)
-	{
-		errorText_ = "RtApiAlsa::getDeviceInfo: device ID is invalid!";
-		error(Exception::INVALID_USE);
 	}
 
 foundDevice:
@@ -184,10 +177,10 @@ foundDevice:
 	{
 		if (device >= devices_.size())
 		{
-			errorText_ = "RtApiAlsa::getDeviceInfo: device ID was not present before stream was opened.";
-			error(Exception::WARNING);
+			Levin::Warn() << "Linux Alsa: getDeviceInfo, device ID was not present before stream was opened.";
 			return info;
 		}
+
 		return devices_[device];
 	}
 
@@ -201,21 +194,21 @@ foundDevice:
 
 	// First try for playback
 	stream = SND_PCM_STREAM_PLAYBACK;
-	snd_pcm_info_set_device(pcminfo, subdevice);
+	snd_pcm_info_set_device(pcminfo, subDevice);
 	snd_pcm_info_set_subdevice(pcminfo, 0);
 	snd_pcm_info_set_stream(pcminfo, stream);
 
-	result = snd_ctl_pcm_info(chandle, pcminfo);
+	result = snd_ctl_pcm_info(handle, pcminfo);
 	if (result < 0)
 	{
 		// Device probably doesn't support playback.
 		goto captureProbe;
 	}
 
-	result = snd_pcm_open(&phandle, name, stream, openMode | SND_PCM_NONBLOCK);
+	result = snd_pcm_open(&phandle, name.data(), stream, openMode | SND_PCM_NONBLOCK);
 	if (result < 0)
 	{
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name << "), "
+		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name.data() << "), "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		error(Exception::WARNING);
@@ -227,7 +220,7 @@ foundDevice:
 	if (result < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_hw_params error for device (" << name << "), "
+		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_hw_params error for device (" << name.data() << "), "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		error(Exception::WARNING);
@@ -240,7 +233,7 @@ foundDevice:
 	if (result < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: error getting device (" << name << ") output channels, "
+		errorStream_ << "RtApiAlsa::getDeviceInfo: error getting device (" << name.data() << ") output channels, "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		error(Exception::WARNING);
@@ -254,8 +247,8 @@ captureProbe:
 	stream = SND_PCM_STREAM_CAPTURE;
 	snd_pcm_info_set_stream(pcminfo, stream);
 
-	result = snd_ctl_pcm_info(chandle, pcminfo);
-	snd_ctl_close(chandle);
+	result = snd_ctl_pcm_info(handle, pcminfo);
+	snd_ctl_close(handle);
 	if (result < 0)
 	{
 		// Device probably doesn't support capture.
@@ -264,10 +257,10 @@ captureProbe:
 		goto probeParameters;
 	}
 
-	result = snd_pcm_open(&phandle, name, stream, openMode | SND_PCM_NONBLOCK);
+	result = snd_pcm_open(&phandle, name.data(), stream, openMode | SND_PCM_NONBLOCK);
 	if (result < 0)
 	{
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name << "), "
+		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name.data() << "), "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		error(Exception::WARNING);
@@ -281,7 +274,7 @@ captureProbe:
 	if (result < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_hw_params error for device (" << name << "), "
+		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_hw_params error for device (" << name.data() << "), "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		error(Exception::WARNING);
@@ -294,7 +287,7 @@ captureProbe:
 	if (result < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: error getting device (" << name << ") input channels, "
+		errorStream_ << "RtApiAlsa::getDeviceInfo: error getting device (" << name.data() << ") input channels, "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		error(Exception::WARNING);
@@ -338,10 +331,10 @@ probeParameters:
 	}
 	snd_pcm_info_set_stream(pcminfo, stream);
 
-	result = snd_pcm_open(&phandle, name, stream, openMode | SND_PCM_NONBLOCK);
+	result = snd_pcm_open(&phandle, name.data(), stream, openMode | SND_PCM_NONBLOCK);
 	if (result < 0)
 	{
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name << "), "
+		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name.data() << "), "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		error(Exception::WARNING);
@@ -353,7 +346,7 @@ probeParameters:
 	if (result < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_hw_params error for device (" << name << "), "
+		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_hw_params error for device (" << name.data() << "), "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		error(Exception::WARNING);
@@ -372,7 +365,7 @@ probeParameters:
 	if (info.sampleRates.size() == 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: no supported sample rates found for device (" << name << ").";
+		errorStream_ << "RtApiAlsa::getDeviceInfo: no supported sample rates found for device (" << name.data() << ").";
 		errorText_ = errorStream_.str();
 		error(Exception::WARNING);
 		return info;
@@ -415,7 +408,8 @@ probeParameters:
 	// Check that we have at least one supported format
 	if (info.nativeFormats == 0)
 	{
-		errorStream_ << "RtApiAlsa::getDeviceInfo: pcm device (" << name << ") data format not supported by RtAudio.";
+		errorStream_ << "RtApiAlsa::getDeviceInfo: pcm device (" << name.data()
+					 << ") data format not supported by RtAudio.";
 		errorText_ = errorStream_.str();
 		error(Exception::WARNING);
 		return info;
@@ -426,9 +420,9 @@ probeParameters:
 	result = snd_card_get_name(card, &cardname);
 	if (result >= 0)
 	{
-		sprintf(name, "hw:%s,%d", cardname, subdevice);
+		sprintf(name.data(), "hw:%s,%d", cardname, subDevice);
 	}
-	info.name = name;
+	info.name = name.data();
 
 	// That's all ... close the device and return
 	snd_pcm_close(phandle);
