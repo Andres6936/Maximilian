@@ -7,6 +7,15 @@
 
 namespace Maximilian
 {
+
+	/**
+	 * AudioArchitecture is a "controller" used to select an available audio i/o
+	 * interface.  It presents a common API for the user to call but
+	 * all functionality is implemented by the class RtApi and its
+	 * subclasses.  RtAudio creates an instance of an RtApi subclass
+	 * based on the user's API choice.  If no choice is made, RtAudio
+	 * attempts to make a "logical" API selection.
+	 */
 	class AudioArchitecture
 	{
 

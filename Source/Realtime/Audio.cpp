@@ -44,10 +44,14 @@
 #include "Realtime/LinuxAlsa.hpp"
 
 #include <iostream>
+#include <memory>
+
+#include <Levin/Log.h>
+#include <Levin/Logger.h>
 
 using namespace Maximilian;
 
-void Audio::getCompiledApi(std::vector <Maximilian::Audio::SupportedArchitectures>& apis) throw()
+void Audio::getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) throw()
 {
 	apis.clear();
 
@@ -110,8 +114,11 @@ void Audio::openRtApi(Audio::SupportedArchitectures api)
 #endif
 }
 
-Maximilian::Audio::Audio(Audio::SupportedArchitectures api) throw()
+Audio::Audio(Audio::SupportedArchitectures api) throw()
 {
+	// Initialize Levin for use of Log
+	Levin::LOGGER = std::make_unique <Levin::ColoredLogger>(std::wcout);
+
 	rtapi_ = 0;
 
 	if (api != SupportedArchitectures::Unspecified)
@@ -149,7 +156,7 @@ Maximilian::Audio::Audio(Audio::SupportedArchitectures api) throw()
 	std::cerr << "\nRtAudio: no compiled API support found ... critical error!!\n\n";
 }
 
-Maximilian::Audio::~Audio() throw()
+Audio::~Audio() throw()
 {
 	delete rtapi_;
 }
@@ -171,7 +178,8 @@ void Audio::openStream(
 		StreamParameters& outputParameters,
 		AudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
-		RtAudioCallback callback, void* userData,
+		RtAudioCallback callback,
+		void* userData,
 		StreamOptions* options)
 {
 	return rtapi_->openStream(outputParameters, format,

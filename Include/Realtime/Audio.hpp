@@ -154,18 +154,11 @@ namespace Maximilian
 			RtAudioStreamStatus status,
 			void* userData);
 
-	/**
-	 * RtAudio is a "controller" used to select an available audio i/o
-	 * interface.  It presents a common API for the user to call but
-	 * all functionality is implemented by the class RtApi and its
-	 * subclasses.  RtAudio creates an instance of an RtApi subclass
-	 * based on the user's API choice.  If no choice is made, RtAudio
-	 * attempts to make a "logical" API selection.
-	 */
 	class AudioArchitecture;
 
 	class Audio
 	{
+
 	public:
 
 		//! Audio API specifier arguments.
@@ -205,15 +198,12 @@ namespace Maximilian
 		//! The structure for specifying input or ouput stream parameters.
 		struct StreamParameters
 		{
-			unsigned int deviceId;     /*!< Device index (0 to getDeviceCount() - 1). */
-			unsigned int nChannels;    /*!< Number of channels. */
-			unsigned int firstChannel; /*!< First channel index on device (default = 0). */
+			unsigned int deviceId = 0;     /*!< Device index (0 to getDeviceCount() - 1). */
+			unsigned int nChannels = 0;    /*!< Number of channels. */
+			unsigned int firstChannel = 0; /*!< First channel index on device (default = 0). */
 
 			// Default constructor.
-			StreamParameters()
-					: deviceId(0), nChannels(0), firstChannel(0)
-			{
-			}
+			StreamParameters() = default;
 		};
 
 		//! The structure for specifying stream options.
@@ -275,10 +265,10 @@ namespace Maximilian
 		*/
 		struct StreamOptions
 		{
-			RtAudioStreamFlags flags;      /*!< A bit-mask of stream flags (RTAUDIO_NONINTERLEAVED, RTAUDIO_MINIMIZE_LATENCY, RTAUDIO_HOG_DEVICE, RTAUDIO_ALSA_USE_DEFAULT). */
+			int priority;                   /*!< Scheduling priority of callback thread (only used with flag RTAUDIO_SCHEDULE_REALTIME). */
 			unsigned int numberOfBuffers;  /*!< Number of stream buffers. */
+			RtAudioStreamFlags flags;      /*!< A bit-mask of stream flags (RTAUDIO_NONINTERLEAVED, RTAUDIO_MINIMIZE_LATENCY, RTAUDIO_HOG_DEVICE, RTAUDIO_ALSA_USE_DEFAULT). */
 			std::string streamName;        /*!< A stream name (currently used only in Jack). */
-			int priority;                  /*!< Scheduling priority of callback thread (only used with flag RTAUDIO_SCHEDULE_REALTIME). */
 
 			// Default constructor.
 			StreamOptions()
@@ -287,15 +277,6 @@ namespace Maximilian
 			}
 		};
 
-		//! A static function to determine the available compiled audio APIs.
-		/*!
-		  The values returned in the std::vector can be compared against
-		  the enumerated list values.  Note that there can be more than one
-		  API compiled for certain operating systems.
-		*/
-		static void getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) throw();
-
-		//! The class constructor.
 		/*!
 		  The constructor performs minor initialization tasks.  No exceptions
 		  can be thrown.
@@ -305,6 +286,15 @@ namespace Maximilian
 		  systems) and ASIO, DS (Windows systems).
 		*/
 		explicit Audio(Audio::SupportedArchitectures api = SupportedArchitectures::Unspecified) throw();
+
+		/*!
+		  The values returned in the std::vector can be compared against
+		  the enumerated list values.  Note that there can be more than one
+		  API compiled for certain operating systems.
+		//! A static function to determine the available compiled audio APIs.
+		*/
+		static void getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) throw();
+
 
 		//! The destructor.
 		/*!
@@ -527,10 +517,6 @@ typedef int StreamMutex;
 // RtApiJack, RtApiCore, RtApiAl, RtApiDs, or RtApiAsio).
 //
 // **************************************************************** //
-
-#if defined( HAVE_GETTIMEOFDAY )
-#include <sys/time.h>
-#endif
 
 #include <sstream>
 

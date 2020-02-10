@@ -2,14 +2,12 @@
 
 using namespace Maximilian;
 
-//This shows how to use maximilian to do basic amplitude modulation. Amplitude modulation is when you multiply waves together. In maximilian you just use the * inbetween the two waveforms.
+//This shows how to use maximilian to do basic amplitude modulation.
+// Amplitude modulation is when you multiply waves together.
+// In maximilian you just use the * inbetween the two waveforms.
 
-Oscilation mySine, myOtherSine;//Two oscillators. They can be called anything. They can be any of the available waveforms. These ones will be sinewaves
-
-void setup()
-{//some inits
-	//nothing to go here this time
-}
+Oscilation mySine, myOtherSine;//Two oscillators. They can be called anything.
+// They can be any of the available waveforms. These ones will be sinewaves
 
 void play(double* output)
 {
@@ -55,9 +53,8 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 
 int main()
 {
-	setup();
-
 	Audio dac(Audio::SupportedArchitectures::Windows_Ds);
+
 	if (dac.getDeviceCount() < 1)
 	{
 		std::cout << "\nNo audio devices found!\n";
