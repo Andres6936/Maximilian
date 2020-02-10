@@ -56,7 +56,7 @@ int main()
 {
 	setup();
 
-	Maximilian::Audio dac(Maximilian::Audio::Windows_Ds);
+	Maximilian::Audio dac(Maximilian::Audio::SupportedArchitectures::Windows_Ds);
 	if (dac.getDeviceCount() < 1)
 	{
 		std::cout << "\nNo audio devices found!\n";

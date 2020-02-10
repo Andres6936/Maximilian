@@ -187,7 +187,7 @@ namespace Maximilian
 	public:
 
 		//! Audio API specifier arguments.
-		enum SupportedArchitectures
+		enum class SupportedArchitectures : unsigned char
 		{
 			Unspecified,    /*!< Search for a working compiled API. */
 			Linux_Alsa,     /*!< The Advanced Linux Sound Architecture API. */
@@ -322,7 +322,7 @@ namespace Maximilian
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
 		*/
-		explicit Audio(Audio::SupportedArchitectures api = Unspecified) throw();
+		explicit Audio(Audio::SupportedArchitectures api = SupportedArchitectures::Unspecified) throw();
 
 		//! The destructor.
 		/*!

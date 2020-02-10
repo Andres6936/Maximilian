@@ -57,7 +57,7 @@ void Audio::getCompiledApi(std::vector <Maximilian::Audio::SupportedArchitecture
 	apis.push_back( UNIX_JACK );
 #endif
 #if defined(__LINUX_ALSA__)
-	apis.push_back(Linux_Alsa);
+	apis.push_back(SupportedArchitectures::Linux_Alsa);
 #endif
 #if defined(__LINUX_OSS__)
 	apis.push_back( LINUX_OSS );
@@ -83,7 +83,7 @@ void Audio::openRtApi(Audio::SupportedArchitectures api)
     rtapi_ = new RtApiJack();
 #endif
 #if defined(__LINUX_ALSA__)
-	if (api == Linux_Alsa)
+	if (api == SupportedArchitectures::Linux_Alsa)
 	{
 		rtapi_ = new LinuxAlsa();
 	}
@@ -114,7 +114,7 @@ Maximilian::Audio::Audio(Audio::SupportedArchitectures api) throw()
 {
 	rtapi_ = 0;
 
-	if (api != Unspecified)
+	if (api != SupportedArchitectures::Unspecified)
 	{
 		// Attempt to open the specified API.
 		openRtApi(api);
@@ -5884,7 +5884,7 @@ extern "C" void *ossCallbackHandler( void *ptr )
 
 Audio::SupportedArchitectures Audio::getCurrentApi() throw()
 {
-	return rtapi_->getCurrentApi();
+	return rtapi_->getCurrentArchitecture();
 }
 
 unsigned int Audio::getDeviceCount() throw()

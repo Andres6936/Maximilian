@@ -51,7 +51,7 @@ int main()
 {
 	setup();
 
-	Audio dac(Audio::Windows_Ds);
+	Audio dac(Audio::SupportedArchitectures::Windows_Ds);
 
 	if (dac.getDeviceCount() < 1)
 	{

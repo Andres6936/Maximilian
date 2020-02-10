@@ -12,11 +12,11 @@ namespace Maximilian
 
 		void assertThatStreamIsNotOpen();
 
+		void assertThatTheFormatOfBytesIsGreaterThatZero(RtAudioFormat _format);
+
 		void assertThatDeviceParameterIsNotInvalid(const Audio::StreamParameters& _parameters);
 
 		static void assertThatChannelsAreGreaterThatOne(const Audio::StreamParameters& _parameters);
-
-		void assertThatTheFormatOfBytesIsGreaterThatZero(const RtAudioFormat _format);
 
 	public:
 
@@ -24,15 +24,15 @@ namespace Maximilian
 
 		virtual ~AudioArchitecture();
 
-		virtual Audio::SupportedArchitectures getCurrentApi() = 0;
-
 		virtual unsigned int getDeviceCount() = 0;
-
-		virtual Audio::DeviceInfo getDeviceInfo(unsigned int device) = 0;
 
 		virtual unsigned int getDefaultInputDevice();
 
 		virtual unsigned int getDefaultOutputDevice();
+
+		virtual Audio::SupportedArchitectures getCurrentArchitecture() = 0;
+
+		virtual Audio::DeviceInfo getDeviceInfo(unsigned int device) = 0;
 
 		void openStream(Audio::StreamParameters& oParams,
 				RtAudioFormat format, unsigned int sampleRate,

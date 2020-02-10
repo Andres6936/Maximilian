@@ -119,7 +119,7 @@ int main()
 		std::cout <<  "PortAudio error: "<< Pa_GetErrorText( err ) << std::endl;
 
 #elif defined(MAXIMILIAN_RT_AUDIO)
-	Maximilian::Audio dac(Maximilian::Audio::Windows_Ds);
+	Maximilian::Audio dac(Maximilian::Audio::SupportedArchitectures::Windows_Ds);
 	if (dac.getDeviceCount() < 1)
 	{
 		std::cout << "\nNo audio devices found!\n";

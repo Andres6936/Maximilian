@@ -17,9 +17,9 @@ namespace Maximilian
 
 		~LinuxAlsa() override;
 
-		Audio::SupportedArchitectures getCurrentApi() override
+		Audio::SupportedArchitectures getCurrentArchitecture() override
 		{
-			return Audio::Linux_Alsa;
+			return Audio::SupportedArchitectures::Linux_Alsa;
 		};
 
 		unsigned int getDeviceCount() override;
