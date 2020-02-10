@@ -51,9 +51,9 @@
 
 using namespace Maximilian;
 
-void Audio::getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) throw()
+std::vector <Audio::SupportedArchitectures> Audio::getArchitecturesCompiled()
 {
-	apis.clear();
+	std::vector <SupportedArchitectures> architectures;
 
 	// The order here will control the order of RtAudio's API search in
 	// the constructor.
@@ -61,7 +61,7 @@ void Audio::getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) th
 	apis.push_back( UNIX_JACK );
 #endif
 #if defined(__LINUX_ALSA__)
-	apis.push_back(SupportedArchitectures::Linux_Alsa);
+	architectures.push_back(SupportedArchitectures::Linux_Alsa);
 #endif
 #if defined(__LINUX_OSS__)
 	apis.push_back( LINUX_OSS );
@@ -78,18 +78,26 @@ void Audio::getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) th
 #if defined(__RTAUDIO_DUMMY__)
 	apis.push_back( RTAUDIO_DUMMY );
 #endif
+
+	return architectures;
 }
 
-void Audio::openRtApi(Audio::SupportedArchitectures api)
+void Audio::getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) throw()
+{
+	apis.clear();
+
+}
+
+void Audio::tryInitializeInstanceOfArchitecture(Audio::SupportedArchitectures _architecture)
 {
 #if defined(__UNIX_JACK__)
 																															if ( api == UNIX_JACK )
     rtapi_ = new RtApiJack();
 #endif
 #if defined(__LINUX_ALSA__)
-	if (api == SupportedArchitectures::Linux_Alsa)
+	if (_architecture == SupportedArchitectures::Linux_Alsa)
 	{
-		rtapi_ = new LinuxAlsa();
+		audioArchitecture = new LinuxAlsa();
 	}
 #endif
 #if defined(__LINUX_OSS__)
@@ -114,51 +122,59 @@ void Audio::openRtApi(Audio::SupportedArchitectures api)
 #endif
 }
 
-Audio::Audio(Audio::SupportedArchitectures api) throw()
+Audio::Audio(Audio::SupportedArchitectures _architecture)
 {
 	// Initialize Levin for use of Log
 	Levin::LOGGER = std::make_unique <Levin::ColoredLogger>(std::wcout);
 
-	rtapi_ = 0;
-
-	if (api != SupportedArchitectures::Unspecified)
+	if (_architecture != SupportedArchitectures::Unspecified)
 	{
 		// Attempt to open the specified API.
-		openRtApi(api);
-		if (rtapi_)
-		{ return; }
+		tryInitializeInstanceOfArchitecture(_architecture);
+
+		if (audioArchitecture != nullptr)
+		{
+			// Audio Architecture initialized, work done, exit of function.
+			return;
+		}
 
 		// No compiled support for specified API value.  Issue a debug
 		// warning and continue as if no API was specified.
-		std::cerr << "\nRtAudio: no compiled support for specified API argument!\n" << std::endl;
+		Levin::Warn() << "No compiled support for specified API argument." << Levin::endl;
 	}
 
 	// Iterate through the compiled APIs and return as soon as we find
 	// one with at least one device or we reach the end of the list.
-	std::vector <Audio::SupportedArchitectures> supportedArchitectures;
-	getCompiledApi(supportedArchitectures);
+	std::vector <SupportedArchitectures> supportedArchitectures = getArchitecturesCompiled();
 
-	for (auto& architecture : supportedArchitectures)
+	for (SupportedArchitectures architecture : supportedArchitectures)
 	{
-		openRtApi(architecture);
+		tryInitializeInstanceOfArchitecture(architecture);
 
-		if (rtapi_->getDeviceCount())
-		{ break; }
+		if (audioArchitecture->getDeviceCount() >= 1)
+		{
+			Levin::Info() << "Number of devices is: " << audioArchitecture->getDeviceCount()
+						  << "." << Levin::endl;
+			break;
+		}
 	}
 
-	if (rtapi_)
-	{ return; }
+	if (audioArchitecture != nullptr)
+	{
+		// Audio Architecture initialized, work done, exit of function.
+		return;
+	}
 
 	// It should not be possible to get here because the preprocessor
 	// definition __RTAUDIO_DUMMY__ is automatically defined if no
 	// API-specific definitions are passed to the compiler. But just in
 	// case something weird happens, we'll print out an error message.
-	std::cerr << "\nRtAudio: no compiled API support found ... critical error!!\n\n";
+	Levin::Error() << "No compiled API support found... Critical error." << Levin::endl;
 }
 
 Audio::~Audio() throw()
 {
-	delete rtapi_;
+	delete audioArchitecture;
 }
 
 void Audio::openStream(
@@ -169,7 +185,7 @@ void Audio::openStream(
 		RtAudioCallback callback, void* userData,
 		StreamOptions* options)
 {
-	return rtapi_->openStream(outputParameters, inputParameters, format,
+	return audioArchitecture->openStream(outputParameters, inputParameters, format,
 			sampleRate, bufferFrames, callback,
 			userData, options);
 }
@@ -182,7 +198,7 @@ void Audio::openStream(
 		void* userData,
 		StreamOptions* options)
 {
-	return rtapi_->openStream(outputParameters, format,
+	return audioArchitecture->openStream(outputParameters, format,
 			sampleRate, bufferFrames, callback,
 			userData, options);
 }
@@ -5892,75 +5908,75 @@ extern "C" void *ossCallbackHandler( void *ptr )
 
 Audio::SupportedArchitectures Audio::getCurrentApi() throw()
 {
-	return rtapi_->getCurrentArchitecture();
+	return audioArchitecture->getCurrentArchitecture();
 }
 
 unsigned int Audio::getDeviceCount() throw()
 {
-	return rtapi_->getDeviceCount();
+	return audioArchitecture->getDeviceCount();
 }
 
 Audio::DeviceInfo Audio::getDeviceInfo(unsigned int device)
 {
-	return rtapi_->getDeviceInfo(device);
+	return audioArchitecture->getDeviceInfo(device);
 }
 
 unsigned int Audio::getDefaultInputDevice() throw()
 {
-	return rtapi_->getDefaultInputDevice();
+	return audioArchitecture->getDefaultInputDevice();
 }
 
 unsigned int Audio::getDefaultOutputDevice() throw()
 {
-	return rtapi_->getDefaultOutputDevice();
+	return audioArchitecture->getDefaultOutputDevice();
 }
 
 void Audio::closeStream() throw()
 {
-	return rtapi_->closeStream();
+	return audioArchitecture->closeStream();
 }
 
 void Audio::startStream()
 {
-	return rtapi_->startStream();
+	return audioArchitecture->startStream();
 }
 
 void Audio::stopStream()
 {
-	return rtapi_->stopStream();
+	return audioArchitecture->stopStream();
 }
 
 void Audio::abortStream()
 {
-	return rtapi_->abortStream();
+	return audioArchitecture->abortStream();
 }
 
 bool Audio::isStreamOpen() const throw()
 {
-	return rtapi_->isStreamOpen();
+	return audioArchitecture->isStreamOpen();
 }
 
 bool Audio::isStreamRunning() const throw()
 {
-	return rtapi_->isStreamRunning();
+	return audioArchitecture->isStreamRunning();
 }
 
 long Audio::getStreamLatency()
 {
-	return rtapi_->getStreamLatency();
+	return audioArchitecture->getStreamLatency();
 }
 
 unsigned int Audio::getStreamSampleRate()
 {
-	return rtapi_->getStreamSampleRate();
+	return audioArchitecture->getStreamSampleRate();
 };
 
 double Audio::getStreamTime()
 {
-	return rtapi_->getStreamTime();
+	return audioArchitecture->getStreamTime();
 }
 
 void Audio::showWarnings(bool value) throw()
 {
-	rtapi_->showWarnings(value);
+	audioArchitecture->showWarnings(value);
 }

@@ -277,6 +277,12 @@ namespace Maximilian
 			}
 		};
 
+	private:
+
+		void tryInitializeInstanceOfArchitecture(Audio::SupportedArchitectures _architecture);
+
+	public:
+
 		/*!
 		  The constructor performs minor initialization tasks.  No exceptions
 		  can be thrown.
@@ -285,7 +291,7 @@ namespace Maximilian
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
 		*/
-		explicit Audio(Audio::SupportedArchitectures api = SupportedArchitectures::Unspecified) throw();
+		explicit Audio(Audio::SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
 
 		/*!
 		  The values returned in the std::vector can be compared against
@@ -294,6 +300,8 @@ namespace Maximilian
 		//! A static function to determine the available compiled audio APIs.
 		*/
 		static void getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) throw();
+
+		std::vector <SupportedArchitectures> getArchitecturesCompiled();
 
 
 		//! The destructor.
@@ -466,9 +474,7 @@ namespace Maximilian
 
 	protected:
 
-		void openRtApi(Audio::SupportedArchitectures api);
-
-		AudioArchitecture* rtapi_;
+		AudioArchitecture* audioArchitecture = nullptr;
 	};
 }
 
