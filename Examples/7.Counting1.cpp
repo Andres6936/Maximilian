@@ -2,8 +2,8 @@
 #include "Maximilian.hpp"
 #include "Realtime/Audio.hpp"
 
-maxiOsc mySine; // This is the oscillator we will use to generate the test tone
-maxiClock myClock; // This will allow us to generate a clock signal and do things at specific times
+Maximilian::maxiOsc mySine; // This is the oscillator we will use to generate the test tone
+Maximilian::maxiClock myClock; // This will allow us to generate a clock signal and do things at specific times
 double freq; // This is a variable that we will use to hold and set the current frequency of the oscillator
 
 void setup()
@@ -55,7 +55,7 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 	for (i = 0; i < nBufferFrames; i++)
 	{
 		play(lastValues);
-		for (j = 0; j < maxiSettings::channels; j++)
+		for (j = 0; j < Maximilian::maxiSettings::channels; j++)
 		{
 			*buffer++ = lastValues[j];
 		}
@@ -78,12 +78,12 @@ int main()
 
 	RtAudio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
-	parameters.nChannels = maxiSettings::channels;
+	parameters.nChannels = Maximilian::maxiSettings::channels;
 	parameters.firstChannel = 0;
-	unsigned int sampleRate = maxiSettings::sampleRate;
-	unsigned int bufferFrames = maxiSettings::bufferSize;
+	unsigned int sampleRate = Maximilian::maxiSettings::sampleRate;
+	unsigned int bufferFrames = Maximilian::maxiSettings::bufferSize;
 	//double data[maxiSettings::channels];
-	vector <double> data(maxiSettings::channels, 0);
+	vector <double> data(Maximilian::maxiSettings::channels, 0);
 
 	try
 	{

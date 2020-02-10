@@ -3,7 +3,7 @@
 
 //This shows how the fundamental building block of digital audio - the sine wave.
 //
-maxiOsc mySine;//One oscillator - can be called anything. Can be any of the available waveforms.
+Maximilian::maxiOsc mySine;//One oscillator - can be called anything. Can be any of the available waveforms.
 void setup()
 {//some inits
 	//nothing to go here this time
@@ -36,7 +36,7 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 	for (i = 0; i < nBufferFrames; i++)
 	{
 		play(lastValues);
-		for (j = 0; j < maxiSettings::channels; j++)
+		for (j = 0; j < Maximilian::maxiSettings::channels; j++)
 		{
 			*buffer++ = lastValues[j];
 		}
@@ -59,12 +59,12 @@ int main()
 
 	RtAudio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
-	parameters.nChannels = maxiSettings::channels;
+	parameters.nChannels = Maximilian::maxiSettings::channels;
 	parameters.firstChannel = 0;
-	unsigned int sampleRate = maxiSettings::sampleRate;
-	unsigned int bufferFrames = maxiSettings::bufferSize;
+	unsigned int sampleRate = Maximilian::maxiSettings::sampleRate;
+	unsigned int bufferFrames = Maximilian::maxiSettings::bufferSize;
 	//double data[maxiSettings::channels];
-	vector <double> data(maxiSettings::channels, 0);
+	vector <double> data(Maximilian::maxiSettings::channels, 0);
 
 	try
 	{

@@ -3,7 +3,7 @@
 
 //This shows how to use maximilian to do basic amplitude modulation. Amplitude modulation is when you multiply waves together. In maximilian you just use the * inbetween the two waveforms.
 
-maxiOsc mySine, myOtherSine;//Two oscillators. They can be called anything. They can be any of the available waveforms. These ones will be sinewaves
+Maximilian::maxiOsc mySine, myOtherSine;//Two oscillators. They can be called anything. They can be any of the available waveforms. These ones will be sinewaves
 
 void setup()
 {//some inits
@@ -44,7 +44,7 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 	for (i = 0; i < nBufferFrames; i++)
 	{
 		play(lastValues);
-		for (j = 0; j < maxiSettings::channels; j++)
+		for (j = 0; j < Maximilian::maxiSettings::channels; j++)
 		{
 			*buffer++ = lastValues[j];
 		}
@@ -67,12 +67,12 @@ int main()
 
 	RtAudio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
-	parameters.nChannels = maxiSettings::channels;
+	parameters.nChannels = Maximilian::maxiSettings::channels;
 	parameters.firstChannel = 0;
-	unsigned int sampleRate = maxiSettings::sampleRate;
-	unsigned int bufferFrames = maxiSettings::bufferSize;
+	unsigned int sampleRate = Maximilian::maxiSettings::sampleRate;
+	unsigned int bufferFrames = Maximilian::maxiSettings::bufferSize;
 	//double data[maxiSettings::channels];
-	vector <double> data(maxiSettings::channels, 0);
+	vector <double> data(Maximilian::maxiSettings::channels, 0);
 
 	try
 	{

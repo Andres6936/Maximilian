@@ -7,10 +7,10 @@
 #include "Maximilian.hpp"
 #include "Realtime/Audio.hpp"
 
-maxiOsc myCounter, mySwitchableOsc;//
+Maximilian::maxiOsc myCounter, mySwitchableOsc;//
 int CurrentCount;//
 double myOscOutput, myCurrentVolume;//
-maxiEnv myEnvelope;
+Maximilian::maxiEnv myEnvelope;
 
 
 void setup()
@@ -83,7 +83,7 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 	for (i = 0; i < nBufferFrames; i++)
 	{
 		play(lastValues);
-		for (j = 0; j < maxiSettings::channels; j++)
+		for (j = 0; j < Maximilian::maxiSettings::channels; j++)
 		{
 			*buffer++ = lastValues[j];
 		}
@@ -106,12 +106,12 @@ int main()
 
 	RtAudio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
-	parameters.nChannels = maxiSettings::channels;
+	parameters.nChannels = Maximilian::maxiSettings::channels;
 	parameters.firstChannel = 0;
-	unsigned int sampleRate = maxiSettings::sampleRate;
-	unsigned int bufferFrames = maxiSettings::bufferSize;
+	unsigned int sampleRate = Maximilian::maxiSettings::sampleRate;
+	unsigned int bufferFrames = Maximilian::maxiSettings::bufferSize;
 	//double data[maxiSettings::channels];
-	vector <double> data(maxiSettings::channels, 0);
+	vector <double> data(Maximilian::maxiSettings::channels, 0);
 
 	try
 	{
