@@ -69,7 +69,7 @@ namespace Maximilian
 			- \e RTAUDIO_FLOAT32: Normalized between plus/minus 1.0.
 			- \e RTAUDIO_FLOAT64: Normalized between plus/minus 1.0.
 		*/
-	typedef unsigned long RtAudioFormat;
+	using RtAudioFormat = unsigned long;
 
 	/*! \typedef typedef unsigned long RtAudioStreamFlags;
 			\brief RtAudio stream option flags.
@@ -113,7 +113,7 @@ namespace Maximilian
 			open the "default" PCM device when using the ALSA API. Note that this
 			will override any specified input or output device id.
 		*/
-	typedef unsigned int RtAudioStreamFlags;
+	using RtAudioStreamFlags = unsigned int;
 
 	/*! \typedef typedef unsigned long RtAudioStreamStatus;
 			\brief RtAudio stream status (over- or underflow) flags.
@@ -126,7 +126,7 @@ namespace Maximilian
 			- \e RTAUDIO_INPUT_OVERFLOW:   Input data was discarded because of an overflow condition at the driver.
 			- \e RTAUDIO_OUTPUT_UNDERFLOW: The output buffer ran low, likely producing a break in the output sound.
 		*/
-	typedef unsigned int RtAudioStreamStatus;
+	using RtAudioStreamStatus = unsigned int;
 
 	/*!
 		   All RtAudio clients must create a function of type RtAudioCallback
@@ -172,6 +172,14 @@ namespace Maximilian
 			RtAudioStreamStatus status,
 			void* userData);
 
+	/**
+	 * RtAudio is a "controller" used to select an available audio i/o
+	 * interface.  It presents a common API for the user to call but
+	 * all functionality is implemented by the class RtApi and its
+	 * subclasses.  RtAudio creates an instance of an RtApi subclass
+	 * based on the user's API choice.  If no choice is made, RtAudio
+	 * attempts to make a "logical" API selection.
+	 */
 	class RtApi;
 
 	class RtAudio
@@ -179,16 +187,16 @@ namespace Maximilian
 	public:
 
 		//! Audio API specifier arguments.
-		enum Api
+		enum SupportedArchitectures
 		{
-			UNSPECIFIED,    /*!< Search for a working compiled API. */
-			LINUX_ALSA,     /*!< The Advanced Linux Sound Architecture API. */
-			LINUX_OSS,      /*!< The Linux Open Sound System API. */
-			UNIX_JACK,      /*!< The Jack Low-Latency Audio Server API. */
-			MACOSX_CORE,    /*!< Macintosh OS-X Core Audio API. */
-			WINDOWS_ASIO,   /*!< The Steinberg Audio Stream I/O API. */
-			WINDOWS_DS,     /*!< The Microsoft Direct Sound API. */
-			RTAUDIO_DUMMY   /*!< A compilable but non-functional API. */
+			Unspecified,    /*!< Search for a working compiled API. */
+			Linux_Alsa,     /*!< The Advanced Linux Sound Architecture API. */
+			Linux_Oss,      /*!< The Linux Open Sound System API. */
+			Unix_Jack,      /*!< The Jack Low-Latency Audio Server API. */
+			MacOs_Core,    /*!< Macintosh OS-X Core Audio API. */
+			Windows_Asio,   /*!< The Steinberg Audio Stream I/O API. */
+			Windows_Ds,     /*!< The Microsoft Direct Sound API. */
+			Audio_Dummy   /*!< A compilable but non-functional API. */
 		};
 
 		//! The public device information structure for returning queried values.
@@ -303,7 +311,7 @@ namespace Maximilian
 		  the enumerated list values.  Note that there can be more than one
 		  API compiled for certain operating systems.
 		*/
-		static void getCompiledApi(std::vector <RtAudio::Api>& apis) throw();
+		static void getCompiledApi(std::vector <RtAudio::SupportedArchitectures>& apis) throw();
 
 		//! The class constructor.
 		/*!
@@ -314,7 +322,7 @@ namespace Maximilian
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
 		*/
-		RtAudio(RtAudio::Api api = UNSPECIFIED) throw();
+		RtAudio(RtAudio::SupportedArchitectures api = Unspecified) throw();
 
 		//! The destructor.
 		/*!
@@ -324,7 +332,7 @@ namespace Maximilian
 		~RtAudio() throw();
 
 		//! Returns the audio API specifier for the current instance of RtAudio.
-		RtAudio::Api getCurrentApi(void) throw();
+		RtAudio::SupportedArchitectures getCurrentApi() throw();
 
 		//! A public function that queries for the number of audio devices available.
 		/*!
@@ -332,7 +340,7 @@ namespace Maximilian
 		  is called, thus supporting devices connected \e after instantiation. If
 		  a system error occurs during processing, a warning will be issued.
 		*/
-		unsigned int getDeviceCount(void) throw();
+		unsigned int getDeviceCount() throw();
 
 		//! Return an RtAudio::DeviceInfo structure for a specified device number.
 		/*!
@@ -355,7 +363,7 @@ namespace Maximilian
 		  client's responsibility to verify that a device is available
 		  before attempting to open a stream.
 		*/
-		unsigned int getDefaultOutputDevice(void) throw();
+		unsigned int getDefaultOutputDevice() throw();
 
 		//! A function that returns the index of the default input device.
 		/*!
@@ -365,7 +373,7 @@ namespace Maximilian
 		  client's responsibility to verify that a device is available
 		  before attempting to open a stream.
 		*/
-		unsigned int getDefaultInputDevice(void) throw();
+		unsigned int getDefaultInputDevice() throw();
 
 		//! A public function for opening a stream with the specified parameters.
 		/*!
@@ -416,7 +424,7 @@ namespace Maximilian
 		  If a stream is not open, this function issues a warning and
 		  returns (no exception is thrown).
 		*/
-		void closeStream(void) throw();
+		void closeStream() throw();
 
 		//! A function that starts a stream.
 		/*!
@@ -425,7 +433,7 @@ namespace Maximilian
 		  stream is not open.  A warning is issued if the stream is already
 		  running.
 		*/
-		void startStream(void);
+		void startStream();
 
 		//! Stop a stream, allowing any samples remaining in the output queue to be played.
 		/*!
@@ -434,7 +442,7 @@ namespace Maximilian
 		  stream is not open.  A warning is issued if the stream is already
 		  stopped.
 		*/
-		void stopStream(void);
+		void stopStream();
 
 		//! Stop a stream, discarding any samples remaining in the input/output queue.
 		/*!
@@ -443,19 +451,19 @@ namespace Maximilian
 		  stream is not open.  A warning is issued if the stream is already
 		  stopped.
 		*/
-		void abortStream(void);
+		void abortStream();
 
 		//! Returns true if a stream is open and false if not.
-		bool isStreamOpen(void) const throw();
+		bool isStreamOpen() const throw();
 
 		//! Returns true if the stream is running and false if it is stopped or not open.
-		bool isStreamRunning(void) const throw();
+		bool isStreamRunning() const throw();
 
 		//! Returns the number of elapsed seconds since the stream was started.
 		/*!
 		  If a stream is not open, an Exception (type = INVALID_USE) will be thrown.
 		*/
-		double getStreamTime(void);
+		double getStreamTime();
 
 		//! Returns the internal stream latency in sample frames.
 		/*!
@@ -466,7 +474,7 @@ namespace Maximilian
 		  Exception (type = INVALID_USE) will be thrown.  If the API does not
 		  report latency, the return value will be zero.
 		*/
-		long getStreamLatency(void);
+		long getStreamLatency();
 
 		//! Returns actual sample rate in use by the stream.
 		/*!
@@ -474,14 +482,14 @@ namespace Maximilian
 		  than that specified in the stream parameters.  If a stream is not
 		  open, an Exception (type = INVALID_USE) will be thrown.
 		*/
-		unsigned int getStreamSampleRate(void);
+		unsigned int getStreamSampleRate();
 
 		//! Specify whether warning messages should be printed to stderr.
 		void showWarnings(bool value = true) throw();
 
 	protected:
 
-		void openRtApi(RtAudio::Api api);
+		void openRtApi(RtAudio::SupportedArchitectures api);
 
 		RtApi* rtapi_;
 	};
@@ -517,15 +525,15 @@ namespace Maximilian
 
 		virtual ~RtApi();
 
-		virtual RtAudio::Api getCurrentApi(void) = 0;
+		virtual RtAudio::SupportedArchitectures getCurrentApi() = 0;
 
-		virtual unsigned int getDeviceCount(void) = 0;
+		virtual unsigned int getDeviceCount() = 0;
 
 		virtual RtAudio::DeviceInfo getDeviceInfo(unsigned int device) = 0;
 
-		virtual unsigned int getDefaultInputDevice(void);
+		virtual unsigned int getDefaultInputDevice();
 
-		virtual unsigned int getDefaultOutputDevice(void);
+		virtual unsigned int getDefaultOutputDevice();
 
 		void openStream(RtAudio::StreamParameters* outputParameters,
 				RtAudio::StreamParameters* inputParameters,
@@ -533,26 +541,26 @@ namespace Maximilian
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData, RtAudio::StreamOptions* options);
 
-		virtual void closeStream(void);
+		virtual void closeStream();
 
-		virtual void startStream(void) = 0;
+		virtual void startStream() = 0;
 
-		virtual void stopStream(void) = 0;
+		virtual void stopStream() = 0;
 
-		virtual void abortStream(void) = 0;
+		virtual void abortStream() = 0;
 
-		long getStreamLatency(void);
+		long getStreamLatency();
 
-		unsigned int getStreamSampleRate(void);
+		unsigned int getStreamSampleRate();
 
-		virtual double getStreamTime(void);
+		virtual double getStreamTime();
 
-		bool isStreamOpen(void) const
+		bool isStreamOpen() const
 		{
 			return stream_.state != STREAM_CLOSED;
 		};
 
-		bool isStreamRunning(void) const
+		bool isStreamRunning() const
 		{
 			return stream_.state == STREAM_RUNNING;
 		};
@@ -660,7 +668,7 @@ namespace Maximilian
 				RtAudio::StreamOptions* options);
 
 		//! A protected function used to increment the stream time.
-		void tickStreamTime(void);
+		void tickStreamTime();
 
 		//! Protected common method to clear an RtApiStream structure.
 		void clearStreamInfo();
@@ -669,7 +677,7 @@ namespace Maximilian
 		  Protected common method that throws an Exception (type =
 		  INVALID_USE) if a stream is not open.
 		*/
-		void verifyStream(void);
+		void verifyStream();
 
 		//! Protected common error method to allow global control over error handling.
 		void error(Exception::Type type);
@@ -698,34 +706,34 @@ namespace Maximilian
 
 		~RtApiAlsa();
 
-		RtAudio::Api getCurrentApi()
+		RtAudio::SupportedArchitectures getCurrentApi()
 		{
-			return RtAudio::LINUX_ALSA;
+			return RtAudio::Linux_Alsa;
 		};
 
-		unsigned int getDeviceCount(void);
+		unsigned int getDeviceCount();
 
 		RtAudio::DeviceInfo getDeviceInfo(unsigned int device);
 
-		void closeStream(void);
+		void closeStream();
 
-		void startStream(void);
+		void startStream();
 
-		void stopStream(void);
+		void stopStream();
 
-		void abortStream(void);
+		void abortStream();
 
 		// This function is intended for internal use only.  It must be
 		// public because it is called by the internal callback handler,
 		// which is not a member of RtAudio.  External use of this function
 		// will most likely produce highly undesireable results!
-		void callbackEvent(void);
+		void callbackEvent();
 
 	private:
 
 		std::vector <RtAudio::DeviceInfo> devices_;
 
-		void saveDeviceInfo(void);
+		void saveDeviceInfo();
 
 		bool probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 				unsigned int firstChannel, unsigned int sampleRate,
@@ -752,21 +760,6 @@ static const Maximilian::RtAudioStreamStatus RTAUDIO_OUTPUT_UNDERFLOW = 0x2;  //
 
 //! RtAudio callback function prototype.
 
-
-// **************************************************************** //
-//
-// RtAudio class declaration.
-//
-// RtAudio is a "controller" used to select an available audio i/o
-// interface.  It presents a common API for the user to call but all
-// functionality is implemented by the class RtApi and its
-// subclasses.  RtAudio creates an instance of an RtApi subclass
-// based on the user's API choice.  If no choice is made, RtAudio
-// attempts to make a "logical" API selection.
-//
-// **************************************************************** //
-
-class RtApi;
 
 // Operating system dependent thread functionality.
 #if defined(__WINDOWS_DS__) || defined(__WINDOWS_ASIO__)
@@ -814,12 +807,12 @@ typedef int StreamMutex;
 //
 // **************************************************************** //
 
-inline Maximilian::RtAudio::Api Maximilian::RtAudio::getCurrentApi(void) throw()
+inline Maximilian::RtAudio::SupportedArchitectures Maximilian::RtAudio::getCurrentApi() throw()
 {
 	return rtapi_->getCurrentApi();
 }
 
-inline unsigned int Maximilian::RtAudio::getDeviceCount(void) throw()
+inline unsigned int Maximilian::RtAudio::getDeviceCount() throw()
 {
 	return rtapi_->getDeviceCount();
 }
@@ -829,57 +822,57 @@ inline Maximilian::RtAudio::DeviceInfo Maximilian::RtAudio::getDeviceInfo(unsign
 	return rtapi_->getDeviceInfo(device);
 }
 
-inline unsigned int Maximilian::RtAudio::getDefaultInputDevice(void) throw()
+inline unsigned int Maximilian::RtAudio::getDefaultInputDevice() throw()
 {
 	return rtapi_->getDefaultInputDevice();
 }
 
-inline unsigned int Maximilian::RtAudio::getDefaultOutputDevice(void) throw()
+inline unsigned int Maximilian::RtAudio::getDefaultOutputDevice() throw()
 {
 	return rtapi_->getDefaultOutputDevice();
 }
 
-inline void Maximilian::RtAudio::closeStream(void) throw()
+inline void Maximilian::RtAudio::closeStream() throw()
 {
 	return rtapi_->closeStream();
 }
 
-inline void Maximilian::RtAudio::startStream(void)
+inline void Maximilian::RtAudio::startStream()
 {
 	return rtapi_->startStream();
 }
 
-inline void Maximilian::RtAudio::stopStream(void)
+inline void Maximilian::RtAudio::stopStream()
 {
 	return rtapi_->stopStream();
 }
 
-inline void Maximilian::RtAudio::abortStream(void)
+inline void Maximilian::RtAudio::abortStream()
 {
 	return rtapi_->abortStream();
 }
 
-inline bool Maximilian::RtAudio::isStreamOpen(void) const throw()
+inline bool Maximilian::RtAudio::isStreamOpen() const throw()
 {
 	return rtapi_->isStreamOpen();
 }
 
-inline bool Maximilian::RtAudio::isStreamRunning(void) const throw()
+inline bool Maximilian::RtAudio::isStreamRunning() const throw()
 {
 	return rtapi_->isStreamRunning();
 }
 
-inline long Maximilian::RtAudio::getStreamLatency(void)
+inline long Maximilian::RtAudio::getStreamLatency()
 {
 	return rtapi_->getStreamLatency();
 }
 
-inline unsigned int Maximilian::RtAudio::getStreamSampleRate(void)
+inline unsigned int Maximilian::RtAudio::getStreamSampleRate()
 {
 	return rtapi_->getStreamSampleRate();
 };
 
-inline double Maximilian::RtAudio::getStreamTime(void)
+inline double Maximilian::RtAudio::getStreamTime()
 {
 	return rtapi_->getStreamTime();
 }
@@ -1100,12 +1093,3 @@ public:
 #endif
 
 #endif
-
-// Indentation settings for Vim and Emacs
-//
-// Local Variables:
-// c-basic-offset: 2
-// indent-tabs-mode: nil
-// End:
-//
-// vim: et sts=2 sw=2

@@ -49,7 +49,7 @@ int main()
 {
 	setup();
 
-	Maximilian::RtAudio dac(Maximilian::RtAudio::WINDOWS_DS);
+	Maximilian::RtAudio dac(Maximilian::RtAudio::Windows_Ds);
 	if (dac.getDeviceCount() < 1)
 	{
 		std::cout << "\nNo audio devices found!\n";
