@@ -82,12 +82,6 @@ std::vector <Audio::SupportedArchitectures> Audio::getArchitecturesCompiled()
 	return architectures;
 }
 
-void Audio::getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) throw()
-{
-	apis.clear();
-
-}
-
 void Audio::tryInitializeInstanceOfArchitecture(Audio::SupportedArchitectures _architecture)
 {
 	// This methods is design for be called several times of way consecutive

@@ -293,15 +293,7 @@ namespace Maximilian
 		*/
 		explicit Audio(Audio::SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
 
-		/*!
-		  The values returned in the std::vector can be compared against
-		  the enumerated list values.  Note that there can be more than one
-		  API compiled for certain operating systems.
-		//! A static function to determine the available compiled audio APIs.
-		*/
-		static void getCompiledApi(std::vector <Audio::SupportedArchitectures>& apis) throw();
-
-		std::vector <SupportedArchitectures> getArchitecturesCompiled();
+		static std::vector <SupportedArchitectures> getArchitecturesCompiled();
 
 
 		//! The destructor.
