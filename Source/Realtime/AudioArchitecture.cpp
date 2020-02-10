@@ -234,7 +234,7 @@ void AudioArchitecture::error(Exception::Type type)
 	errorStream_.str(""); // clear the ostringstream
 	if (type == Exception::WARNING && showWarnings_ == true)
 	{
-		std::cerr << '\n' << errorText_ << "\n\n";
+		Levin::Error() << errorText_ << Levin::endl;
 	}
 	else if (type != Exception::WARNING)
 	{

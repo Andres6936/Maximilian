@@ -102,6 +102,8 @@ void Audio::tryInitializeInstanceOfArchitecture(Audio::SupportedArchitectures _a
 	if (_architecture == SupportedArchitectures::Linux_Alsa)
 	{
 		audioArchitecture = new LinuxAlsa();
+		// Exit methods
+		return;
 	}
 #endif
 #if defined(__LINUX_OSS__)
@@ -124,6 +126,25 @@ void Audio::tryInitializeInstanceOfArchitecture(Audio::SupportedArchitectures _a
 																															if ( api == RTAUDIO_DUMMY )
     rtapi_ = new RtApiDummy();
 #endif
+
+	// No compiled support for specified API value.  Issue a debug
+	// warning and continue as if no API was specified.
+	Levin::Warn() << "No compiled support for specified API argument." << Levin::endl;
+}
+
+void Audio::assertThatAudioArchitectureHaveMinimumAnDevice()
+{
+	if (audioArchitecture == nullptr)
+	{
+		Levin::Error() << "No compiled API support found... Critical error." << Levin::endl;
+
+		throw Exception("AudioArchitectureNoCompiledException");
+	}
+
+	if (audioArchitecture->getDeviceCount() < 0)
+	{
+		throw Exception("NoAudioDevicesFoundException");
+	}
 }
 
 Audio::Audio(Audio::SupportedArchitectures _architecture)
@@ -136,16 +157,16 @@ Audio::Audio(Audio::SupportedArchitectures _architecture)
 		// Attempt to open the specified API.
 		tryInitializeInstanceOfArchitecture(_architecture);
 
+		// If the instance ha been correctly initialized
 		if (audioArchitecture != nullptr)
 		{
-			// Audio Architecture initialized, work done, exit of function.
+			assertThatAudioArchitectureHaveMinimumAnDevice();
 			return;
 		}
-
-		// No compiled support for specified API value.  Issue a debug
-		// warning and continue as if no API was specified.
-		Levin::Warn() << "No compiled support for specified API argument." << Levin::endl;
 	}
+
+	// If the instance of Audio Architect is null,
+	// try use an architect available
 
 	// Iterate through the compiled APIs and return as soon as we find
 	// one with at least one device or we reach the end of the list.
@@ -164,19 +185,8 @@ Audio::Audio(Audio::SupportedArchitectures _architecture)
 		}
 	}
 
-	if (audioArchitecture != nullptr)
-	{
-		// Audio Architecture initialized, work done, exit of function.
-		return;
-	}
-
-	// It should not be possible to get here because the preprocessor
-	// definition __RTAUDIO_DUMMY__ is automatically defined if no
-	// API-specific definitions are passed to the compiler. But just in
-	// case something weird happens, we'll print out an error message.
-	Levin::Error() << "No compiled API support found... Critical error." << Levin::endl;
-
-	throw Exception("AudioArchitectureNoCompiledException");
+	// If the for-loop finalize and the instance not have an device, throw exception
+	assertThatAudioArchitectureHaveMinimumAnDevice();
 }
 
 Audio::~Audio() throw()

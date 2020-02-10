@@ -279,6 +279,8 @@ namespace Maximilian
 
 	private:
 
+		void assertThatAudioArchitectureHaveMinimumAnDevice();
+
 		void tryInitializeInstanceOfArchitecture(Audio::SupportedArchitectures _architecture);
 
 	public:

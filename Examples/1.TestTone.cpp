@@ -53,14 +53,6 @@ int main()
 
 	Audio audio(Audio::SupportedArchitectures::Windows_Ds);
 
-	if (audio.getDeviceCount() < 1)
-	{
-		std::cout << "\nNo audio devices found!\n";
-		char input;
-		std::cin.get(input);
-		exit(0);
-	}
-
 	Audio::StreamParameters parameters;
 	parameters.deviceId = audio.getDefaultOutputDevice();
 	parameters.nChannels = Settings::CHANNELS;
