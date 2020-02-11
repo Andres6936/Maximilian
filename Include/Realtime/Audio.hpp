@@ -177,22 +177,18 @@ namespace Maximilian
 		//! The public device information structure for returning queried values.
 		struct DeviceInfo
 		{
-			bool probed;                  /*!< true if the device capabilities were successfully probed. */
+			bool probed = false;                  /*!< true if the device capabilities were successfully probed. */
 			std::string name;             /*!< Character string device identifier. */
-			unsigned int outputChannels;  /*!< Maximum output channels supported by device. */
-			unsigned int inputChannels;   /*!< Maximum input channels supported by device. */
-			unsigned int duplexChannels;  /*!< Maximum simultaneous input/output channels supported by device. */
-			bool isDefaultOutput;         /*!< true if this is the default output device. */
-			bool isDefaultInput;          /*!< true if this is the default input device. */
+			unsigned int outputChannels = 0;  /*!< Maximum output channels supported by device. */
+			unsigned int inputChannels = 0;   /*!< Maximum input channels supported by device. */
+			unsigned int duplexChannels = 0;  /*!< Maximum simultaneous input/output channels supported by device. */
+			bool isDefaultOutput = false;         /*!< true if this is the default output device. */
+			bool isDefaultInput = false;          /*!< true if this is the default input device. */
 			std::vector <unsigned int> sampleRates; /*!< Supported sample rates (queried from list of standard rates). */
-			AudioFormat nativeFormats;  /*!< Bit mask of supported data formats. */
+			AudioFormat nativeFormats = 0;  /*!< Bit mask of supported data formats. */
 
 			// Default constructor.
-			DeviceInfo()
-					: probed(false), outputChannels(0), inputChannels(0), duplexChannels(0),
-					  isDefaultOutput(false), isDefaultInput(false), nativeFormats(0)
-			{
-			}
+			DeviceInfo() = default;
 		};
 
 		//! The structure for specifying input or ouput stream parameters.

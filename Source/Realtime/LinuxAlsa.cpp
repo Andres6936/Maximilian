@@ -320,46 +320,43 @@ probeParameters:
 	}
 
 	// Probe the supported data formats ... we don't care about endian-ness just yet
-	snd_pcm_format_t format;
-	info.nativeFormats = 0;
-	format = SND_PCM_FORMAT_S8;
-	if (snd_pcm_hw_params_test_format(phandle, params, format) == 0)
+
+	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S8) == 0)
 	{
 		info.nativeFormats |= RTAUDIO_SINT8;
 	}
-	format = SND_PCM_FORMAT_S16;
-	if (snd_pcm_hw_params_test_format(phandle, params, format) == 0)
+
+	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S16) == 0)
 	{
 		info.nativeFormats |= RTAUDIO_SINT16;
 	}
-	format = SND_PCM_FORMAT_S24;
-	if (snd_pcm_hw_params_test_format(phandle, params, format) == 0)
+
+	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S24) == 0)
 	{
 		info.nativeFormats |= RTAUDIO_SINT24;
 	}
-	format = SND_PCM_FORMAT_S32;
-	if (snd_pcm_hw_params_test_format(phandle, params, format) == 0)
+
+	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S32) == 0)
 	{
 		info.nativeFormats |= RTAUDIO_SINT32;
 	}
-	format = SND_PCM_FORMAT_FLOAT;
-	if (snd_pcm_hw_params_test_format(phandle, params, format) == 0)
+
+	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_FLOAT) == 0)
 	{
 		info.nativeFormats |= RTAUDIO_FLOAT32;
 	}
-	format = SND_PCM_FORMAT_FLOAT64;
-	if (snd_pcm_hw_params_test_format(phandle, params, format) == 0)
+
+	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_FLOAT64) == 0)
 	{
 		info.nativeFormats |= RTAUDIO_FLOAT64;
 	}
 
-	// Check that we have at least one supported format
 	if (info.nativeFormats == 0)
 	{
-		errorStream_ << "RtApiAlsa::getDeviceInfo: pcm device (" << name.data()
-					 << ") data format not supported by RtAudio.";
-		errorText_ = errorStream_.str();
-		error(Exception::WARNING);
+		Levin::Warn() << "Linux Alsa: getDeviceInfo, pcm device (" << name.data()
+					  << ") data format not supported by RtAudio." << Levin::endl;
+
+		// Exit function
 		return info;
 	}
 
