@@ -112,7 +112,7 @@ unsigned int LinuxAlsa::getDeviceCount()
 	return numberOfDevices;
 }
 
-Audio::DeviceInfo LinuxAlsa::getDeviceInfo(unsigned int device)
+Audio::DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 {
 	if (device >= getDeviceCount())
 	{
@@ -122,9 +122,8 @@ Audio::DeviceInfo LinuxAlsa::getDeviceInfo(unsigned int device)
 	Audio::DeviceInfo info;
 	info.probed = false;
 
-	unsigned numberOfDevices = 0;
 	int result;
-	int subDevice;
+	int subDevice = device;
 
 	std::array <char, 64> name{ };
 
@@ -138,50 +137,8 @@ Audio::DeviceInfo LinuxAlsa::getDeviceInfo(unsigned int device)
 	{
 		sprintf(name.data(), "hw:%d", card);
 		snd_ctl_open(&handle, name.data(), SND_CTL_NONBLOCK);
-
-		subDevice = -1;
-
-		while (true)
-		{
-			result = snd_ctl_pcm_next_device(handle, &subDevice);
-
-			if (result < 0)
-			{
-				Levin::Warn() << "Linux Alsa: getDeviceCount, control next device, card = " << card
-							  << ", " << snd_strerror(result) << "." << Levin::endl;
-				break;
-			}
-
-			if (subDevice < 0)
-			{
-				break;
-			}
-
-			if (numberOfDevices == device)
-			{
-				sprintf(name.data(), "hw:%d,%d", card, subDevice);
-				goto foundDevice;
-			}
-
-			numberOfDevices++;
-		}
-
-	}
-
-foundDevice:
-
-	// If a stream is already open, we cannot probe the stream devices.
-	// Thus, use the saved results.
-	if (stream_.state != StreamState::STREAM_CLOSED &&
-		(stream_.device[0] == device || stream_.device[1] == device))
-	{
-		if (device >= devices_.size())
-		{
-			Levin::Warn() << "Linux Alsa: getDeviceInfo, device ID was not present before stream was opened.";
-			return info;
-		}
-
-		return devices_[device];
+		snd_ctl_pcm_next_device(handle, &subDevice);
+		sprintf(name.data(), "hw:%d,%d", card, subDevice);
 	}
 
 	int openMode = SND_PCM_ASYNC;

@@ -24,7 +24,7 @@ namespace Maximilian
 
 		unsigned int getDeviceCount() override;
 
-		Audio::DeviceInfo getDeviceInfo(unsigned int device) override;
+		Audio::DeviceInfo getDeviceInfo(int device) override;
 
 		void closeStream() override;
 

@@ -43,7 +43,7 @@ namespace Maximilian
 
 		virtual Audio::SupportedArchitectures getCurrentArchitecture() = 0;
 
-		virtual Audio::DeviceInfo getDeviceInfo(unsigned int device) = 0;
+		virtual Audio::DeviceInfo getDeviceInfo(int device) = 0;
 
 		void openStream(Audio::StreamParameters& oParams,
 				AudioFormat format, unsigned int sampleRate,
