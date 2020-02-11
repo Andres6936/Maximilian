@@ -1,7 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
-PROJECT(Maximilian)
+PROJECT(Maximilian VERSION 2020.0211 LANGUAGES CXX)
 
 SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
 
 INCLUDE_DIRECTORIES(Include)
 
@@ -9,6 +11,13 @@ INCLUDE_DIRECTORIES(Include)
 INCLUDE_DIRECTORIES(Library)
 # Here find the .a, .so, .dll, .lib
 LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/Library)
+
+# Reference: 10.1. Simple Boolean Logic {Craig Scott - Professional CMake}
+IF ($<CONFIG:Debug>)
+    # Support to Coverage Metrics {gcov} only in
+    # mode of Debug configuration
+    SET(CMAKE_CXX_FLAGS "--coverage")
+ENDIF ()
 
 ADD_DEFINITIONS(-D__LINUX_ALSA__)
 
@@ -25,9 +34,7 @@ TARGET_LINK_LIBRARIES(Maximilian PRIVATE pthread asound)
 # Link to Maximilian the library Levin
 TARGET_LINK_LIBRARIES(Maximilian PRIVATE Levin)
 
-ADD_EXECUTABLE(ExampleMain
-        player.cpp)
-
+ADD_EXECUTABLE(ExampleMain player.cpp)
 TARGET_LINK_LIBRARIES(ExampleMain PRIVATE Maximilian)
 
 ADD_EXECUTABLE(TestTone Examples/1.TestTone.cpp)
