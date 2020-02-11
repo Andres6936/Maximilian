@@ -154,45 +154,41 @@ Audio::DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	snd_pcm_info_set_subdevice(pcminfo, 0);
 	snd_pcm_info_set_stream(pcminfo, stream);
 
-	result = snd_ctl_pcm_info(handle, pcminfo);
-	if (result < 0)
+	if (snd_ctl_pcm_info(handle, pcminfo) < 0)
 	{
 		// Device probably doesn't support playback.
 		goto captureProbe;
 	}
 
-	result = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK);
-	if (result < 0)
+	// Feature C++17, assigment operator in if-else
+	if (int e = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
 	{
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name.data() << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		error(Exception::WARNING);
+		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("
+					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+
 		goto captureProbe;
 	}
 
 	// The device is open ... fill the parameter structure.
-	result = snd_pcm_hw_params_any(phandle, params);
-	if (result < 0)
+	if (int e = snd_pcm_hw_params_any(phandle, params) < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_hw_params error for device (" << name.data() << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		error(Exception::WARNING);
+
+		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_hw_params error for device ("
+					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+
 		goto captureProbe;
 	}
 
 	// Get output channel information.
 	unsigned int value;
-	result = snd_pcm_hw_params_get_channels_max(params, &value);
-	if (result < 0)
+	if (int e = snd_pcm_hw_params_get_channels_max(params, &value) < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: error getting device (" << name.data() << ") output channels, "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		error(Exception::WARNING);
+
+		Levin::Warn() << "Linux Alsa: getDeviceInfo, error getting device ("
+					  << name.data() << ") output channels, " << snd_strerror(e) << "." << Levin::endl;
+
 		goto captureProbe;
 	}
 	info.outputChannels = value;
