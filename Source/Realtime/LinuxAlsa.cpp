@@ -136,6 +136,7 @@ Audio::DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	{
 		sprintf(name.data(), "hw:%d", card);
 		snd_ctl_open(&handle, name.data(), SND_CTL_NONBLOCK);
+		snd_config_update_free_global();
 		snd_ctl_pcm_next_device(handle, &subDevice);
 		sprintf(name.data(), "hw:%d,%d", card, subDevice);
 	}
@@ -162,11 +163,14 @@ Audio::DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	// Feature C++17, assigment operator in if-else
 	if (int e = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
 	{
+		snd_config_update_free_global();
 		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("
 					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
 
 		goto captureProbe;
 	}
+
+	snd_config_update_free_global();
 
 	// The device is open ... fill the parameter structure.
 	if (int e = snd_pcm_hw_params_any(phandle, params) < 0)
@@ -213,6 +217,7 @@ captureProbe:
 
 	if (int e = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
 	{
+		snd_config_update_free_global();
 		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("
 					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
 
@@ -220,6 +225,8 @@ captureProbe:
 		{ return info; }
 		goto probeParameters;
 	}
+
+	snd_config_update_free_global();
 
 	// The device is open ... fill the parameter structure.
 	if (int e = snd_pcm_hw_params_any(phandle, params) < 0)
@@ -310,7 +317,7 @@ probeParameters:
 			info.sampleRates.push_back(SAMPLE_RATES[i]);
 		}
 	}
-	if (info.sampleRates.size() == 0)
+	if (info.sampleRates.empty())
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::getDeviceInfo: no supported sample rates found for device (" << name.data() << ").";
@@ -421,6 +428,8 @@ bool LinuxAlsa::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned i
 		{
 			sprintf(name, "hw:%d", card);
 			result = snd_ctl_open(&chandle, name, SND_CTL_NONBLOCK);
+			snd_config_update_free_global();
+
 			if (result < 0)
 			{
 				errorStream_ << "RtApiAlsa::probeDeviceOpen: control open, card = " << card << ", "
@@ -486,6 +495,8 @@ foundDevice:
 	snd_pcm_t* phandle;
 	int openMode = SND_PCM_ASYNC;
 	result = snd_pcm_open(&phandle, name, stream, openMode);
+	snd_config_update_free_global();
+
 	if (result < 0)
 	{
 		if (mode == StreamMode::OUTPUT)
