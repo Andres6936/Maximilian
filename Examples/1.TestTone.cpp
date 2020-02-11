@@ -7,11 +7,6 @@ using namespace Maximilian;
 //
 Oscilation mySine;//One oscillator - can be called anything. Can be any of the available waveforms.
 
-void setup()
-{//some inits
-	//nothing to go here this time
-}
-
 void play(double* output)
 {
 
@@ -49,8 +44,6 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 
 int main()
 {
-	setup();
-
 	Audio audio(Audio::SupportedArchitectures::Windows_Ds);
 
 	Audio::StreamParameters parameters;
