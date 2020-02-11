@@ -982,8 +982,8 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 
 void AudioArchitecture::byteSwapBuffer(char* buffer, unsigned int samples, AudioFormat format)
 {
-	register char val;
-	register char* ptr;
+	char val;
+	char* ptr;
 
 	ptr = buffer;
 	if (format == RTAUDIO_SINT16)

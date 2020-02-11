@@ -191,6 +191,7 @@ Audio::DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 
 		goto captureProbe;
 	}
+
 	info.outputChannels = value;
 	snd_pcm_close(phandle);
 
