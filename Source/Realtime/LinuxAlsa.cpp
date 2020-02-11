@@ -9,20 +9,20 @@ using namespace Maximilian;
 
 // A structure to hold various information related to the ALSA API
 // implementation.
-struct AlsaHandle
+class AlsaHandle
 {
-	snd_pcm_t* handles[2];
-	bool synchronized;
-	bool xrun[2];
-	pthread_cond_t runnable_cv;
-	bool runnable;
 
-	AlsaHandle()
-			: synchronized(false), runnable(false)
-	{
-		xrun[0] = false;
-		xrun[1] = false;
-	}
+public:
+
+	bool runnable = false;
+	bool synchronized = false;
+
+	snd_pcm_t* handles[2];
+	pthread_cond_t runnable_cv;
+
+	std::array <bool, 2> xrun{ false, false };
+
+	AlsaHandle() = default;
 };
 
 
