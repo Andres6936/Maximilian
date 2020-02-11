@@ -5,19 +5,19 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 
-INCLUDE_DIRECTORIES(Include)
-
-# Added the library Levin for purpose of log
-INCLUDE_DIRECTORIES(Library)
-# Here find the .a, .so, .dll, .lib
-LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/Library)
-
 # Reference: 10.1. Simple Boolean Logic {Craig Scott - Professional CMake}
 IF ($<CONFIG:Debug>)
     # Support to Coverage Metrics {gcov} only in
     # mode of Debug configuration
     SET(CMAKE_CXX_FLAGS "--coverage")
 ENDIF ()
+
+INCLUDE_DIRECTORIES(Include)
+
+# Added the library Levin for purpose of log
+INCLUDE_DIRECTORIES(Library)
+# Here find the .a, .so, .dll, .lib
+LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/Library)
 
 ADD_DEFINITIONS(-D__LINUX_ALSA__)
 
