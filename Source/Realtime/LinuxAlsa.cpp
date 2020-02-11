@@ -141,7 +141,6 @@ Audio::DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 		sprintf(name.data(), "hw:%d,%d", card, subDevice);
 	}
 
-	int openMode = SND_PCM_ASYNC;
 	snd_pcm_stream_t stream;
 	snd_pcm_info_t* pcminfo;
 	snd_pcm_info_alloca(&pcminfo);
@@ -162,7 +161,7 @@ Audio::DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 		goto captureProbe;
 	}
 
-	result = snd_pcm_open(&phandle, name.data(), stream, openMode | SND_PCM_NONBLOCK);
+	result = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK);
 	if (result < 0)
 	{
 		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name.data() << "), "
@@ -214,7 +213,7 @@ captureProbe:
 		goto probeParameters;
 	}
 
-	result = snd_pcm_open(&phandle, name.data(), stream, openMode | SND_PCM_NONBLOCK);
+	result = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK);
 	if (result < 0)
 	{
 		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name.data() << "), "
@@ -288,7 +287,7 @@ probeParameters:
 	}
 	snd_pcm_info_set_stream(pcminfo, stream);
 
-	result = snd_pcm_open(&phandle, name.data(), stream, openMode | SND_PCM_NONBLOCK);
+	result = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK);
 	if (result < 0)
 	{
 		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name.data() << "), "
