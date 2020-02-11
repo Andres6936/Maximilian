@@ -122,7 +122,6 @@ Audio::DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	Audio::DeviceInfo info;
 	info.probed = false;
 
-	int result;
 	int subDevice = device;
 
 	std::array <char, 64> name{ };
@@ -200,54 +199,53 @@ captureProbe:
 	stream = SND_PCM_STREAM_CAPTURE;
 	snd_pcm_info_set_stream(pcminfo, stream);
 
-	result = snd_ctl_pcm_info(handle, pcminfo);
-	snd_ctl_close(handle);
-	if (result < 0)
+	if (snd_ctl_pcm_info(handle, pcminfo) < 0)
 	{
+		snd_ctl_close(handle);
+
 		// Device probably doesn't support capture.
 		if (info.outputChannels == 0)
 		{ return info; }
 		goto probeParameters;
 	}
 
-	result = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK);
-	if (result < 0)
+	snd_ctl_close(handle);
+
+	if (int e = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
 	{
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name.data() << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		error(Exception::WARNING);
+		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("
+					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+
 		if (info.outputChannels == 0)
 		{ return info; }
 		goto probeParameters;
 	}
 
 	// The device is open ... fill the parameter structure.
-	result = snd_pcm_hw_params_any(phandle, params);
-	if (result < 0)
+	if (int e = snd_pcm_hw_params_any(phandle, params) < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_hw_params error for device (" << name.data() << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		error(Exception::WARNING);
+
+		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_hw_params error for device ("
+					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+
 		if (info.outputChannels == 0)
 		{ return info; }
 		goto probeParameters;
 	}
 
-	result = snd_pcm_hw_params_get_channels_max(params, &value);
-	if (result < 0)
+	if (int e = snd_pcm_hw_params_get_channels_max(params, &value) < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: error getting device (" << name.data() << ") input channels, "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		error(Exception::WARNING);
+
+		Levin::Warn() << "Linux Alsa: getDeviceInfo, error getting device ("
+					  << name.data() << ") input channels, " << snd_strerror(e) << "." << Levin::endl;
+
 		if (info.outputChannels == 0)
 		{ return info; }
 		goto probeParameters;
 	}
+
 	info.inputChannels = value;
 	snd_pcm_close(phandle);
 
@@ -284,25 +282,22 @@ probeParameters:
 	}
 	snd_pcm_info_set_stream(pcminfo, stream);
 
-	result = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK);
-	if (result < 0)
+	if (int e = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
 	{
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_open error for device (" << name.data() << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		error(Exception::WARNING);
+		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("
+					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+
 		return info;
 	}
 
 	// The device is open ... fill the parameter structure.
-	result = snd_pcm_hw_params_any(phandle, params);
-	if (result < 0)
+	if (int e = snd_pcm_hw_params_any(phandle, params) < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::getDeviceInfo: snd_pcm_hw_params error for device (" << name.data() << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		error(Exception::WARNING);
+
+		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_hw_params error for device ("
+					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+
 		return info;
 	}
 
@@ -370,11 +365,12 @@ probeParameters:
 
 	// Get the device name
 	char* cardname;
-	result = snd_card_get_name(card, &cardname);
-	if (result >= 0)
+
+	if (snd_card_get_name(card, &cardname) >= 0)
 	{
 		sprintf(name.data(), "hw:%s,%d", cardname, subDevice);
 	}
+
 	info.name = name.data();
 
 	// That's all ... close the device and return
