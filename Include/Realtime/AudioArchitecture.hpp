@@ -74,7 +74,7 @@ namespace Maximilian
 		/**
 		 * Specifying the desired sample data format.
 		 */
-		AudioFormat format = RTAUDIO_FLOAT64;
+		AudioFormat format = AudioFormat::RTAUDIO_FLOAT64;
 
 		void assertThatStreamIsNotOpen();
 

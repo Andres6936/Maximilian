@@ -1,7 +1,6 @@
 #ifndef MAXIMILIAN_AUDIOFORMAT_HPP
 #define MAXIMILIAN_AUDIOFORMAT_HPP
 
-
 namespace Maximilian
 {
 
@@ -23,14 +22,21 @@ namespace Maximilian
 	 * - \e RTAUDIO_FLOAT32: Normalized between plus/minus 1.0.
 	 * - \e RTAUDIO_FLOAT64: Normalized between plus/minus 1.0.
 	 */
-	using AudioFormat = unsigned long;
-
-	static constexpr AudioFormat RTAUDIO_SINT8 = 0x1;    // 8-bit signed integer.
-	static constexpr AudioFormat RTAUDIO_SINT16 = 0x2;   // 16-bit signed integer.
-	static constexpr AudioFormat RTAUDIO_SINT24 = 0x4;   // Lower 3 bytes of 32-bit signed integer.
-	static constexpr AudioFormat RTAUDIO_SINT32 = 0x8;   // 32-bit signed integer.
-	static constexpr AudioFormat RTAUDIO_FLOAT32 = 0x10; // Normalized between plus/minus 1.0.
-	static constexpr AudioFormat RTAUDIO_FLOAT64 = 0x20; // Normalized between plus/minus 1.0.
+	enum class AudioFormat : unsigned long
+	{
+		// 8-bit signed integer.
+				RTAUDIO_SINT8 = 0x1,
+		// 16-bit signed integer.
+				RTAUDIO_SINT16 = 0x2,
+		// Lower 3 bytes of 32-bit signed integer.
+				RTAUDIO_SINT24 = 0x4,
+		// 32-bit signed integer.
+				RTAUDIO_SINT32 = 0x8,
+		// Normalized between plus/minus 1.0.
+				RTAUDIO_FLOAT32 = 0x10,
+		// Normalized between plus/minus 1.0.
+				RTAUDIO_FLOAT64 = 0x20,
+	};
 }
 
 

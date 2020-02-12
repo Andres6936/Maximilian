@@ -330,41 +330,32 @@ probeParameters:
 
 	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S8) == 0)
 	{
-		info.nativeFormats |= RTAUDIO_SINT8;
+		info.nativeFormats = AudioFormat::RTAUDIO_SINT8;
 	}
 
 	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S16) == 0)
 	{
-		info.nativeFormats |= RTAUDIO_SINT16;
+		info.nativeFormats = AudioFormat::RTAUDIO_SINT16;
 	}
 
 	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S24) == 0)
 	{
-		info.nativeFormats |= RTAUDIO_SINT24;
+		info.nativeFormats = AudioFormat::RTAUDIO_SINT24;
 	}
 
 	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S32) == 0)
 	{
-		info.nativeFormats |= RTAUDIO_SINT32;
+		info.nativeFormats = AudioFormat::RTAUDIO_SINT32;
 	}
 
 	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_FLOAT) == 0)
 	{
-		info.nativeFormats |= RTAUDIO_FLOAT32;
+		info.nativeFormats = AudioFormat::RTAUDIO_FLOAT32;
 	}
 
 	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_FLOAT64) == 0)
 	{
-		info.nativeFormats |= RTAUDIO_FLOAT64;
-	}
-
-	if (info.nativeFormats == 0)
-	{
-		Levin::Warn() << "Linux Alsa: getDeviceInfo, pcm device (" << name.data()
-					  << ") data format not supported by RtAudio." << Levin::endl;
-
-		// Exit function
-		return info;
+		info.nativeFormats = AudioFormat::RTAUDIO_FLOAT64;
 	}
 
 	// Get the device name
@@ -573,27 +564,27 @@ foundDevice:
 	stream_.userFormat = getAudioFormat();
 	snd_pcm_format_t deviceFormat = SND_PCM_FORMAT_UNKNOWN;
 
-	if (getAudioFormat() == RTAUDIO_SINT8)
+	if (getAudioFormat() == AudioFormat::RTAUDIO_SINT8)
 	{
 		deviceFormat = SND_PCM_FORMAT_S8;
 	}
-	else if (getAudioFormat() == RTAUDIO_SINT16)
+	else if (getAudioFormat() == AudioFormat::RTAUDIO_SINT16)
 	{
 		deviceFormat = SND_PCM_FORMAT_S16;
 	}
-	else if (getAudioFormat() == RTAUDIO_SINT24)
+	else if (getAudioFormat() == AudioFormat::RTAUDIO_SINT24)
 	{
 		deviceFormat = SND_PCM_FORMAT_S24;
 	}
-	else if (getAudioFormat() == RTAUDIO_SINT32)
+	else if (getAudioFormat() == AudioFormat::RTAUDIO_SINT32)
 	{
 		deviceFormat = SND_PCM_FORMAT_S32;
 	}
-	else if (getAudioFormat() == RTAUDIO_FLOAT32)
+	else if (getAudioFormat() == AudioFormat::RTAUDIO_FLOAT32)
 	{
 		deviceFormat = SND_PCM_FORMAT_FLOAT;
 	}
-	else if (getAudioFormat() == RTAUDIO_FLOAT64)
+	else if (getAudioFormat() == AudioFormat::RTAUDIO_FLOAT64)
 	{
 		deviceFormat = SND_PCM_FORMAT_FLOAT64;
 	}
@@ -608,42 +599,42 @@ foundDevice:
 	deviceFormat = SND_PCM_FORMAT_FLOAT64;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[index] = RTAUDIO_FLOAT64;
+		stream_.deviceFormat[index] = AudioFormat::RTAUDIO_FLOAT64;
 		goto setFormat;
 	}
 
 	deviceFormat = SND_PCM_FORMAT_FLOAT;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[index] = RTAUDIO_FLOAT32;
+		stream_.deviceFormat[index] = AudioFormat::RTAUDIO_FLOAT32;
 		goto setFormat;
 	}
 
 	deviceFormat = SND_PCM_FORMAT_S32;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[index] = RTAUDIO_SINT32;
+		stream_.deviceFormat[index] = AudioFormat::RTAUDIO_SINT32;
 		goto setFormat;
 	}
 
 	deviceFormat = SND_PCM_FORMAT_S24;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[index] = RTAUDIO_SINT24;
+		stream_.deviceFormat[index] = AudioFormat::RTAUDIO_SINT24;
 		goto setFormat;
 	}
 
 	deviceFormat = SND_PCM_FORMAT_S16;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[index] = RTAUDIO_SINT16;
+		stream_.deviceFormat[index] = AudioFormat::RTAUDIO_SINT16;
 		goto setFormat;
 	}
 
 	deviceFormat = SND_PCM_FORMAT_S8;
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[index] = RTAUDIO_SINT8;
+		stream_.deviceFormat[index] = AudioFormat::RTAUDIO_SINT8;
 		goto setFormat;
 	}
 
