@@ -22,8 +22,8 @@ namespace Maximilian
 		int inJump = 0;
 		int outJump = 0;
 
-		AudioFormat outFormat = AudioFormat::SInt8;
-		AudioFormat inFormat = AudioFormat::SInt8;
+		AudioFormat outFormat = AudioFormat::Float64;
+		AudioFormat inFormat = AudioFormat::Float64;
 
 		std::vector <int> inOffset;
 		std::vector <int> outOffset;

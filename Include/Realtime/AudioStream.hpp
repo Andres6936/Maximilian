@@ -33,36 +33,40 @@ namespace Maximilian
 
 	public:
 
-		unsigned int device[2];    // Playback and record, respectively.
-		void* apiHandle;           // void pointer for API specific stream handle information
-		StreamMode mode;           // OUTPUT, INPUT, or DUPLEX.
-		StreamState state;         // STOPPED, RUNNING, or CLOSED
-		char* userBuffer[2];       // Playback and record, respectively.
-		char* deviceBuffer;
-		bool doConvertBuffer[2];   // Playback and record, respectively.
-		bool userInterleaved;
-		bool deviceInterleaved[2]; // Playback and record, respectively.
-		bool doByteSwap[2];        // Playback and record, respectively.
-		unsigned int sampleRate;
-		unsigned int bufferSize;
-		unsigned int nBuffers;
-		unsigned int nUserChannels[2];    // Playback and record, respectively.
-		unsigned int nDeviceChannels[2];  // Playback and record channels, respectively.
-		unsigned int channelOffset[2];    // Playback and record, respectively.
-		unsigned long latency[2];         // Playback and record, respectively.
-		AudioFormat userFormat;
-		AudioFormat deviceFormat[2];    // Playback and record, respectively.
-		pthread_mutex_t mutex;
-		CallbackInfo callbackInfo;
-		ConvertInfo convertInfo[2];
-		double streamTime;         // Number of elapsed seconds since the stream started.
 
-		AudioStream()
-				: apiHandle(0), deviceBuffer(0)
-		{
-			device[0] = 11111;
-			device[1] = 11111;
-		}
+		void* apiHandle = nullptr;          // void pointer for API specific stream handle information
+
+		char* userBuffer[2] = { nullptr, nullptr };       // Playback and record, respectively.
+		char* deviceBuffer = nullptr;
+
+		bool doConvertBuffer[2] = { false, false };   // Playback and record, respectively.
+		bool userInterleaved = true;
+		bool deviceInterleaved[2] = { true, true }; // Playback and record, respectively.
+		bool doByteSwap[2] = { false, false };        // Playback and record, respectively.
+
+		unsigned int device[2] = { 11'111, 11'111 };    // Playback and record, respectively.
+		unsigned int sampleRate = 0;
+		unsigned int bufferSize = 0;
+		unsigned int nBuffers = 0;
+		unsigned int nUserChannels[2] = { 0, 0 };    // Playback and record, respectively.
+		unsigned int nDeviceChannels[2] = { 0, 0 };  // Playback and record channels, respectively.
+		unsigned int channelOffset[2] = { 0, 0 };    // Playback and record, respectively.
+
+		unsigned long latency[2] = { 0, 0 };         // Playback and record, respectively.
+
+		double streamTime = 0.0;         // Number of elapsed seconds since the stream started.
+
+		pthread_mutex_t mutex;
+
+		StreamMode mode = StreamMode::UNINITIALIZED;           // OUTPUT, INPUT, or DUPLEX.
+		StreamState state = StreamState::STREAM_CLOSED;         // STOPPED, RUNNING, or CLOSED
+		AudioFormat userFormat = AudioFormat::Float64;
+		AudioFormat deviceFormat[2] = { AudioFormat::Float64,
+										AudioFormat::Float64 };    // Playback and record, respectively.
+		CallbackInfo callbackInfo;
+		ConvertInfo convertInfo[2] = { };
+
+		AudioStream() = default;
 
 	};
 }

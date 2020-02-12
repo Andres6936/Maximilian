@@ -175,7 +175,7 @@ namespace Maximilian
 
 		std::ostringstream errorStream_;
 		std::string errorText_;
-		bool showWarnings_;
+		bool showWarnings_ = true;
 		AudioStream stream_;
 
 		/*!
@@ -193,9 +193,6 @@ namespace Maximilian
 
 		//! A protected function used to increment the stream time.
 		void tickStreamTime();
-
-		//! Protected common method to clear an RtApiStream structure.
-		void clearStreamInfo();
 
 		/*!
 		  Protected common method that throws an Exception (type =

@@ -18,18 +18,15 @@ namespace Maximilian
 
 	public:
 
-		void* object;    // Used as a "this" pointer.
+		void* object = nullptr;    // Used as a "this" pointer.
 		pthread_t thread;
-		void* callback;
-		void* userData;
-		void* apiInfo;   // void pointer for API specific callback information
-		bool isRunning;
+		void* callback = nullptr;
+		void* userData = nullptr;
+		void* apiInfo = nullptr;   // void pointer for API specific callback information
+		bool isRunning = false;
 
 		// Default constructor.
-		CallbackInfo()
-				: object(0), callback(0), userData(0), apiInfo(0), isRunning(false)
-		{
-		}
+		CallbackInfo() = default;
 
 	};
 }

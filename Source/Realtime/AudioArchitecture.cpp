@@ -15,14 +15,7 @@ const unsigned int AudioArchitecture::SAMPLE_RATES[] = {
 
 Maximilian::AudioArchitecture::AudioArchitecture()
 {
-	stream_.state = StreamState::STREAM_CLOSED;
-	stream_.mode = StreamMode::UNINITIALIZED;
-	stream_.apiHandle = nullptr;
-	stream_.userBuffer[0] = nullptr;
-	stream_.userBuffer[1] = nullptr;
 	pthread_mutex_init(&stream_.mutex, nullptr);
-	showWarnings_ = true;
-
 	outputParameters.setDeviceId(getDefaultOutputDevice());
 }
 
@@ -44,8 +37,6 @@ void AudioArchitecture::assertThatStreamIsNotOpen()
 void AudioArchitecture::openStream(RtAudioCallback callback, void* userData)
 {
 	assertThatStreamIsNotOpen();
-
-	clearStreamInfo();
 
 	bool result = probeDeviceOpen(
 			outputParameters.getDeviceId(),
@@ -153,43 +144,6 @@ void AudioArchitecture::verifyStream()
 	{
 		errorText_ = "RtApi:: a stream is not open!";
 		error(Exception::INVALID_USE);
-	}
-}
-
-void AudioArchitecture::clearStreamInfo()
-{
-	stream_.mode = StreamMode::UNINITIALIZED;
-	stream_.state = StreamState::STREAM_CLOSED;
-	stream_.sampleRate = 0;
-	stream_.bufferSize = 0;
-	stream_.nBuffers = 0;
-	stream_.userFormat = AudioFormat::Float64;
-	stream_.userInterleaved = true;
-	stream_.streamTime = 0.0;
-	stream_.apiHandle = 0;
-	stream_.deviceBuffer = 0;
-	stream_.callbackInfo.callback = 0;
-	stream_.callbackInfo.userData = 0;
-	stream_.callbackInfo.isRunning = false;
-	for (int i = 0; i < 2; i++)
-	{
-		stream_.device[i] = 11111;
-		stream_.doConvertBuffer[i] = false;
-		stream_.deviceInterleaved[i] = true;
-		stream_.doByteSwap[i] = false;
-		stream_.nUserChannels[i] = 0;
-		stream_.nDeviceChannels[i] = 0;
-		stream_.channelOffset[i] = 0;
-		stream_.deviceFormat[i] = AudioFormat::Float64;
-		stream_.latency[i] = 0;
-		stream_.userBuffer[i] = 0;
-		stream_.convertInfo[i].channels = 0;
-		stream_.convertInfo[i].inJump = 0;
-		stream_.convertInfo[i].outJump = 0;
-		stream_.convertInfo[i].inFormat = AudioFormat::Float64;
-		stream_.convertInfo[i].outFormat = AudioFormat::Float64;
-		stream_.convertInfo[i].inOffset.clear();
-		stream_.convertInfo[i].outOffset.clear();
 	}
 }
 
