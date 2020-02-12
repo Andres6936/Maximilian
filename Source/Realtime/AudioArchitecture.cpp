@@ -347,19 +347,17 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		memset(outBuffer, 0, stream_.bufferSize * info.outJump * formatBytes(info.outFormat));
 	}
 
-	int j;
 	if (info.outFormat == AudioFormat::Float64)
 	{
-		Float64 scale;
 		Float64* out = (Float64*)outBuffer;
 
 		if (info.inFormat == AudioFormat::SInt8)
 		{
 			signed char* in = (signed char*)inBuffer;
-			scale = 1.0 / 127.5;
+			Float64 scale = 1.0 / 127.5;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Float64)in[info.inOffset[j]];
 					out[info.outOffset[j]] += 0.5;
@@ -372,10 +370,10 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		else if (info.inFormat == AudioFormat::SInt16)
 		{
 			Int16* in = (Int16*)inBuffer;
-			scale = 1.0 / 32767.5;
+			Float64 scale = 1.0 / 32767.5;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Float64)in[info.inOffset[j]];
 					out[info.outOffset[j]] += 0.5;
@@ -388,10 +386,10 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		else if (info.inFormat == AudioFormat::SInt24)
 		{
 			Int32* in = (Int32*)inBuffer;
-			scale = 1.0 / 8388607.5;
+			Float64 scale = 1.0 / 8388607.5;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Float64)(in[info.inOffset[j]] & 0x00ffffff);
 					out[info.outOffset[j]] += 0.5;
@@ -404,10 +402,10 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		else if (info.inFormat == AudioFormat::SInt32)
 		{
 			Int32* in = (Int32*)inBuffer;
-			scale = 1.0 / 2147483647.5;
+			Float64 scale = 1.0 / 2147483647.5;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Float64)in[info.inOffset[j]];
 					out[info.outOffset[j]] += 0.5;
@@ -422,7 +420,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Float64)in[info.inOffset[j]];
 				}
@@ -436,7 +434,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = in[info.inOffset[j]];
 				}
@@ -447,16 +445,15 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 	}
 	else if (info.outFormat == AudioFormat::Float32)
 	{
-		Float32 scale;
 		Float32* out = (Float32*)outBuffer;
 
 		if (info.inFormat == AudioFormat::SInt8)
 		{
 			signed char* in = (signed char*)inBuffer;
-			scale = (Float32)(1.0 / 127.5);
+			Float32 scale = (Float32)(1.0 / 127.5);
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Float32)in[info.inOffset[j]];
 					out[info.outOffset[j]] += 0.5;
@@ -469,10 +466,10 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		else if (info.inFormat == AudioFormat::SInt16)
 		{
 			Int16* in = (Int16*)inBuffer;
-			scale = (Float32)(1.0 / 32767.5);
+			Float32 scale = (Float32)(1.0 / 32767.5);
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Float32)in[info.inOffset[j]];
 					out[info.outOffset[j]] += 0.5;
@@ -485,10 +482,10 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		else if (info.inFormat == AudioFormat::SInt24)
 		{
 			Int32* in = (Int32*)inBuffer;
-			scale = (Float32)(1.0 / 8388607.5);
+			Float32 scale = (Float32)(1.0 / 8388607.5);
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Float32)(in[info.inOffset[j]] & 0x00ffffff);
 					out[info.outOffset[j]] += 0.5;
@@ -501,10 +498,10 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		else if (info.inFormat == AudioFormat::SInt32)
 		{
 			Int32* in = (Int32*)inBuffer;
-			scale = (Float32)(1.0 / 2147483647.5);
+			Float32 scale = (Float32)(1.0 / 2147483647.5);
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Float32)in[info.inOffset[j]];
 					out[info.outOffset[j]] += 0.5;
@@ -520,7 +517,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = in[info.inOffset[j]];
 				}
@@ -533,7 +530,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Float32)in[info.inOffset[j]];
 				}
@@ -550,7 +547,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			signed char* in = (signed char*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int32)in[info.inOffset[j]];
 					out[info.outOffset[j]] <<= 24;
@@ -564,7 +561,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int16* in = (Int16*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int32)in[info.inOffset[j]];
 					out[info.outOffset[j]] <<= 16;
@@ -578,7 +575,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int32)in[info.inOffset[j]];
 					out[info.outOffset[j]] <<= 8;
@@ -593,7 +590,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = in[info.inOffset[j]];
 				}
@@ -606,7 +603,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int32)(in[info.inOffset[j]] * 2147483647.5 - 0.5);
 				}
@@ -619,7 +616,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int32)(in[info.inOffset[j]] * 2147483647.5 - 0.5);
 				}
@@ -636,7 +633,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			signed char* in = (signed char*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int32)in[info.inOffset[j]];
 					out[info.outOffset[j]] <<= 16;
@@ -650,7 +647,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int16* in = (Int16*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int32)in[info.inOffset[j]];
 					out[info.outOffset[j]] <<= 8;
@@ -665,7 +662,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = in[info.inOffset[j]];
 				}
@@ -678,7 +675,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int32)in[info.inOffset[j]];
 					out[info.outOffset[j]] >>= 8;
@@ -692,7 +689,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int32)(in[info.inOffset[j]] * 8388607.5 - 0.5);
 				}
@@ -705,7 +702,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int32)(in[info.inOffset[j]] * 8388607.5 - 0.5);
 				}
@@ -722,7 +719,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			signed char* in = (signed char*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int16)in[info.inOffset[j]];
 					out[info.outOffset[j]] <<= 8;
@@ -737,7 +734,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int16* in = (Int16*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = in[info.inOffset[j]];
 				}
@@ -750,7 +747,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int16)((in[info.inOffset[j]] >> 8) & 0x0000ffff);
 				}
@@ -763,7 +760,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int16)((in[info.inOffset[j]] >> 16) & 0x0000ffff);
 				}
@@ -776,7 +773,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int16)(in[info.inOffset[j]] * 32767.5 - 0.5);
 				}
@@ -789,7 +786,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (Int16)(in[info.inOffset[j]] * 32767.5 - 0.5);
 				}
@@ -807,7 +804,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			signed char* in = (signed char*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = in[info.inOffset[j]];
 				}
@@ -820,7 +817,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int16* in = (Int16*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (signed char)((in[info.inOffset[j]] >> 8) & 0x00ff);
 				}
@@ -833,7 +830,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (signed char)((in[info.inOffset[j]] >> 16) & 0x000000ff);
 				}
@@ -846,7 +843,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (signed char)((in[info.inOffset[j]] >> 24) & 0x000000ff);
 				}
@@ -859,7 +856,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (signed char)(in[info.inOffset[j]] * 127.5 - 0.5);
 				}
@@ -872,7 +869,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
 			{
-				for (j = 0; j < info.channels; j++)
+				for (unsigned int j = 0; j < info.channels; j++)
 				{
 					out[info.outOffset[j]] = (signed char)(in[info.inOffset[j]] * 127.5 - 0.5);
 				}
