@@ -387,12 +387,16 @@ namespace Maximilian
 				StreamParameters& inputParameters,
 				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData = NULL, Audio::StreamOptions* options = NULL);
+				void* userData = nullptr, Audio::StreamOptions* options = nullptr);
 
 		void openStream(StreamParameters& outputParameters,
 				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData = NULL, Audio::StreamOptions* options = NULL);
+				void* userData = nullptr, Audio::StreamOptions* options = nullptr);
+
+		void openStream(AudioFormat format, unsigned int sampleRate,
+				unsigned int* bufferFrames, RtAudioCallback callback,
+				void* userData = nullptr, Audio::StreamOptions* options = nullptr);
 
 		//! A function that closes a stream and frees any associated stream memory.
 		/*!

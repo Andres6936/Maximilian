@@ -46,13 +46,17 @@ namespace Maximilian
 		virtual Audio::DeviceInfo getDeviceInfo(int device) = 0;
 
 		void openStream(Audio::StreamParameters& oParams,
+				Audio::StreamParameters& iParams,
 				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData, Audio::StreamOptions* options);
 
 		void openStream(Audio::StreamParameters& oParams,
-				Audio::StreamParameters& iParams,
 				AudioFormat format, unsigned int sampleRate,
+				unsigned int* bufferFrames, RtAudioCallback callback,
+				void* userData, Audio::StreamOptions* options);
+
+		void openStream(AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData, Audio::StreamOptions* options);
 

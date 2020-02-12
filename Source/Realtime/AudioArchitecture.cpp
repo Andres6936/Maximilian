@@ -69,32 +69,6 @@ void AudioArchitecture::assertThatTheFormatOfBytesIsGreaterThatZero(const AudioF
 	}
 }
 
-void AudioArchitecture::openStream(Audio::StreamParameters& oParams, AudioFormat format, unsigned int sampleRate,
-		unsigned int* bufferFrames, RtAudioCallback callback, void* userData, Audio::StreamOptions* options)
-{
-	assertThatStreamIsNotOpen();
-	assertThatChannelsAreGreaterThatOne(oParams);
-	assertThatDeviceParameterIsNotInvalid(oParams);
-	assertThatTheFormatOfBytesIsGreaterThatZero(format);
-
-	clearStreamInfo();
-
-	bool result;
-
-	result = probeDeviceOpen(oParams.deviceId, StreamMode::OUTPUT, oParams.nChannels, oParams.firstChannel,
-			sampleRate, format, bufferFrames, options);
-
-	if (result == false)
-	{ error(Exception::SYSTEM_ERROR); }
-
-	stream_.callbackInfo.callback = (void*)callback;
-	stream_.callbackInfo.userData = userData;
-
-	if (options)
-	{ options->numberOfBuffers = stream_.nBuffers; }
-	stream_.state = StreamState::STREAM_STOPPED;
-}
-
 void AudioArchitecture::openStream(
 		Audio::StreamParameters& oParams,
 		Audio::StreamParameters& iParams,
@@ -112,9 +86,7 @@ void AudioArchitecture::openStream(
 
 	clearStreamInfo();
 
-	bool result;
-
-	result = probeDeviceOpen(oParams.deviceId, StreamMode::OUTPUT, oParams.nChannels, oParams.firstChannel,
+	bool result = probeDeviceOpen(oParams.deviceId, StreamMode::OUTPUT, oParams.nChannels, oParams.firstChannel,
 			sampleRate, format, bufferFrames, options);
 
 	if (result == false)
@@ -130,6 +102,52 @@ void AudioArchitecture::openStream(
 		{ closeStream(); }
 		error(Exception::SYSTEM_ERROR);
 	}
+
+	stream_.callbackInfo.callback = (void*)callback;
+	stream_.callbackInfo.userData = userData;
+
+	if (options)
+	{ options->numberOfBuffers = stream_.nBuffers; }
+	stream_.state = StreamState::STREAM_STOPPED;
+}
+
+void AudioArchitecture::openStream(Audio::StreamParameters& oParams, AudioFormat format, unsigned int sampleRate,
+		unsigned int* bufferFrames, RtAudioCallback callback, void* userData, Audio::StreamOptions* options)
+{
+	assertThatStreamIsNotOpen();
+	assertThatChannelsAreGreaterThatOne(oParams);
+	assertThatDeviceParameterIsNotInvalid(oParams);
+	assertThatTheFormatOfBytesIsGreaterThatZero(format);
+
+	clearStreamInfo();
+
+	bool result = probeDeviceOpen(oParams.deviceId, StreamMode::OUTPUT, oParams.nChannels, oParams.firstChannel,
+			sampleRate, format, bufferFrames, options);
+
+	if (result == false)
+	{ error(Exception::SYSTEM_ERROR); }
+
+	stream_.callbackInfo.callback = (void*)callback;
+	stream_.callbackInfo.userData = userData;
+
+	if (options)
+	{ options->numberOfBuffers = stream_.nBuffers; }
+	stream_.state = StreamState::STREAM_STOPPED;
+}
+
+void AudioArchitecture::openStream(AudioFormat format, unsigned int sampleRate, unsigned int* bufferFrames,
+		RtAudioCallback callback, void* userData, Audio::StreamOptions* options)
+{
+	assertThatStreamIsNotOpen();
+	assertThatTheFormatOfBytesIsGreaterThatZero(format);
+
+	clearStreamInfo();
+
+	bool result = probeDeviceOpen(getDefaultOutputDevice(), StreamMode::OUTPUT, 2, 0,
+			sampleRate, format, bufferFrames, options);
+
+	if (result == false)
+	{ error(Exception::SYSTEM_ERROR); }
 
 	stream_.callbackInfo.callback = (void*)callback;
 	stream_.callbackInfo.userData = userData;
