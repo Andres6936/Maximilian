@@ -45,7 +45,7 @@ int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
 
 int main()
 {
-	Audio audio(Audio::SupportedArchitectures::Windows_Ds);
+	Audio audio(SupportedArchitectures::Windows_Ds);
 
 	unsigned int sampleRate = Settings::SAMPLE_RATE;
 	unsigned int bufferFrames = Settings::BUFFER_SIZE;

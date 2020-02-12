@@ -96,7 +96,7 @@ int main()
 {
 	setup();
 
-	Audio dac(Audio::SupportedArchitectures::Windows_Ds);
+	Audio dac(SupportedArchitectures::Windows_Ds);
 
 	Audio::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();

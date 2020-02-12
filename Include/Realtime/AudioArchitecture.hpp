@@ -41,7 +41,7 @@ namespace Maximilian
 
 		virtual unsigned int getDefaultOutputDevice();
 
-		virtual Audio::SupportedArchitectures getCurrentArchitecture() = 0;
+		virtual SupportedArchitectures getCurrentArchitecture() = 0;
 
 		virtual Audio::DeviceInfo getDeviceInfo(int device) = 0;
 

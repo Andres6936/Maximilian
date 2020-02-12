@@ -56,7 +56,7 @@ int main()
 {
 	setup();
 
-	Audio audio(Audio::SupportedArchitectures::Windows_Ds);
+	Audio audio(SupportedArchitectures::Windows_Ds);
 
 	unsigned int sampleRate = Settings::SAMPLE_RATE;
 	unsigned int bufferFrames = Settings::BUFFER_SIZE;

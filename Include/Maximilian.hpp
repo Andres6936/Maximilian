@@ -68,6 +68,7 @@
 
 #include "Realtime/Audio.hpp"
 #include "Definition/AudioFormat.hpp"
+#include "Enum/SupportedArchitectures.hpp"
 
 using namespace std;
 #ifndef PI

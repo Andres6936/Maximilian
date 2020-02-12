@@ -49,6 +49,7 @@
 #include "Definition/AudioFormat.hpp"
 #include "Definition/AudioStreamFlags.hpp"
 #include "Definition/AudioStreamStatus.hpp"
+#include "Enum/SupportedArchitectures.hpp"
 
 namespace Maximilian
 {
@@ -103,19 +104,6 @@ namespace Maximilian
 	{
 
 	public:
-
-		//! Audio API specifier arguments.
-		enum class SupportedArchitectures : unsigned char
-		{
-			Unspecified,    /*!< Search for a working compiled API. */
-			Linux_Alsa,     /*!< The Advanced Linux Sound Architecture API. */
-			Linux_Oss,      /*!< The Linux Open Sound System API. */
-			Unix_Jack,      /*!< The Jack Low-Latency Audio Server API. */
-			MacOs_Core,    /*!< Macintosh OS-X Core Audio API. */
-			Windows_Asio,   /*!< The Steinberg Audio Stream I/O API. */
-			Windows_Ds,     /*!< The Microsoft Direct Sound API. */
-			Audio_Dummy   /*!< A compilable but non-functional API. */
-		};
 
 		//! The public device information structure for returning queried values.
 		struct DeviceInfo
@@ -220,7 +208,7 @@ namespace Maximilian
 
 		void assertThatAudioArchitectureHaveMinimumAnDevice();
 
-		void tryInitializeInstanceOfArchitecture(Audio::SupportedArchitectures _architecture);
+		void tryInitializeInstanceOfArchitecture(SupportedArchitectures _architecture);
 
 	public:
 
@@ -232,7 +220,7 @@ namespace Maximilian
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
 		*/
-		explicit Audio(Audio::SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
+		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
 
 		static std::vector <SupportedArchitectures> getArchitecturesCompiled();
 
@@ -245,7 +233,7 @@ namespace Maximilian
 		~Audio() throw();
 
 		//! Returns the audio API specifier for the current instance of RtAudio.
-		Audio::SupportedArchitectures getCurrentApi() throw();
+		SupportedArchitectures getCurrentApi() throw();
 
 		//! A public function that queries for the number of audio devices available.
 		/*!

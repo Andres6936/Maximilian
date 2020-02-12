@@ -51,7 +51,7 @@
 
 using namespace Maximilian;
 
-std::vector <Audio::SupportedArchitectures> Audio::getArchitecturesCompiled()
+std::vector <SupportedArchitectures> Audio::getArchitecturesCompiled()
 {
 	std::vector <SupportedArchitectures> architectures;
 
@@ -82,7 +82,7 @@ std::vector <Audio::SupportedArchitectures> Audio::getArchitecturesCompiled()
 	return architectures;
 }
 
-void Audio::tryInitializeInstanceOfArchitecture(Audio::SupportedArchitectures _architecture)
+void Audio::tryInitializeInstanceOfArchitecture(SupportedArchitectures _architecture)
 {
 	// This methods is design for be called several times of way consecutive
 	// to found an instance that content an device.
@@ -147,7 +147,7 @@ void Audio::assertThatAudioArchitectureHaveMinimumAnDevice()
 	}
 }
 
-Audio::Audio(Audio::SupportedArchitectures _architecture)
+Audio::Audio(SupportedArchitectures _architecture)
 {
 	// Initialize Levin for use of Log
 	Levin::LOGGER = std::make_unique <Levin::ColoredLogger>(std::wcout);
@@ -5934,7 +5934,7 @@ extern "C" void *ossCallbackHandler( void *ptr )
 #endif
 
 
-Audio::SupportedArchitectures Audio::getCurrentApi() throw()
+SupportedArchitectures Audio::getCurrentApi() throw()
 {
 	return audioArchitecture->getCurrentArchitecture();
 }
