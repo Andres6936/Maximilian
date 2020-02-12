@@ -193,31 +193,32 @@ void AudioArchitecture::clearStreamInfo()
 	}
 }
 
-unsigned int AudioArchitecture::formatBytes(Maximilian::AudioFormat format)
+unsigned int AudioArchitecture::formatBytes(AudioFormat _audioFormat)
 {
-	if (format == AudioFormat::RTAUDIO_SINT16)
+	if (_audioFormat == AudioFormat::RTAUDIO_SINT16)
 	{
 		return 2;
 	}
-	else if (format == AudioFormat::RTAUDIO_SINT24 ||
-			 format == AudioFormat::RTAUDIO_SINT32 ||
-			 format == AudioFormat::RTAUDIO_FLOAT32)
+	else if (_audioFormat == AudioFormat::RTAUDIO_SINT24 ||
+			 _audioFormat == AudioFormat::RTAUDIO_SINT32 ||
+			 _audioFormat == AudioFormat::RTAUDIO_FLOAT32)
 	{
 		return 4;
 	}
-	else if (format == AudioFormat::RTAUDIO_FLOAT64)
+	else if (_audioFormat == AudioFormat::RTAUDIO_FLOAT64)
 	{
 		return 8;
 	}
-	else if (format == AudioFormat::RTAUDIO_SINT8)
+	else if (_audioFormat == AudioFormat::RTAUDIO_SINT8)
 	{
 		return 1;
 	}
+	else
+	{
+		Levin::Error() << "FormatBytes: Undefined format." << Levin::endl;
 
-	errorText_ = "RtApi::formatBytes: undefined format.";
-	error(Exception::WARNING);
-
-	return 0;
+		throw Exception("UndefinedFormatBytesException");
+	}
 }
 
 void AudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChannel)

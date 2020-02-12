@@ -90,6 +90,13 @@ namespace Maximilian
 
 		static unsigned int getDefaultOutputDevice();
 
+		/**
+		 * Protected common method that returns the number of bytes for a given format.
+		 * @param _audioFormat Audio format
+		 * @return Number of bytes of format.
+		 */
+		static unsigned int formatBytes(AudioFormat _audioFormat);
+
 		// Virtual Methods
 
 		virtual unsigned int getDeviceCount() = 0;
@@ -207,9 +214,6 @@ namespace Maximilian
 
 		//! Protected common method used to perform byte-swapping on buffers.
 		void byteSwapBuffer(char* buffer, unsigned int samples, AudioFormat format);
-
-		//! Protected common method that returns the number of bytes for a given format.
-		unsigned int formatBytes(AudioFormat format);
 
 		//! Protected common method that sets up the parameters for buffer conversion.
 		void setConvertInfo(StreamMode mode, unsigned int firstChannel);
