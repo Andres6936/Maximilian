@@ -417,7 +417,7 @@ bool LinuxAlsa::probeDeviceOpen(
 	char name[64];
 	snd_ctl_t* chandle;
 
-	if (getOptionsFlags() == AudioStreamFlags::RTAUDIO_ALSA_USE_DEFAULT)
+	if (getOptionsFlags() == AudioStreamFlags::Alsa_Use_Default)
 	{
 		snprintf(name, sizeof(name), "%s", "default");
 	}
@@ -532,7 +532,7 @@ foundDevice:
 #endif
 
 	// Set access ... check user preference.
-	if (getOptionsFlags() == AudioStreamFlags::RTAUDIO_NONINTERLEAVED)
+	if (getOptionsFlags() == AudioStreamFlags::Non_Interleaved)
 	{
 		stream_.userInterleaved = false;
 		result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_NONINTERLEAVED);
@@ -754,7 +754,7 @@ setFormat:
 
 	// Set the buffer number, which in ALSA is referred to as the "period".
 	unsigned int periods = 0;
-	if (getOptionsFlags() == AudioStreamFlags::RTAUDIO_MINIMIZE_LATENCY)
+	if (getOptionsFlags() == AudioStreamFlags::Minimize_Latency)
 	{ periods = 2; }
 
 	if (getNumberOfBuffersOptions() > 0)
@@ -961,7 +961,7 @@ setFormat:
 		pthread_attr_init(&attr);
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 #ifdef SCHED_RR // Undefined with some OSes (eg: NetBSD 1.6.x with GNU Pthread)
-		if (getOptionsFlags() == AudioStreamFlags::RTAUDIO_SCHEDULE_REALTIME)
+		if (getOptionsFlags() == AudioStreamFlags::Schedule_Realtime)
 		{
 			struct sched_param param;
 			int priority = getOptionsPriority();

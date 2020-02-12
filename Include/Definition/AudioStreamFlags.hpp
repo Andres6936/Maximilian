@@ -50,15 +50,15 @@ namespace Maximilian
 	{
 		None,
 		// Use non-interleaved buffers (default = interleaved).
-				RTAUDIO_NONINTERLEAVED = 0x1,
+				Non_Interleaved = 0x1,
 		// Attempt to set stream parameters for lowest possible latency.
-				RTAUDIO_MINIMIZE_LATENCY = 0x2,
+				Minimize_Latency = 0x2,
 		// Attempt grab device and prevent use by others.
-				RTAUDIO_HOG_DEVICE = 0x4,
+				HOG_Device = 0x4,
 		// Try to select realtime scheduling for callback thread.
-				RTAUDIO_SCHEDULE_REALTIME = 0x8,
+				Schedule_Realtime = 0x8,
 		// Use the "default" PCM device (ALSA only).
-				RTAUDIO_ALSA_USE_DEFAULT = 0x10,
+				Alsa_Use_Default = 0x10,
 	};
 }
 
