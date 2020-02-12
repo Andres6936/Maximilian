@@ -1277,7 +1277,6 @@ void LinuxAlsa::callbackEvent()
 	}
 
 	int doStopStream = 0;
-	RtAudioCallback callback = (RtAudioCallback)stream_.callbackInfo.callback;
 	double streamTime = getStreamTime();
 	AudioStreamStatus status = 0;
 	if (stream_.mode != StreamMode::INPUT && apiInfo->xrun[0] == true)
@@ -1290,8 +1289,23 @@ void LinuxAlsa::callbackEvent()
 		status |= RTAUDIO_INPUT_OVERFLOW;
 		apiInfo->xrun[1] = false;
 	}
-	doStopStream = callback(stream_.userBuffer[0], stream_.userBuffer[1],
-			stream_.bufferSize, streamTime, status, stream_.callbackInfo.userData);
+
+	// Start Callback Function
+
+	std::vector <double> data(2, 0);
+
+	// Write interleaved audio data.
+	for (int i = 0; i < stream_.bufferSize; i++)
+	{
+		play(data);
+
+		for (int j = 0; j < 2; j++)
+		{
+			*(stream_.userBuffer[0])++ = data[j];
+		}
+	}
+
+	// End Callback Function
 
 	if (doStopStream == 2)
 	{

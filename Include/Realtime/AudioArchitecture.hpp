@@ -105,7 +105,7 @@ namespace Maximilian
 
 		virtual DeviceInfo getDeviceInfo(int device) = 0;
 
-		void openStream(RtAudioCallback callback, void* userData);
+		void openStream(void _functionUser(std::vector <double>&));
 
 		virtual void closeStream();
 
@@ -162,6 +162,8 @@ namespace Maximilian
 
 		static const unsigned int MAX_SAMPLE_RATES;
 		static const unsigned int SAMPLE_RATES[];
+
+		std::function <void(std::vector <double>&)> play;
 
 		enum
 		{

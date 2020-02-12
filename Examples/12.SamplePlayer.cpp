@@ -15,43 +15,14 @@ void setup()
 
 }
 
-void play(double* output)
-{//this is where the magic happens. Very slow magic.
-
+void play(std::vector <double>& output)
+{
 	//output[0]=beats.play();//just play the file. Looping is default for all play functions.
 	output[0] = beats.play(0.68);//play the file with a speed setting. 1. is normal speed.
 	//output[0]=beats.play(0.5,0,44100);//linear interpolationplay with a frequency input, start point and end point. Useful for syncing.
 	//output[0]=beats.play4(0.5,0,44100);//cubic interpolation play with a frequency input, start point and end point. Useful for syncing.
 
 	output[1] = output[0];
-}
-
-
-int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-		double streamTime, AudioStreamStatus status, void* userData)
-{
-
-	unsigned int i, j;
-	double* buffer = (double*)outputBuffer;
-	double* lastValues = (double*)userData;
-	//	double currentTime = (double) streamTime; Might come in handy for control
-	if (status)
-	{
-		std::cout << "Stream underflow detected!" << std::endl;
-	}
-	for (i = 0; i < nBufferFrames; i++)
-	{
-	}
-	// Write interleaved audio data.
-	for (i = 0; i < nBufferFrames; i++)
-	{
-		play(lastValues);
-		for (j = 0; j < Settings::CHANNELS; j++)
-		{
-			*buffer++ = lastValues[j];
-		}
-	}
-	return 0;
 }
 
 int main()
@@ -64,7 +35,7 @@ int main()
 
 	try
 	{
-		audio.openStream(&routing, (void*)&(data[0]));
+		audio.openStream(play);
 
 		audio.startStream();
 	}

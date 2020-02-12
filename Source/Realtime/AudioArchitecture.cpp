@@ -34,7 +34,7 @@ void AudioArchitecture::assertThatStreamIsNotOpen()
 }
 
 
-void AudioArchitecture::openStream(RtAudioCallback callback, void* userData)
+void AudioArchitecture::openStream(void _functionUser(std::vector <double>&))
 {
 	assertThatStreamIsNotOpen();
 
@@ -44,11 +44,10 @@ void AudioArchitecture::openStream(RtAudioCallback callback, void* userData)
 			outputParameters.getNChannels(),
 			outputParameters.getFirstChannel());
 
+	play = _functionUser;
+
 	if (result == false)
 	{ error(Exception::SYSTEM_ERROR); }
-
-	stream_.callbackInfo.callback = (void*)callback;
-	stream_.callbackInfo.userData = userData;
 
 	if (getOptionsFlags() != AudioStreamFlags::None)
 	{ options.setNumberOfBuffers(stream_.nBuffers); }

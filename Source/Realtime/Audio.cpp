@@ -194,9 +194,9 @@ Audio::~Audio() throw()
 	delete audioArchitecture;
 }
 
-void Audio::openStream(RtAudioCallback callback, void* userData)
+void Audio::openStream(void _functionUser(std::vector <double>&))
 {
-	return audioArchitecture->openStream(callback, userData);
+	return audioArchitecture->openStream(_functionUser);
 }
 
 #if defined(__MACOSX_CORE__)
