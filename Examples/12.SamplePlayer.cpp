@@ -1,5 +1,7 @@
 #include "Maximilian.hpp"
 
+#include <vector>
+
 using namespace Maximilian;
 
 Sample beats; //We give our sample a name. It's called beats this time. We could have loads of them, but they have to have different names.
@@ -58,15 +60,11 @@ int main()
 
 	Audio audio(SupportedArchitectures::Windows_Ds);
 
-	unsigned int sampleRate = Settings::SAMPLE_RATE;
-	unsigned int bufferFrames = Settings::BUFFER_SIZE;
-	//double data[maxiSettings::channels];
-	vector <double> data(Settings::CHANNELS, 0);
+	std::vector <double> data(Settings::CHANNELS, 0);
 
 	try
 	{
-		audio.openStream(RTAUDIO_FLOAT64,
-				sampleRate, &bufferFrames, &routing, (void*)&(data[0]));
+		audio.openStream(RTAUDIO_FLOAT64, &routing, (void*)&(data[0]));
 
 		audio.startStream();
 	}

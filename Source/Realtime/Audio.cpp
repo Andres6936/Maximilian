@@ -196,14 +196,11 @@ Audio::~Audio() throw()
 
 void Audio::openStream(
 		AudioFormat format,
-		unsigned int sampleRate,
-		unsigned int* bufferFrames,
 		RtAudioCallback callback,
 		void* userData,
 		StreamOptions* options)
 {
-	return audioArchitecture->openStream(format,
-			sampleRate, bufferFrames, callback, userData, options);
+	return audioArchitecture->openStream(format, callback, userData, options);
 }
 
 #if defined(__MACOSX_CORE__)

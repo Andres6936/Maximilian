@@ -220,8 +220,7 @@ namespace Maximilian
 				 lowest allowable value is used.  The actual value used is
 				 returned via the structure argument.  The parameter is API dependent.
 		*/
-		void openStream(AudioFormat format, unsigned int sampleRate,
-				unsigned int* bufferFrames, RtAudioCallback callback,
+		void openStream(AudioFormat format, RtAudioCallback callback,
 				void* userData = nullptr, StreamOptions* options = nullptr);
 
 		//! A function that closes a stream and frees any associated stream memory.

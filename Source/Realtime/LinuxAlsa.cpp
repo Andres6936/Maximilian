@@ -395,9 +395,12 @@ void LinuxAlsa::saveDeviceInfo()
 	}
 }
 
-bool LinuxAlsa::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
-		unsigned int firstChannel, unsigned int sampleRate,
-		AudioFormat format, unsigned int* bufferSize,
+bool LinuxAlsa::probeDeviceOpen(
+		unsigned int device,
+		StreamMode mode,
+		unsigned int channels,
+		unsigned int firstChannel,
+		AudioFormat format,
 		StreamOptions* options)
 {
 #if defined(__RTAUDIO_DEBUG__)
@@ -734,7 +737,7 @@ setFormat:
 
 	// Set the buffer (or period) size.
 	int dir = 0;
-	snd_pcm_uframes_t periodSize = *bufferSize;
+	snd_pcm_uframes_t periodSize = bufferFrames;
 	result = snd_pcm_hw_params_set_period_size_near(phandle, hw_params, &periodSize, &dir);
 	if (result < 0)
 	{
@@ -744,7 +747,8 @@ setFormat:
 		errorText_ = errorStream_.str();
 		return FAILURE;
 	}
-	*bufferSize = periodSize;
+
+	bufferFrames = periodSize;
 
 	// Set the buffer number, which in ALSA is referred to as the "period".
 	unsigned int periods = 0;
@@ -766,7 +770,7 @@ setFormat:
 
 	// If attempting to setup a duplex stream, the bufferSize parameter
 	// MUST be the same in both directions!
-	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT && *bufferSize != stream_.bufferSize)
+	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT && bufferFrames != stream_.bufferSize)
 	{
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: system error setting buffer size for duplex stream on device ("
 					 << name << ").";
@@ -774,7 +778,7 @@ setFormat:
 		return FAILURE;
 	}
 
-	stream_.bufferSize = *bufferSize;
+	stream_.bufferSize = bufferFrames;
 
 	// Install the hardware configuration
 	result = snd_pcm_hw_params(phandle, hw_params);
@@ -796,7 +800,7 @@ setFormat:
 	snd_pcm_sw_params_t* sw_params = NULL;
 	snd_pcm_sw_params_alloca(&sw_params);
 	snd_pcm_sw_params_current(phandle, sw_params);
-	snd_pcm_sw_params_set_start_threshold(phandle, sw_params, *bufferSize);
+	snd_pcm_sw_params_set_start_threshold(phandle, sw_params, bufferFrames);
 	snd_pcm_sw_params_set_stop_threshold(phandle, sw_params, ULONG_MAX);
 	snd_pcm_sw_params_set_silence_threshold(phandle, sw_params, 0);
 
@@ -873,7 +877,7 @@ setFormat:
 
 	// Allocate necessary internal buffers.
 	unsigned long bufferBytes;
-	bufferBytes = stream_.nUserChannels[index] * *bufferSize * formatBytes(stream_.userFormat);
+	bufferBytes = stream_.nUserChannels[index] * bufferFrames * formatBytes(stream_.userFormat);
 	stream_.userBuffer[index] = (char*)calloc(bufferBytes, 1);
 	if (stream_.userBuffer[index] == NULL)
 	{
@@ -898,7 +902,7 @@ setFormat:
 
 		if (makeBuffer)
 		{
-			bufferBytes *= *bufferSize;
+			bufferBytes *= bufferFrames;
 			if (stream_.deviceBuffer)
 			{ free(stream_.deviceBuffer); }
 			stream_.deviceBuffer = (char*)calloc(bufferBytes, 1);

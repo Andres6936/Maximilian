@@ -20,6 +20,18 @@ namespace Maximilian
 	class AudioArchitecture
 	{
 
+	protected:
+
+		/**
+		 * The desired sample rate (sample frames per second).
+		 */
+		unsigned int sampleRate = 44'100;
+
+		/*
+		 * The desired internal buffer size in sample frames.
+		 */
+		unsigned int bufferFrames = 1'024;
+
 	private:
 
 		/**
@@ -62,8 +74,7 @@ namespace Maximilian
 
 		virtual DeviceInfo getDeviceInfo(int device) = 0;
 
-		void openStream(AudioFormat format, unsigned int sampleRate,
-				unsigned int* bufferFrames, RtAudioCallback callback,
+		void openStream(AudioFormat format, RtAudioCallback callback,
 				void* userData, StreamOptions* options);
 
 		virtual void closeStream();
@@ -123,9 +134,12 @@ namespace Maximilian
 		  "warning" message is reported and FAILURE is returned. A
 		  successful probe is indicated by a return value of SUCCESS.
 		*/
-		virtual bool probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
-				unsigned int firstChannel, unsigned int sampleRate,
-				AudioFormat format, unsigned int* bufferSize,
+		virtual bool probeDeviceOpen(
+				unsigned int device,
+				StreamMode mode,
+				unsigned int channels,
+				unsigned int firstChannel,
+				AudioFormat format,
 				StreamOptions* options);
 
 		//! A protected function used to increment the stream time.
