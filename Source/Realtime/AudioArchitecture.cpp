@@ -53,7 +53,7 @@ void AudioArchitecture::assertThatTheFormatOfBytesIsGreaterThatZero(const AudioF
 
 
 void AudioArchitecture::openStream(AudioFormat format,
-		RtAudioCallback callback, void* userData, StreamOptions* options)
+		RtAudioCallback callback, void* userData)
 {
 	assertThatStreamIsNotOpen();
 	assertThatTheFormatOfBytesIsGreaterThatZero(format);
@@ -65,7 +65,7 @@ void AudioArchitecture::openStream(AudioFormat format,
 			StreamMode::OUTPUT,
 			outputParameters.getNChannels(),
 			outputParameters.getFirstChannel(),
-			format, options);
+			format);
 
 	if (result == false)
 	{ error(Exception::SYSTEM_ERROR); }
@@ -73,8 +73,8 @@ void AudioArchitecture::openStream(AudioFormat format,
 	stream_.callbackInfo.callback = (void*)callback;
 	stream_.callbackInfo.userData = userData;
 
-	if (options)
-	{ options->numberOfBuffers = stream_.nBuffers; }
+	if (getOptionsFlags() != AudioStreamFlags::None)
+	{ options.setNumberOfBuffers(stream_.nBuffers); }
 	stream_.state = StreamState::STREAM_STOPPED;
 }
 
@@ -101,8 +101,7 @@ bool AudioArchitecture::probeDeviceOpen(
 		StreamMode mode,
 		unsigned int channels,
 		unsigned int firstChannel,
-		Maximilian::AudioFormat format,
-		StreamOptions* options)
+		Maximilian::AudioFormat format)
 {
 	// MUST be implemented in subclasses!
 	return FAILURE;
@@ -1017,4 +1016,24 @@ void AudioArchitecture::setSampleRate(unsigned int _sampleRate)
 void AudioArchitecture::setBufferFrames(unsigned int _bufferFrames)
 {
 	bufferFrames = _bufferFrames;
+}
+
+AudioStreamFlags AudioArchitecture::getOptionsFlags() const
+{
+	return options.getFlags();
+}
+
+int AudioArchitecture::getOptionsPriority() const
+{
+	return options.getPriority();
+}
+
+unsigned int AudioArchitecture::getNumberOfBuffersOptions() const
+{
+	return options.getNumberOfBuffers();
+}
+
+void AudioArchitecture::setNumberOfBuffersOptions(unsigned int _numberOfBuffers)
+{
+	options.setNumberOfBuffers(_numberOfBuffers);
 }

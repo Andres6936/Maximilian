@@ -51,8 +51,7 @@ namespace Maximilian
 				StreamMode mode,
 				unsigned int channels,
 				unsigned int firstChannel,
-				AudioFormat format,
-				StreamOptions* options) override;
+				AudioFormat format) override;
 	};
 }
 

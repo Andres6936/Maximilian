@@ -43,6 +43,25 @@ namespace Maximilian
 		StreamParameters inputParameters;
 
 		/**
+		 *  Enum that content various global stream options, including
+		 *  a list of OR'ed RtAudioStreamFlags and a suggested number
+		 *  of stream buffers that can be used to control stream latency.
+		 *  More buffers typically result in more robust performance,
+		 *  though at a cost of greater latency.
+		 *
+		 *  If a value of zero is specified, a system-specific median
+		 *  value is chosen.
+		 *
+		 *  If the RTAUDIO_MINIMIZE_LATENCY flag bit is set, the lowest
+		 *  allowable value is used.
+		 *
+		 *  The actual value used is returned via the structure argument.
+		 *
+		 *  The parameter is API dependent.
+		 */
+		StreamOptions options;
+
+		/**
 		 * The desired sample rate (sample frames per second).
 		 */
 		unsigned int sampleRate = 44'100;
@@ -72,8 +91,7 @@ namespace Maximilian
 
 		virtual DeviceInfo getDeviceInfo(int device) = 0;
 
-		void openStream(AudioFormat format, RtAudioCallback callback,
-				void* userData, StreamOptions* options);
+		void openStream(AudioFormat format, RtAudioCallback callback, void* userData);
 
 		virtual void closeStream();
 
@@ -104,13 +122,25 @@ namespace Maximilian
 			showWarnings_ = value;
 		};
 
+		// Getters
+
+		int getOptionsPriority() const;
+
 		unsigned int getSampleRate() const;
 
 		unsigned int getBufferFrames() const;
 
+		unsigned int getNumberOfBuffersOptions() const;
+
+		AudioStreamFlags getOptionsFlags() const;
+
+		// Setters
+
 		void setSampleRate(unsigned int _sampleRate);
 
 		void setBufferFrames(unsigned int _bufferFrames);
+
+		void setNumberOfBuffersOptions(unsigned int _numberOfBuffers);
 
 	protected:
 
@@ -144,8 +174,7 @@ namespace Maximilian
 				StreamMode mode,
 				unsigned int channels,
 				unsigned int firstChannel,
-				AudioFormat format,
-				StreamOptions* options);
+				AudioFormat format);
 
 		//! A protected function used to increment the stream time.
 		void tickStreamTime();

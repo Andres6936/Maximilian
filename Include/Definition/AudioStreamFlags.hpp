@@ -46,14 +46,20 @@ namespace Maximilian
 			open the "default" PCM device when using the ALSA API. Note that this
 			will override any specified input or output device id.
 		*/
-	using AudioStreamFlags = unsigned int;
-
-	static constexpr AudioStreamFlags RTAUDIO_NONINTERLEAVED = 0x1;    // Use non-interleaved buffers (default = interleaved).
-	static constexpr AudioStreamFlags RTAUDIO_MINIMIZE_LATENCY = 0x2;  // Attempt to set stream parameters for lowest possible latency.
-	static constexpr AudioStreamFlags RTAUDIO_HOG_DEVICE = 0x4;        // Attempt grab device and prevent use by others.
-	static constexpr AudioStreamFlags RTAUDIO_SCHEDULE_REALTIME = 0x8; // Try to select realtime scheduling for callback thread.
-	static constexpr AudioStreamFlags RTAUDIO_ALSA_USE_DEFAULT = 0x10; // Use the "default" PCM device (ALSA only).
-
+	enum class AudioStreamFlags : unsigned int
+	{
+		None,
+		// Use non-interleaved buffers (default = interleaved).
+				RTAUDIO_NONINTERLEAVED = 0x1,
+		// Attempt to set stream parameters for lowest possible latency.
+				RTAUDIO_MINIMIZE_LATENCY = 0x2,
+		// Attempt grab device and prevent use by others.
+				RTAUDIO_HOG_DEVICE = 0x4,
+		// Try to select realtime scheduling for callback thread.
+				RTAUDIO_SCHEDULE_REALTIME = 0x8,
+		// Use the "default" PCM device (ALSA only).
+				RTAUDIO_ALSA_USE_DEFAULT = 0x10,
+	};
 }
 
 #endif //MAXIMILIAN_AUDIOSTREAMFLAGS_HPP

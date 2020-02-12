@@ -197,10 +197,9 @@ Audio::~Audio() throw()
 void Audio::openStream(
 		AudioFormat format,
 		RtAudioCallback callback,
-		void* userData,
-		StreamOptions* options)
+		void* userData)
 {
-	return audioArchitecture->openStream(format, callback, userData, options);
+	return audioArchitecture->openStream(format, callback, userData);
 }
 
 #if defined(__MACOSX_CORE__)

@@ -400,8 +400,7 @@ bool LinuxAlsa::probeDeviceOpen(
 		StreamMode mode,
 		unsigned int channels,
 		unsigned int firstChannel,
-		AudioFormat format,
-		StreamOptions* options)
+		AudioFormat format)
 {
 #if defined(__RTAUDIO_DEBUG__)
 	snd_output_t *out;
@@ -418,7 +417,7 @@ bool LinuxAlsa::probeDeviceOpen(
 	char name[64];
 	snd_ctl_t* chandle;
 
-	if (options && options->flags & RTAUDIO_ALSA_USE_DEFAULT)
+	if (getOptionsFlags() == AudioStreamFlags::RTAUDIO_ALSA_USE_DEFAULT)
 	{
 		snprintf(name, sizeof(name), "%s", "default");
 	}
@@ -533,7 +532,7 @@ foundDevice:
 #endif
 
 	// Set access ... check user preference.
-	if (options && options->flags & RTAUDIO_NONINTERLEAVED)
+	if (getOptionsFlags() == AudioStreamFlags::RTAUDIO_NONINTERLEAVED)
 	{
 		stream_.userInterleaved = false;
 		result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_NONINTERLEAVED);
@@ -755,10 +754,12 @@ setFormat:
 
 	// Set the buffer number, which in ALSA is referred to as the "period".
 	unsigned int periods = 0;
-	if (options && options->flags & RTAUDIO_MINIMIZE_LATENCY)
+	if (getOptionsFlags() == AudioStreamFlags::RTAUDIO_MINIMIZE_LATENCY)
 	{ periods = 2; }
-	if (options && options->numberOfBuffers > 0)
-	{ periods = options->numberOfBuffers; }
+
+	if (getNumberOfBuffersOptions() > 0)
+	{ periods = getNumberOfBuffersOptions(); }
+
 	if (periods < 2)
 	{ periods = 4; } // a fairly safe default value
 	result = snd_pcm_hw_params_set_periods_near(phandle, hw_params, &periods, &dir);
@@ -960,10 +961,10 @@ setFormat:
 		pthread_attr_init(&attr);
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 #ifdef SCHED_RR // Undefined with some OSes (eg: NetBSD 1.6.x with GNU Pthread)
-		if (options && options->flags & RTAUDIO_SCHEDULE_REALTIME)
+		if (getOptionsFlags() == AudioStreamFlags::RTAUDIO_SCHEDULE_REALTIME)
 		{
 			struct sched_param param;
-			int priority = options->priority;
+			int priority = getOptionsPriority();
 			int min = sched_get_priority_min(SCHED_RR);
 			int max = sched_get_priority_max(SCHED_RR);
 			if (priority < min)

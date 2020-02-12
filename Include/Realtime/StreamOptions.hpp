@@ -84,13 +84,9 @@ namespace Maximilian
 		unsigned int numberOfBuffers = 0;
 
 		/**
-		 * A bit-mask of stream flags
-		 * (RTAUDIO_NONINTERLEAVED,
-		 * RTAUDIO_MINIMIZE_LATENCY,
-		 * RTAUDIO_HOG_DEVICE,
-		 * RTAUDIO_ALSA_USE_DEFAULT).
+		 * A bit-mask of stream flags.
 		 */
-		AudioStreamFlags flags = 0;
+		AudioStreamFlags flags = AudioStreamFlags::None;
 
 		/**
 		 * A stream name (currently used only in Jack).
@@ -99,6 +95,18 @@ namespace Maximilian
 
 		// Default constructor.
 		StreamOptions() = default;
+
+		// Getters
+
+		[[nodiscard]] int getPriority() const;
+
+		[[nodiscard]] unsigned int getNumberOfBuffers() const;
+
+		[[nodiscard]] AudioStreamFlags getFlags() const;
+
+		// Setters
+
+		void setNumberOfBuffers(unsigned int _numberOfBuffers);
 
 	};
 }
