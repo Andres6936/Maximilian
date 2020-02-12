@@ -23,6 +23,16 @@ namespace Maximilian
 	private:
 
 		/**
+		 * The desired sample rate (sample frames per second).
+		 */
+		unsigned int sampleRate = 44'100;
+
+		/*
+		 * The desired internal buffer size in sample frames.
+		 */
+		unsigned int bufferFrames = 1'024;
+
+		/**
 		 * Specifies output stream parameters to use when opening a
 		 * stream, including a device ID, number of channels, and
 		 * starting channel number.  For input-only streams, this
@@ -62,15 +72,8 @@ namespace Maximilian
 		StreamOptions options;
 
 		/**
-		 * The desired sample rate (sample frames per second).
+		 * Specifying the desired sample data format.
 		 */
-		unsigned int sampleRate = 44'100;
-
-		/*
-		 * The desired internal buffer size in sample frames.
-		 */
-		unsigned int bufferFrames = 1'024;
-
 		AudioFormat format = RTAUDIO_FLOAT64;
 
 		void assertThatStreamIsNotOpen();
