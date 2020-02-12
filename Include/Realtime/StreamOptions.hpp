@@ -72,16 +72,33 @@ namespace Maximilian
 
 	public:
 
-		int priority;                   /*!< Scheduling priority of callback thread (only used with flag RTAUDIO_SCHEDULE_REALTIME). */
-		unsigned int numberOfBuffers;  /*!< Number of stream buffers. */
-		AudioStreamFlags flags;      /*!< A bit-mask of stream flags (RTAUDIO_NONINTERLEAVED, RTAUDIO_MINIMIZE_LATENCY, RTAUDIO_HOG_DEVICE, RTAUDIO_ALSA_USE_DEFAULT). */
-		std::string streamName;        /*!< A stream name (currently used only in Jack). */
+		/**
+		 * Scheduling priority of callback thread
+		 * (only used with flag RTAUDIO_SCHEDULE_REALTIME).
+		 */
+		int priority = 0;
+
+		/**
+		 * Number of stream buffers.
+		 */
+		unsigned int numberOfBuffers = 0;
+
+		/**
+		 * A bit-mask of stream flags
+		 * (RTAUDIO_NONINTERLEAVED,
+		 * RTAUDIO_MINIMIZE_LATENCY,
+		 * RTAUDIO_HOG_DEVICE,
+		 * RTAUDIO_ALSA_USE_DEFAULT).
+		 */
+		AudioStreamFlags flags = 0;
+
+		/**
+		 * A stream name (currently used only in Jack).
+		 */
+		std::string streamName;
 
 		// Default constructor.
-		StreamOptions()
-				: flags(0), numberOfBuffers(0), priority(0)
-		{
-		}
+		StreamOptions() = default;
 
 	};
 }
