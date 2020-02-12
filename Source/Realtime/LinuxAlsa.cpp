@@ -399,8 +399,7 @@ bool LinuxAlsa::probeDeviceOpen(
 		unsigned int device,
 		StreamMode mode,
 		unsigned int channels,
-		unsigned int firstChannel,
-		AudioFormat format)
+		unsigned int firstChannel)
 {
 #if defined(__RTAUDIO_DEBUG__)
 	snd_output_t *out;
@@ -571,37 +570,37 @@ foundDevice:
 	}
 
 	// Determine how to set the device format.
-	stream_.userFormat = format;
+	stream_.userFormat = getAudioFormat();
 	snd_pcm_format_t deviceFormat = SND_PCM_FORMAT_UNKNOWN;
 
-	if (format == RTAUDIO_SINT8)
+	if (getAudioFormat() == RTAUDIO_SINT8)
 	{
 		deviceFormat = SND_PCM_FORMAT_S8;
 	}
-	else if (format == RTAUDIO_SINT16)
+	else if (getAudioFormat() == RTAUDIO_SINT16)
 	{
 		deviceFormat = SND_PCM_FORMAT_S16;
 	}
-	else if (format == RTAUDIO_SINT24)
+	else if (getAudioFormat() == RTAUDIO_SINT24)
 	{
 		deviceFormat = SND_PCM_FORMAT_S24;
 	}
-	else if (format == RTAUDIO_SINT32)
+	else if (getAudioFormat() == RTAUDIO_SINT32)
 	{
 		deviceFormat = SND_PCM_FORMAT_S32;
 	}
-	else if (format == RTAUDIO_FLOAT32)
+	else if (getAudioFormat() == RTAUDIO_FLOAT32)
 	{
 		deviceFormat = SND_PCM_FORMAT_FLOAT;
 	}
-	else if (format == RTAUDIO_FLOAT64)
+	else if (getAudioFormat() == RTAUDIO_FLOAT64)
 	{
 		deviceFormat = SND_PCM_FORMAT_FLOAT64;
 	}
 
 	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
 	{
-		stream_.deviceFormat[index] = format;
+		stream_.deviceFormat[index] = getAudioFormat();
 		goto setFormat;
 	}
 

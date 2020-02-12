@@ -78,8 +78,6 @@ namespace Maximilian
 
 		void assertThatStreamIsNotOpen();
 
-		void assertThatTheFormatOfBytesIsGreaterThatZero(AudioFormat _format);
-
 	public:
 
 		AudioArchitecture();
@@ -137,6 +135,8 @@ namespace Maximilian
 
 		unsigned int getNumberOfBuffersOptions() const;
 
+		AudioFormat getAudioFormat() const;
+
 		AudioStreamFlags getOptionsFlags() const;
 
 		// Setters
@@ -178,8 +178,7 @@ namespace Maximilian
 				unsigned int device,
 				StreamMode mode,
 				unsigned int channels,
-				unsigned int firstChannel,
-				AudioFormat format);
+				unsigned int firstChannel);
 
 		//! A protected function used to increment the stream time.
 		void tickStreamTime();

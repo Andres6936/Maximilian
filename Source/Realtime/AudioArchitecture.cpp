@@ -41,21 +41,9 @@ void AudioArchitecture::assertThatStreamIsNotOpen()
 }
 
 
-void AudioArchitecture::assertThatTheFormatOfBytesIsGreaterThatZero(const AudioFormat _format)
-{
-	if (formatBytes(_format) == 0)
-	{
-		Levin::Error() << "Assert: OpenStream, 'format' parameter "
-						  "value is undefined." << Levin::endl;
-		throw "FormatValueIsUndefinedException";
-	}
-}
-
-
 void AudioArchitecture::openStream(RtAudioCallback callback, void* userData)
 {
 	assertThatStreamIsNotOpen();
-	assertThatTheFormatOfBytesIsGreaterThatZero(format);
 
 	clearStreamInfo();
 
@@ -63,8 +51,7 @@ void AudioArchitecture::openStream(RtAudioCallback callback, void* userData)
 			outputParameters.getDeviceId(),
 			StreamMode::OUTPUT,
 			outputParameters.getNChannels(),
-			outputParameters.getFirstChannel(),
-			format);
+			outputParameters.getFirstChannel());
 
 	if (result == false)
 	{ error(Exception::SYSTEM_ERROR); }
@@ -99,8 +86,7 @@ bool AudioArchitecture::probeDeviceOpen(
 		unsigned int device,
 		StreamMode mode,
 		unsigned int channels,
-		unsigned int firstChannel,
-		Maximilian::AudioFormat format)
+		unsigned int firstChannel)
 {
 	// MUST be implemented in subclasses!
 	return FAILURE;
@@ -1035,4 +1021,9 @@ unsigned int AudioArchitecture::getNumberOfBuffersOptions() const
 void AudioArchitecture::setNumberOfBuffersOptions(unsigned int _numberOfBuffers)
 {
 	options.setNumberOfBuffers(_numberOfBuffers);
+}
+
+AudioFormat AudioArchitecture::getAudioFormat() const
+{
+	return format;
 }
