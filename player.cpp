@@ -39,7 +39,7 @@ int routing(const void *inputBuffer,
 #elif defined(MAXIMILIAN_RT_AUDIO)
 
 int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-		double streamTime, Maximilian::RtAudioStreamStatus status, void* userData)
+		double streamTime, Maximilian::AudioStreamStatus status, void* userData)
 {
 #endif
 

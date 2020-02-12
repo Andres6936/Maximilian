@@ -49,6 +49,7 @@
 
 #include "Exception.h"
 #include "Definition/AudioFormat.hpp"
+#include "Definition//AudioStreamStatus.hpp"
 
 namespace Maximilian
 {
@@ -97,19 +98,6 @@ namespace Maximilian
 		*/
 	using RtAudioStreamFlags = unsigned int;
 
-	/*! \typedef typedef unsigned long RtAudioStreamStatus;
-			\brief RtAudio stream status (over- or underflow) flags.
-
-			Notification of a stream over- or underflow is indicated by a
-			non-zero stream \c status argument in the RtAudioCallback function.
-			The stream status can be one of the following two options,
-			depending on whether the stream is open for output and/or input:
-
-			- \e RTAUDIO_INPUT_OVERFLOW:   Input data was discarded because of an overflow condition at the driver.
-			- \e RTAUDIO_OUTPUT_UNDERFLOW: The output buffer ran low, likely producing a break in the output sound.
-		*/
-	using RtAudioStreamStatus = unsigned int;
-
 	/*!
 		   All RtAudio clients must create a function of type RtAudioCallback
 		   to read and/or write data from/to the audio stream.  When the
@@ -151,7 +139,7 @@ namespace Maximilian
 	typedef int (* RtAudioCallback)(void* outputBuffer, void* inputBuffer,
 			unsigned int nFrames,
 			double streamTime,
-			RtAudioStreamStatus status,
+			AudioStreamStatus status,
 			void* userData);
 
 	class AudioArchitecture;
@@ -195,7 +183,7 @@ namespace Maximilian
 		struct StreamParameters
 		{
 			unsigned int deviceId = 0;     /*!< Device index (0 to getDeviceCount() - 1). */
-			unsigned int nChannels = 0;    /*!< Number of channels. */
+			unsigned int nChannels = 2;    /*!< Number of channels. */
 			unsigned int firstChannel = 0; /*!< First channel index on device (default = 0). */
 
 			// Default constructor.
@@ -477,9 +465,6 @@ static const Maximilian::RtAudioStreamFlags RTAUDIO_MINIMIZE_LATENCY = 0x2;  // 
 static const Maximilian::RtAudioStreamFlags RTAUDIO_HOG_DEVICE = 0x4;        // Attempt grab device and prevent use by others.
 static const Maximilian::RtAudioStreamFlags RTAUDIO_SCHEDULE_REALTIME = 0x8; // Try to select realtime scheduling for callback thread.
 static const Maximilian::RtAudioStreamFlags RTAUDIO_ALSA_USE_DEFAULT = 0x10; // Use the "default" PCM device (ALSA only).
-
-static const Maximilian::RtAudioStreamStatus RTAUDIO_INPUT_OVERFLOW = 0x1;    // Input data was discarded because of an overflow condition at the driver.
-static const Maximilian::RtAudioStreamStatus RTAUDIO_OUTPUT_UNDERFLOW = 0x2;  // The output buffer ran low, likely causing a gap in the output sound.
 
 //! RtAudio callback function prototype.
 

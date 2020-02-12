@@ -1281,7 +1281,7 @@ void LinuxAlsa::callbackEvent()
 	int doStopStream = 0;
 	RtAudioCallback callback = (RtAudioCallback)stream_.callbackInfo.callback;
 	double streamTime = getStreamTime();
-	RtAudioStreamStatus status = 0;
+	AudioStreamStatus status = 0;
 	if (stream_.mode != StreamMode::INPUT && apiInfo->xrun[0] == true)
 	{
 		status |= RTAUDIO_OUTPUT_UNDERFLOW;

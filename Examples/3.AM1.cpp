@@ -25,7 +25,7 @@ void play(double* output)
 
 
 int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-		double streamTime, RtAudioStreamStatus status, void* userData)
+		double streamTime, AudioStreamStatus status, void* userData)
 {
 
 	unsigned int i, j;
