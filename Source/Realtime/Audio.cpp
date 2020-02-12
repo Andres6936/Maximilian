@@ -5918,12 +5918,12 @@ DeviceInfo Audio::getDeviceInfo(unsigned int device)
 
 unsigned int Audio::getDefaultInputDevice() throw()
 {
-	return audioArchitecture->getDefaultInputDevice();
+	return AudioArchitecture::getDefaultInputDevice();
 }
 
 unsigned int Audio::getDefaultOutputDevice() throw()
 {
-	return audioArchitecture->getDefaultOutputDevice();
+	return AudioArchitecture::getDefaultOutputDevice();
 }
 
 void Audio::closeStream() throw()

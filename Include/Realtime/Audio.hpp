@@ -170,7 +170,7 @@ namespace Maximilian
 		  client's responsibility to verify that a device is available
 		  before attempting to open a stream.
 		*/
-		unsigned int getDefaultOutputDevice() throw();
+		static unsigned int getDefaultOutputDevice() throw();
 
 		//! A function that returns the index of the default input device.
 		/*!
@@ -180,7 +180,7 @@ namespace Maximilian
 		  client's responsibility to verify that a device is available
 		  before attempting to open a stream.
 		*/
-		unsigned int getDefaultInputDevice() throw();
+		static unsigned int getDefaultInputDevice() throw();
 
 		//! A public function for opening a stream with the specified parameters.
 		/*!
