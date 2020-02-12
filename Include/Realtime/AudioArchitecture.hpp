@@ -50,16 +50,16 @@ namespace Maximilian
 				StreamParameters& iParams,
 				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData, Audio::StreamOptions* options);
+				void* userData, StreamOptions* options);
 
 		void openStream(StreamParameters& oParams,
 				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData, Audio::StreamOptions* options);
+				void* userData, StreamOptions* options);
 
 		void openStream(AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData, Audio::StreamOptions* options);
+				void* userData, StreamOptions* options);
 
 		virtual void closeStream();
 
@@ -121,7 +121,7 @@ namespace Maximilian
 		virtual bool probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 				unsigned int firstChannel, unsigned int sampleRate,
 				AudioFormat format, unsigned int* bufferSize,
-				Audio::StreamOptions* options);
+				StreamOptions* options);
 
 		//! A protected function used to increment the stream time.
 		void tickStreamTime();

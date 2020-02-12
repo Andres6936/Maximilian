@@ -49,7 +49,7 @@ namespace Maximilian
 		bool probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 				unsigned int firstChannel, unsigned int sampleRate,
 				AudioFormat format, unsigned int* bufferSize,
-				Audio::StreamOptions* options) override;
+				StreamOptions* options) override;
 	};
 }
 

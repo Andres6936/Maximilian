@@ -226,7 +226,7 @@ void Audio::openStream(
 		unsigned int* bufferFrames,
 		RtAudioCallback callback,
 		void* userData,
-		Audio::StreamOptions* options)
+		StreamOptions* options)
 {
 	return audioArchitecture->openStream(format,
 			sampleRate, bufferFrames, callback, userData, options);

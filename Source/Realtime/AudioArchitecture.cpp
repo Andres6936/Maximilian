@@ -75,7 +75,7 @@ void AudioArchitecture::openStream(
 		Maximilian::AudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
 		Maximilian::RtAudioCallback callback, void* userData,
-		Audio::StreamOptions* options)
+		StreamOptions* options)
 {
 	assertThatStreamIsNotOpen();
 	assertThatChannelsAreGreaterThatOne(oParams);
@@ -112,7 +112,7 @@ void AudioArchitecture::openStream(
 }
 
 void AudioArchitecture::openStream(StreamParameters& oParams, AudioFormat format, unsigned int sampleRate,
-		unsigned int* bufferFrames, RtAudioCallback callback, void* userData, Audio::StreamOptions* options)
+		unsigned int* bufferFrames, RtAudioCallback callback, void* userData, StreamOptions* options)
 {
 	assertThatStreamIsNotOpen();
 	assertThatChannelsAreGreaterThatOne(oParams);
@@ -136,7 +136,7 @@ void AudioArchitecture::openStream(StreamParameters& oParams, AudioFormat format
 }
 
 void AudioArchitecture::openStream(AudioFormat format, unsigned int sampleRate, unsigned int* bufferFrames,
-		RtAudioCallback callback, void* userData, Audio::StreamOptions* options)
+		RtAudioCallback callback, void* userData, StreamOptions* options)
 {
 	assertThatStreamIsNotOpen();
 	assertThatTheFormatOfBytesIsGreaterThatZero(format);
@@ -178,7 +178,7 @@ void AudioArchitecture::closeStream(void)
 bool AudioArchitecture::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 		unsigned int firstChannel, unsigned int sampleRate,
 		Maximilian::AudioFormat format, unsigned int* bufferSize,
-		Audio::StreamOptions* options)
+		StreamOptions* options)
 {
 	// MUST be implemented in subclasses!
 	return FAILURE;

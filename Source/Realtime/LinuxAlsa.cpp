@@ -398,7 +398,7 @@ void LinuxAlsa::saveDeviceInfo()
 bool LinuxAlsa::probeDeviceOpen(unsigned int device, StreamMode mode, unsigned int channels,
 		unsigned int firstChannel, unsigned int sampleRate,
 		AudioFormat format, unsigned int* bufferSize,
-		Audio::StreamOptions* options)
+		StreamOptions* options)
 {
 #if defined(__RTAUDIO_DEBUG__)
 	snd_output_t *out;
