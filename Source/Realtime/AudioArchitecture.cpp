@@ -39,7 +39,7 @@ void AudioArchitecture::assertThatStreamIsNotOpen()
 }
 
 
-void AudioArchitecture::assertThatDeviceParameterIsNotInvalid(const Audio::StreamParameters& _parameters)
+void AudioArchitecture::assertThatDeviceParameterIsNotInvalid(const StreamParameters& _parameters)
 {
 	if (_parameters.deviceId >= getDeviceCount())
 	{
@@ -49,7 +49,7 @@ void AudioArchitecture::assertThatDeviceParameterIsNotInvalid(const Audio::Strea
 	}
 }
 
-void AudioArchitecture::assertThatChannelsAreGreaterThatOne(const Audio::StreamParameters& _parameters)
+void AudioArchitecture::assertThatChannelsAreGreaterThatOne(const StreamParameters& _parameters)
 {
 	if (_parameters.nChannels < 1)
 	{
@@ -70,8 +70,8 @@ void AudioArchitecture::assertThatTheFormatOfBytesIsGreaterThatZero(const AudioF
 }
 
 void AudioArchitecture::openStream(
-		Audio::StreamParameters& oParams,
-		Audio::StreamParameters& iParams,
+		StreamParameters& oParams,
+		StreamParameters& iParams,
 		Maximilian::AudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames,
 		Maximilian::RtAudioCallback callback, void* userData,
@@ -111,7 +111,7 @@ void AudioArchitecture::openStream(
 	stream_.state = StreamState::STREAM_STOPPED;
 }
 
-void AudioArchitecture::openStream(Audio::StreamParameters& oParams, AudioFormat format, unsigned int sampleRate,
+void AudioArchitecture::openStream(StreamParameters& oParams, AudioFormat format, unsigned int sampleRate,
 		unsigned int* bufferFrames, RtAudioCallback callback, void* userData, Audio::StreamOptions* options)
 {
 	assertThatStreamIsNotOpen();

@@ -26,9 +26,9 @@ namespace Maximilian
 
 		void assertThatTheFormatOfBytesIsGreaterThatZero(AudioFormat _format);
 
-		void assertThatDeviceParameterIsNotInvalid(const Audio::StreamParameters& _parameters);
+		void assertThatDeviceParameterIsNotInvalid(const StreamParameters& _parameters);
 
-		static void assertThatChannelsAreGreaterThatOne(const Audio::StreamParameters& _parameters);
+		static void assertThatChannelsAreGreaterThatOne(const StreamParameters& _parameters);
 
 	public:
 
@@ -46,13 +46,13 @@ namespace Maximilian
 
 		virtual DeviceInfo getDeviceInfo(int device) = 0;
 
-		void openStream(Audio::StreamParameters& oParams,
-				Audio::StreamParameters& iParams,
+		void openStream(StreamParameters& oParams,
+				StreamParameters& iParams,
 				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData, Audio::StreamOptions* options);
 
-		void openStream(Audio::StreamParameters& oParams,
+		void openStream(StreamParameters& oParams,
 				AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData, Audio::StreamOptions* options);

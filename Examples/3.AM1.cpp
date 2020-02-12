@@ -55,7 +55,7 @@ int main()
 {
 	Audio audio(SupportedArchitectures::Windows_Ds);
 
-	Audio::StreamParameters parameters;
+	StreamParameters parameters;
 	parameters.deviceId = audio.getDefaultOutputDevice();
 	parameters.nChannels = Settings::CHANNELS;
 	parameters.firstChannel = 0;

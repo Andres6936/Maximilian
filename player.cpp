@@ -128,7 +128,7 @@ int main()
 		exit(0);
 	}
 
-	Maximilian::Audio::StreamParameters parameters;
+	Maximilian::StreamParameters parameters;
 	parameters.deviceId = dac.getDefaultOutputDevice();
 	parameters.nChannels = Maximilian::Settings::CHANNELS;
 	parameters.firstChannel = 0;
