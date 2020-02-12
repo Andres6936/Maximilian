@@ -25,17 +25,17 @@ namespace Maximilian
 	enum class AudioFormat : unsigned long
 	{
 		// 8-bit signed integer.
-				RTAUDIO_SINT8 = 0x1,
+				SInt8 = 0x1,
 		// 16-bit signed integer.
-				RTAUDIO_SINT16 = 0x2,
+				SInt16 = 0x2,
 		// Lower 3 bytes of 32-bit signed integer.
-				RTAUDIO_SINT24 = 0x4,
+				SInt24 = 0x4,
 		// 32-bit signed integer.
-				RTAUDIO_SINT32 = 0x8,
+				SInt32 = 0x8,
 		// Normalized between plus/minus 1.0.
-				RTAUDIO_FLOAT32 = 0x10,
+				Float32 = 0x10,
 		// Normalized between plus/minus 1.0.
-				RTAUDIO_FLOAT64 = 0x20,
+				Float64 = 0x20,
 	};
 }
 

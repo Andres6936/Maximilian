@@ -163,7 +163,7 @@ void AudioArchitecture::clearStreamInfo()
 	stream_.sampleRate = 0;
 	stream_.bufferSize = 0;
 	stream_.nBuffers = 0;
-	stream_.userFormat = AudioFormat::RTAUDIO_FLOAT64;
+	stream_.userFormat = AudioFormat::Float64;
 	stream_.userInterleaved = true;
 	stream_.streamTime = 0.0;
 	stream_.apiHandle = 0;
@@ -180,14 +180,14 @@ void AudioArchitecture::clearStreamInfo()
 		stream_.nUserChannels[i] = 0;
 		stream_.nDeviceChannels[i] = 0;
 		stream_.channelOffset[i] = 0;
-		stream_.deviceFormat[i] = AudioFormat::RTAUDIO_FLOAT64;
+		stream_.deviceFormat[i] = AudioFormat::Float64;
 		stream_.latency[i] = 0;
 		stream_.userBuffer[i] = 0;
 		stream_.convertInfo[i].channels = 0;
 		stream_.convertInfo[i].inJump = 0;
 		stream_.convertInfo[i].outJump = 0;
-		stream_.convertInfo[i].inFormat = AudioFormat::RTAUDIO_FLOAT64;
-		stream_.convertInfo[i].outFormat = AudioFormat::RTAUDIO_FLOAT64;
+		stream_.convertInfo[i].inFormat = AudioFormat::Float64;
+		stream_.convertInfo[i].outFormat = AudioFormat::Float64;
 		stream_.convertInfo[i].inOffset.clear();
 		stream_.convertInfo[i].outOffset.clear();
 	}
@@ -195,21 +195,21 @@ void AudioArchitecture::clearStreamInfo()
 
 unsigned int AudioArchitecture::formatBytes(AudioFormat _audioFormat)
 {
-	if (_audioFormat == AudioFormat::RTAUDIO_SINT16)
+	if (_audioFormat == AudioFormat::SInt16)
 	{
 		return 2;
 	}
-	else if (_audioFormat == AudioFormat::RTAUDIO_SINT24 ||
-			 _audioFormat == AudioFormat::RTAUDIO_SINT32 ||
-			 _audioFormat == AudioFormat::RTAUDIO_FLOAT32)
+	else if (_audioFormat == AudioFormat::SInt24 ||
+			 _audioFormat == AudioFormat::SInt32 ||
+			 _audioFormat == AudioFormat::Float32)
 	{
 		return 4;
 	}
-	else if (_audioFormat == AudioFormat::RTAUDIO_FLOAT64)
+	else if (_audioFormat == AudioFormat::Float64)
 	{
 		return 8;
 	}
-	else if (_audioFormat == AudioFormat::RTAUDIO_SINT8)
+	else if (_audioFormat == AudioFormat::SInt8)
 	{
 		return 1;
 	}
@@ -348,12 +348,12 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 	}
 
 	int j;
-	if (info.outFormat == AudioFormat::RTAUDIO_FLOAT64)
+	if (info.outFormat == AudioFormat::Float64)
 	{
 		Float64 scale;
 		Float64* out = (Float64*)outBuffer;
 
-		if (info.inFormat == AudioFormat::RTAUDIO_SINT8)
+		if (info.inFormat == AudioFormat::SInt8)
 		{
 			signed char* in = (signed char*)inBuffer;
 			scale = 1.0 / 127.5;
@@ -369,7 +369,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT16)
+		else if (info.inFormat == AudioFormat::SInt16)
 		{
 			Int16* in = (Int16*)inBuffer;
 			scale = 1.0 / 32767.5;
@@ -385,7 +385,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT24)
+		else if (info.inFormat == AudioFormat::SInt24)
 		{
 			Int32* in = (Int32*)inBuffer;
 			scale = 1.0 / 8388607.5;
@@ -401,7 +401,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT32)
+		else if (info.inFormat == AudioFormat::SInt32)
 		{
 			Int32* in = (Int32*)inBuffer;
 			scale = 1.0 / 2147483647.5;
@@ -417,7 +417,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT32)
+		else if (info.inFormat == AudioFormat::Float32)
 		{
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -430,7 +430,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT64)
+		else if (info.inFormat == AudioFormat::Float64)
 		{
 			// Channel compensation and/or (de)interleaving only.
 			Float64* in = (Float64*)inBuffer;
@@ -445,12 +445,12 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			}
 		}
 	}
-	else if (info.outFormat == AudioFormat::RTAUDIO_FLOAT32)
+	else if (info.outFormat == AudioFormat::Float32)
 	{
 		Float32 scale;
 		Float32* out = (Float32*)outBuffer;
 
-		if (info.inFormat == AudioFormat::RTAUDIO_SINT8)
+		if (info.inFormat == AudioFormat::SInt8)
 		{
 			signed char* in = (signed char*)inBuffer;
 			scale = (Float32)(1.0 / 127.5);
@@ -466,7 +466,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT16)
+		else if (info.inFormat == AudioFormat::SInt16)
 		{
 			Int16* in = (Int16*)inBuffer;
 			scale = (Float32)(1.0 / 32767.5);
@@ -482,7 +482,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT24)
+		else if (info.inFormat == AudioFormat::SInt24)
 		{
 			Int32* in = (Int32*)inBuffer;
 			scale = (Float32)(1.0 / 8388607.5);
@@ -498,7 +498,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT32)
+		else if (info.inFormat == AudioFormat::SInt32)
 		{
 			Int32* in = (Int32*)inBuffer;
 			scale = (Float32)(1.0 / 2147483647.5);
@@ -514,7 +514,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT32)
+		else if (info.inFormat == AudioFormat::Float32)
 		{
 			// Channel compensation and/or (de)interleaving only.
 			Float32* in = (Float32*)inBuffer;
@@ -528,7 +528,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT64)
+		else if (info.inFormat == AudioFormat::Float64)
 		{
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -542,10 +542,10 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			}
 		}
 	}
-	else if (info.outFormat == AudioFormat::RTAUDIO_SINT32)
+	else if (info.outFormat == AudioFormat::SInt32)
 	{
 		Int32* out = (Int32*)outBuffer;
-		if (info.inFormat == AudioFormat::RTAUDIO_SINT8)
+		if (info.inFormat == AudioFormat::SInt8)
 		{
 			signed char* in = (signed char*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -559,7 +559,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT16)
+		else if (info.inFormat == AudioFormat::SInt16)
 		{
 			Int16* in = (Int16*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -573,7 +573,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT24)
+		else if (info.inFormat == AudioFormat::SInt24)
 		{ // Hmmm ... we could just leave it in the lower 3 bytes
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -587,7 +587,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT32)
+		else if (info.inFormat == AudioFormat::SInt32)
 		{
 			// Channel compensation and/or (de)interleaving only.
 			Int32* in = (Int32*)inBuffer;
@@ -601,7 +601,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT32)
+		else if (info.inFormat == AudioFormat::Float32)
 		{
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -614,7 +614,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT64)
+		else if (info.inFormat == AudioFormat::Float64)
 		{
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -628,10 +628,10 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			}
 		}
 	}
-	else if (info.outFormat == AudioFormat::RTAUDIO_SINT24)
+	else if (info.outFormat == AudioFormat::SInt24)
 	{
 		Int32* out = (Int32*)outBuffer;
-		if (info.inFormat == AudioFormat::RTAUDIO_SINT8)
+		if (info.inFormat == AudioFormat::SInt8)
 		{
 			signed char* in = (signed char*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -645,7 +645,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT16)
+		else if (info.inFormat == AudioFormat::SInt16)
 		{
 			Int16* in = (Int16*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -659,7 +659,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT24)
+		else if (info.inFormat == AudioFormat::SInt24)
 		{
 			// Channel compensation and/or (de)interleaving only.
 			Int32* in = (Int32*)inBuffer;
@@ -673,7 +673,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT32)
+		else if (info.inFormat == AudioFormat::SInt32)
 		{
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -687,7 +687,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT32)
+		else if (info.inFormat == AudioFormat::Float32)
 		{
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -700,7 +700,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT64)
+		else if (info.inFormat == AudioFormat::Float64)
 		{
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -714,10 +714,10 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			}
 		}
 	}
-	else if (info.outFormat == AudioFormat::RTAUDIO_SINT16)
+	else if (info.outFormat == AudioFormat::SInt16)
 	{
 		Int16* out = (Int16*)outBuffer;
-		if (info.inFormat == AudioFormat::RTAUDIO_SINT8)
+		if (info.inFormat == AudioFormat::SInt8)
 		{
 			signed char* in = (signed char*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -731,7 +731,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT16)
+		else if (info.inFormat == AudioFormat::SInt16)
 		{
 			// Channel compensation and/or (de)interleaving only.
 			Int16* in = (Int16*)inBuffer;
@@ -745,7 +745,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT24)
+		else if (info.inFormat == AudioFormat::SInt24)
 		{
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -758,7 +758,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT32)
+		else if (info.inFormat == AudioFormat::SInt32)
 		{
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -771,7 +771,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT32)
+		else if (info.inFormat == AudioFormat::Float32)
 		{
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -784,7 +784,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT64)
+		else if (info.inFormat == AudioFormat::Float64)
 		{
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -798,10 +798,10 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			}
 		}
 	}
-	else if (info.outFormat == AudioFormat::RTAUDIO_SINT8)
+	else if (info.outFormat == AudioFormat::SInt8)
 	{
 		signed char* out = (signed char*)outBuffer;
-		if (info.inFormat == AudioFormat::RTAUDIO_SINT8)
+		if (info.inFormat == AudioFormat::SInt8)
 		{
 			// Channel compensation and/or (de)interleaving only.
 			signed char* in = (signed char*)inBuffer;
@@ -815,7 +815,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		if (info.inFormat == AudioFormat::RTAUDIO_SINT16)
+		if (info.inFormat == AudioFormat::SInt16)
 		{
 			Int16* in = (Int16*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -828,7 +828,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT24)
+		else if (info.inFormat == AudioFormat::SInt24)
 		{
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -841,7 +841,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_SINT32)
+		else if (info.inFormat == AudioFormat::SInt32)
 		{
 			Int32* in = (Int32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -854,7 +854,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT32)
+		else if (info.inFormat == AudioFormat::Float32)
 		{
 			Float32* in = (Float32*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -867,7 +867,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 				out += info.outJump;
 			}
 		}
-		else if (info.inFormat == AudioFormat::RTAUDIO_FLOAT64)
+		else if (info.inFormat == AudioFormat::Float64)
 		{
 			Float64* in = (Float64*)inBuffer;
 			for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -893,7 +893,7 @@ void AudioArchitecture::byteSwapBuffer(char* buffer, unsigned int samples, Audio
 	char* ptr;
 
 	ptr = buffer;
-	if (format == AudioFormat::RTAUDIO_SINT16)
+	if (format == AudioFormat::SInt16)
 	{
 		for (unsigned int i = 0; i < samples; i++)
 		{
@@ -906,9 +906,9 @@ void AudioArchitecture::byteSwapBuffer(char* buffer, unsigned int samples, Audio
 			ptr += 2;
 		}
 	}
-	else if (format == AudioFormat::RTAUDIO_SINT24 ||
-			 format == AudioFormat::RTAUDIO_SINT32 ||
-			 format == AudioFormat::RTAUDIO_FLOAT32)
+	else if (format == AudioFormat::SInt24 ||
+			 format == AudioFormat::SInt32 ||
+			 format == AudioFormat::Float32)
 	{
 		for (unsigned int i = 0; i < samples; i++)
 		{
@@ -927,7 +927,7 @@ void AudioArchitecture::byteSwapBuffer(char* buffer, unsigned int samples, Audio
 			ptr += 3;
 		}
 	}
-	else if (format == AudioFormat::RTAUDIO_FLOAT64)
+	else if (format == AudioFormat::Float64)
 	{
 		for (unsigned int i = 0; i < samples; i++)
 		{

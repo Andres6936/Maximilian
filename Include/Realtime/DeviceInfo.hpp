@@ -26,7 +26,7 @@ namespace Maximilian
 		bool isDefaultOutput = false;         /*!< true if this is the default output device. */
 		bool isDefaultInput = false;          /*!< true if this is the default input device. */
 		std::vector <unsigned int> sampleRates; /*!< Supported sample rates (queried from list of standard rates). */
-		AudioFormat nativeFormats = AudioFormat::RTAUDIO_FLOAT64;  /*!< Bit mask of supported data formats. */
+		AudioFormat nativeFormats = AudioFormat::Float64;  /*!< Bit mask of supported data formats. */
 
 		// Default constructor.
 		DeviceInfo() = default;
