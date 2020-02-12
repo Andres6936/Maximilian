@@ -195,32 +195,6 @@ Audio::~Audio() throw()
 }
 
 void Audio::openStream(
-		StreamParameters& outputParameters,
-		StreamParameters& inputParameters,
-		AudioFormat format, unsigned int sampleRate,
-		unsigned int* bufferFrames,
-		RtAudioCallback callback, void* userData,
-		StreamOptions* options)
-{
-	return audioArchitecture->openStream(outputParameters, inputParameters, format,
-			sampleRate, bufferFrames, callback,
-			userData, options);
-}
-
-void Audio::openStream(
-		StreamParameters& outputParameters,
-		AudioFormat format, unsigned int sampleRate,
-		unsigned int* bufferFrames,
-		RtAudioCallback callback,
-		void* userData,
-		StreamOptions* options)
-{
-	return audioArchitecture->openStream(outputParameters, format,
-			sampleRate, bufferFrames, callback,
-			userData, options);
-}
-
-void Audio::openStream(
 		AudioFormat format,
 		unsigned int sampleRate,
 		unsigned int* bufferFrames,

@@ -20,6 +20,18 @@ namespace Maximilian
 
 		// Default constructor.
 		StreamParameters() = default;
+
+		// Getters
+
+		[[nodiscard]] unsigned int getDeviceId() const;
+
+		[[nodiscard]] unsigned int getNChannels() const;
+
+		[[nodiscard]] unsigned int getFirstChannel() const;
+
+		// Setters
+
+		void setDeviceId(unsigned int _deviceId);
 	};
 }
 

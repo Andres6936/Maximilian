@@ -22,13 +22,29 @@ namespace Maximilian
 
 	private:
 
+		/**
+		 * Specifies output stream parameters to use when opening a
+		 * stream, including a device ID, number of channels, and
+		 * starting channel number.  For input-only streams, this
+		 * argument should be NULL.
+		 *
+		 * The device ID is an index value between 0 and getDeviceCount() - 1.
+		 */
+		StreamParameters outputParameters;
+
+		/**
+		 * Specifies input stream parameters to use when opening a
+		 * stream, including a device ID, number of channels, and
+		 * starting channel number.  For output-only streams, this
+		 * argument should be NULL.
+		 *
+		 * The device ID is an index value between 0 and getDeviceCount() - 1.
+		 */
+		StreamParameters inputParameters;
+
 		void assertThatStreamIsNotOpen();
 
 		void assertThatTheFormatOfBytesIsGreaterThatZero(AudioFormat _format);
-
-		void assertThatDeviceParameterIsNotInvalid(const StreamParameters& _parameters);
-
-		static void assertThatChannelsAreGreaterThatOne(const StreamParameters& _parameters);
 
 	public:
 
@@ -38,24 +54,13 @@ namespace Maximilian
 
 		virtual unsigned int getDeviceCount() = 0;
 
-		virtual unsigned int getDefaultInputDevice();
+		unsigned int getDefaultInputDevice();
 
-		virtual unsigned int getDefaultOutputDevice();
+		unsigned int getDefaultOutputDevice();
 
 		virtual SupportedArchitectures getCurrentArchitecture() = 0;
 
 		virtual DeviceInfo getDeviceInfo(int device) = 0;
-
-		void openStream(StreamParameters& oParams,
-				StreamParameters& iParams,
-				AudioFormat format, unsigned int sampleRate,
-				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData, StreamOptions* options);
-
-		void openStream(StreamParameters& oParams,
-				AudioFormat format, unsigned int sampleRate,
-				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData, StreamOptions* options);
 
 		void openStream(AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,

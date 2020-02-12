@@ -98,10 +98,6 @@ int main()
 
 	Audio dac(SupportedArchitectures::Windows_Ds);
 
-	StreamParameters parameters;
-	parameters.deviceId = dac.getDefaultOutputDevice();
-	parameters.nChannels = Settings::CHANNELS;
-	parameters.firstChannel = 0;
 	unsigned int sampleRate = Settings::SAMPLE_RATE;
 	unsigned int bufferFrames = Settings::BUFFER_SIZE;
 	//double data[maxiSettings::channels];
@@ -109,7 +105,7 @@ int main()
 
 	try
 	{
-		dac.openStream(parameters, RTAUDIO_FLOAT64,
+		dac.openStream(RTAUDIO_FLOAT64,
 				sampleRate, &bufferFrames, &routing, (void*)&(data[0]));
 
 		dac.startStream();

@@ -69,10 +69,6 @@ int main()
 
 	Audio audio(SupportedArchitectures::Windows_Ds);
 
-	StreamParameters parameters;
-	parameters.deviceId = audio.getDefaultOutputDevice();
-	parameters.nChannels = Settings::CHANNELS;
-	parameters.firstChannel = 0;
 	unsigned int sampleRate = Settings::SAMPLE_RATE;
 	unsigned int bufferFrames = Settings::BUFFER_SIZE;
 	//double data[maxiSettings::channels];
@@ -80,7 +76,7 @@ int main()
 
 	try
 	{
-		audio.openStream(parameters, RTAUDIO_FLOAT64,
+		audio.openStream(RTAUDIO_FLOAT64,
 				sampleRate, &bufferFrames, &routing, (void*)&(data[0]));
 
 		audio.startStream();

@@ -106,6 +106,10 @@ namespace Maximilian
 	class Audio
 	{
 
+	protected:
+
+		AudioArchitecture* audioArchitecture = nullptr;
+
 	private:
 
 		void assertThatAudioArchitectureHaveMinimumAnDevice();
@@ -216,17 +220,6 @@ namespace Maximilian
 				 lowest allowable value is used.  The actual value used is
 				 returned via the structure argument.  The parameter is API dependent.
 		*/
-		void openStream(StreamParameters& outputParameters,
-				StreamParameters& inputParameters,
-				AudioFormat format, unsigned int sampleRate,
-				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData = nullptr, StreamOptions* options = nullptr);
-
-		void openStream(StreamParameters& outputParameters,
-				AudioFormat format, unsigned int sampleRate,
-				unsigned int* bufferFrames, RtAudioCallback callback,
-				void* userData = nullptr, StreamOptions* options = nullptr);
-
 		void openStream(AudioFormat format, unsigned int sampleRate,
 				unsigned int* bufferFrames, RtAudioCallback callback,
 				void* userData = nullptr, StreamOptions* options = nullptr);
@@ -298,15 +291,8 @@ namespace Maximilian
 
 		//! Specify whether warning messages should be printed to stderr.
 		void showWarnings(bool value = true) throw();
-
-	protected:
-
-		AudioArchitecture* audioArchitecture = nullptr;
 	};
 }
-
-//! RtAudio callback function prototype.
-
 
 // Operating system dependent thread functionality.
 #if defined(__WINDOWS_DS__) || defined(__WINDOWS_ASIO__)

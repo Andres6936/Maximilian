@@ -17,11 +17,13 @@ Maximilian::AudioArchitecture::AudioArchitecture()
 {
 	stream_.state = StreamState::STREAM_CLOSED;
 	stream_.mode = StreamMode::UNINITIALIZED;
-	stream_.apiHandle = 0;
-	stream_.userBuffer[0] = 0;
-	stream_.userBuffer[1] = 0;
+	stream_.apiHandle = nullptr;
+	stream_.userBuffer[0] = nullptr;
+	stream_.userBuffer[1] = nullptr;
 	pthread_mutex_init(&stream_.mutex, nullptr);
 	showWarnings_ = true;
+
+	outputParameters.setDeviceId(getDefaultOutputDevice());
 }
 
 Maximilian::AudioArchitecture::~AudioArchitecture()
@@ -39,26 +41,6 @@ void AudioArchitecture::assertThatStreamIsNotOpen()
 }
 
 
-void AudioArchitecture::assertThatDeviceParameterIsNotInvalid(const StreamParameters& _parameters)
-{
-	if (_parameters.deviceId >= getDeviceCount())
-	{
-		Levin::Error() << "Assert: OpenStream, the device parameter value"
-						  " is invalid." << Levin::endl;
-		throw "DeviceParameterIsInvalidException";
-	}
-}
-
-void AudioArchitecture::assertThatChannelsAreGreaterThatOne(const StreamParameters& _parameters)
-{
-	if (_parameters.nChannels < 1)
-	{
-		Levin::Error() << "Assert: OpenStream, StreamParameters structure cannot "
-						  "have an nChannels value less than one." << Levin::endl;
-		throw "StreamChannelsIsLessThatOneException";
-	}
-}
-
 void AudioArchitecture::assertThatTheFormatOfBytesIsGreaterThatZero(const AudioFormat _format)
 {
 	if (formatBytes(_format) == 0)
@@ -69,71 +51,6 @@ void AudioArchitecture::assertThatTheFormatOfBytesIsGreaterThatZero(const AudioF
 	}
 }
 
-void AudioArchitecture::openStream(
-		StreamParameters& oParams,
-		StreamParameters& iParams,
-		Maximilian::AudioFormat format, unsigned int sampleRate,
-		unsigned int* bufferFrames,
-		Maximilian::RtAudioCallback callback, void* userData,
-		StreamOptions* options)
-{
-	assertThatStreamIsNotOpen();
-	assertThatChannelsAreGreaterThatOne(oParams);
-	assertThatDeviceParameterIsNotInvalid(oParams);
-	assertThatChannelsAreGreaterThatOne(iParams);
-	assertThatDeviceParameterIsNotInvalid(iParams);
-	assertThatTheFormatOfBytesIsGreaterThatZero(format);
-
-	clearStreamInfo();
-
-	bool result = probeDeviceOpen(oParams.deviceId, StreamMode::OUTPUT, oParams.nChannels, oParams.firstChannel,
-			sampleRate, format, bufferFrames, options);
-
-	if (result == false)
-	{ error(Exception::SYSTEM_ERROR); }
-
-
-	result = probeDeviceOpen(iParams.deviceId, StreamMode::INPUT, iParams.nChannels, iParams.firstChannel,
-			sampleRate, format, bufferFrames, options);
-
-	if (result == false)
-	{
-		if (oParams.nChannels > 0)
-		{ closeStream(); }
-		error(Exception::SYSTEM_ERROR);
-	}
-
-	stream_.callbackInfo.callback = (void*)callback;
-	stream_.callbackInfo.userData = userData;
-
-	if (options)
-	{ options->numberOfBuffers = stream_.nBuffers; }
-	stream_.state = StreamState::STREAM_STOPPED;
-}
-
-void AudioArchitecture::openStream(StreamParameters& oParams, AudioFormat format, unsigned int sampleRate,
-		unsigned int* bufferFrames, RtAudioCallback callback, void* userData, StreamOptions* options)
-{
-	assertThatStreamIsNotOpen();
-	assertThatChannelsAreGreaterThatOne(oParams);
-	assertThatDeviceParameterIsNotInvalid(oParams);
-	assertThatTheFormatOfBytesIsGreaterThatZero(format);
-
-	clearStreamInfo();
-
-	bool result = probeDeviceOpen(oParams.deviceId, StreamMode::OUTPUT, oParams.nChannels, oParams.firstChannel,
-			sampleRate, format, bufferFrames, options);
-
-	if (result == false)
-	{ error(Exception::SYSTEM_ERROR); }
-
-	stream_.callbackInfo.callback = (void*)callback;
-	stream_.callbackInfo.userData = userData;
-
-	if (options)
-	{ options->numberOfBuffers = stream_.nBuffers; }
-	stream_.state = StreamState::STREAM_STOPPED;
-}
 
 void AudioArchitecture::openStream(AudioFormat format, unsigned int sampleRate, unsigned int* bufferFrames,
 		RtAudioCallback callback, void* userData, StreamOptions* options)
@@ -143,7 +60,11 @@ void AudioArchitecture::openStream(AudioFormat format, unsigned int sampleRate, 
 
 	clearStreamInfo();
 
-	bool result = probeDeviceOpen(getDefaultOutputDevice(), StreamMode::OUTPUT, 2, 0,
+	bool result = probeDeviceOpen(
+			outputParameters.getDeviceId(),
+			StreamMode::OUTPUT,
+			outputParameters.getNChannels(),
+			outputParameters.getFirstChannel(),
 			sampleRate, format, bufferFrames, options);
 
 	if (result == false)
