@@ -4,6 +4,7 @@
 #include "Audio.hpp"
 #include "AudioStream.hpp"
 #include "ConvertInfo.hpp"
+#include "Enum/SupportedArchitectures.hpp"
 
 namespace Maximilian
 {
