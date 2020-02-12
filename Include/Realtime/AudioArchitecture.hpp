@@ -84,11 +84,15 @@ namespace Maximilian
 
 		virtual ~AudioArchitecture();
 
+		// Static Methods
+
+		static unsigned int getDefaultInputDevice();
+
+		static unsigned int getDefaultOutputDevice();
+
+		// Virtual Methods
+
 		virtual unsigned int getDeviceCount() = 0;
-
-		unsigned int getDefaultInputDevice();
-
-		unsigned int getDefaultOutputDevice();
 
 		virtual SupportedArchitectures getCurrentArchitecture() = 0;
 

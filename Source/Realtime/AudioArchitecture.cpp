@@ -36,7 +36,7 @@ void AudioArchitecture::assertThatStreamIsNotOpen()
 	if (stream_.state != StreamState::STREAM_CLOSED)
 	{
 		Levin::Error() << "Assert: OpenStream, a stream is already open!" << Levin::endl;
-		throw "StreamAlreadyOpenException";
+		throw Exception("StreamAlreadyOpenException");
 	}
 }
 
@@ -64,22 +64,22 @@ void AudioArchitecture::openStream(RtAudioCallback callback, void* userData)
 	stream_.state = StreamState::STREAM_STOPPED;
 }
 
-unsigned int AudioArchitecture::getDefaultInputDevice(void)
+unsigned int AudioArchitecture::getDefaultInputDevice()
 {
 	// Should be implemented in subclasses if possible.
 	return 0;
 }
 
-unsigned int AudioArchitecture::getDefaultOutputDevice(void)
+unsigned int AudioArchitecture::getDefaultOutputDevice()
 {
 	// Should be implemented in subclasses if possible.
 	return 0;
 }
 
-void AudioArchitecture::closeStream(void)
+void AudioArchitecture::closeStream()
 {
 	// MUST be implemented in subclasses!
-	return;
+	throw Exception("NotImplementedException");
 }
 
 bool AudioArchitecture::probeDeviceOpen(
@@ -89,23 +89,19 @@ bool AudioArchitecture::probeDeviceOpen(
 		unsigned int firstChannel)
 {
 	// MUST be implemented in subclasses!
-	return FAILURE;
+	throw Exception("NotImplementedException");
 }
 
-void AudioArchitecture::tickStreamTime(void)
+void AudioArchitecture::tickStreamTime()
 {
 	// Subclasses that do not provide their own implementation of
 	// getStreamTime should call this function once per buffer I/O to
 	// provide basic stream time support.
 
 	stream_.streamTime += (stream_.bufferSize * 1.0 / stream_.sampleRate);
-
-#if defined( HAVE_GETTIMEOFDAY )
-	gettimeofday( &stream_.lastTickTimestamp, NULL );
-#endif
 }
 
-long AudioArchitecture::getStreamLatency(void)
+long AudioArchitecture::getStreamLatency()
 {
 	verifyStream();
 
@@ -122,33 +118,16 @@ long AudioArchitecture::getStreamLatency(void)
 	return totalLatency;
 }
 
-double AudioArchitecture::getStreamTime(void)
+double AudioArchitecture::getStreamTime()
 {
 	verifyStream();
-
-#if defined( HAVE_GETTIMEOFDAY )
-	// Return a very accurate estimate of the stream time by
-  // adding in the elapsed time since the last tick.
-  struct timeval then;
-  struct timeval now;
-
-  if ( stream_.state != STREAM_RUNNING || stream_.streamTime == 0.0 )
 	return stream_.streamTime;
 
-  gettimeofday( &now, NULL );
-  then = stream_.lastTickTimestamp;
-  return stream_.streamTime +
-	((now.tv_sec + 0.000001 * now.tv_usec) -
-	 (then.tv_sec + 0.000001 * then.tv_usec));
-#else
-	return stream_.streamTime;
-#endif
 }
 
-unsigned int AudioArchitecture::getStreamSampleRate(void)
+unsigned int AudioArchitecture::getStreamSampleRate()
 {
 	verifyStream();
-
 	return stream_.sampleRate;
 }
 
