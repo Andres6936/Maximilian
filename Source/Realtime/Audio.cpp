@@ -376,9 +376,9 @@ unsigned int RtApiCore :: getDefaultOutputDevice( void )
   return 0;
 }
 
-RtAudio::DeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
+RtDeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
 {
-  RtAudio::DeviceInfo info;
+  RtDeviceInfo info;
   info.probed = false;
 
   // Get device ID
@@ -1720,9 +1720,9 @@ unsigned int RtApiJack :: getDeviceCount( void )
   return nDevices;
 }
 
-RtAudio::DeviceInfo RtApiJack :: getDeviceInfo( unsigned int device )
+RtDeviceInfo RtApiJack :: getDeviceInfo( unsigned int device )
 {
-  RtAudio::DeviceInfo info;
+  RtDeviceInfo info;
   info.probed = false;
 
   jack_options_t options = (jack_options_t) ( JackNoStartServer ); //JackNullOption
@@ -2475,9 +2475,9 @@ unsigned int RtApiAsio :: getDeviceCount( void )
   return (unsigned int) drivers.asioGetNumDev();
 }
 
-RtAudio::DeviceInfo RtApiAsio :: getDeviceInfo( unsigned int device )
+RtDeviceInfo RtApiAsio :: getDeviceInfo( unsigned int device )
 {
-  RtAudio::DeviceInfo info;
+  RtDeviceInfo info;
   info.probed = false;
 
   // Get device ID
@@ -3531,9 +3531,9 @@ unsigned int RtApiDs :: getDeviceCount( void )
   return dsDevices.size();
 }
 
-RtAudio::DeviceInfo RtApiDs :: getDeviceInfo( unsigned int device )
+RtDeviceInfo RtApiDs :: getDeviceInfo( unsigned int device )
 {
-  RtAudio::DeviceInfo info;
+  RtDeviceInfo info;
   info.probed = false;
 
   if ( dsDevices.size() == 0 ) {
@@ -5054,9 +5054,9 @@ unsigned int RtApiOss :: getDeviceCount( void )
   return sysinfo.numaudios;
 }
 
-RtAudio::DeviceInfo RtApiOss :: getDeviceInfo( unsigned int device )
+RtDeviceInfo RtApiOss :: getDeviceInfo( unsigned int device )
 {
-  RtAudio::DeviceInfo info;
+  RtDeviceInfo info;
   info.probed = false;
 
   int mixerfd = open( "/dev/mixer", O_RDWR, 0 );
@@ -5944,7 +5944,7 @@ unsigned int Audio::getDeviceCount() throw()
 	return audioArchitecture->getDeviceCount();
 }
 
-Audio::DeviceInfo Audio::getDeviceInfo(unsigned int device)
+DeviceInfo Audio::getDeviceInfo(unsigned int device)
 {
 	return audioArchitecture->getDeviceInfo(device);
 }

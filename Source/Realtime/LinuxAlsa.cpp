@@ -112,14 +112,14 @@ unsigned int LinuxAlsa::getDeviceCount()
 	return numberOfDevices;
 }
 
-Audio::DeviceInfo LinuxAlsa::getDeviceInfo(int device)
+DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 {
 	if (device >= getDeviceCount())
 	{
 		throw Exception("DeviceInvalidException");
 	}
 
-	Audio::DeviceInfo info;
+	DeviceInfo info;
 	info.probed = false;
 
 	int subDevice = device;

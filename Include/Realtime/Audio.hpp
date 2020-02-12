@@ -46,6 +46,7 @@
 #include <sstream>
 
 #include "Exception.h"
+#include "DeviceInfo.hpp"
 #include "Definition/AudioFormat.hpp"
 #include "Definition/AudioStreamFlags.hpp"
 #include "Definition/AudioStreamStatus.hpp"
@@ -104,23 +105,6 @@ namespace Maximilian
 	{
 
 	public:
-
-		//! The public device information structure for returning queried values.
-		struct DeviceInfo
-		{
-			bool probed = false;                  /*!< true if the device capabilities were successfully probed. */
-			std::string name;             /*!< Character string device identifier. */
-			unsigned int outputChannels = 0;  /*!< Maximum output channels supported by device. */
-			unsigned int inputChannels = 0;   /*!< Maximum input channels supported by device. */
-			unsigned int duplexChannels = 0;  /*!< Maximum simultaneous input/output channels supported by device. */
-			bool isDefaultOutput = false;         /*!< true if this is the default output device. */
-			bool isDefaultInput = false;          /*!< true if this is the default input device. */
-			std::vector <unsigned int> sampleRates; /*!< Supported sample rates (queried from list of standard rates). */
-			AudioFormat nativeFormats = 0;  /*!< Bit mask of supported data formats. */
-
-			// Default constructor.
-			DeviceInfo() = default;
-		};
 
 		//! The structure for specifying input or ouput stream parameters.
 		struct StreamParameters
@@ -243,7 +227,7 @@ namespace Maximilian
 		*/
 		unsigned int getDeviceCount() throw();
 
-		//! Return an RtAudio::DeviceInfo structure for a specified device number.
+		//! Return an RtDeviceInfo structure for a specified device number.
 		/*!
 
 		  Any device integer between 0 and getDeviceCount() - 1 is valid.
@@ -254,7 +238,7 @@ namespace Maximilian
 		  current default input or output device, the corresponding
 		  "isDefault" member will have a value of "true".
 		*/
-		Audio::DeviceInfo getDeviceInfo(unsigned int device);
+		DeviceInfo getDeviceInfo(unsigned int device);
 
 		//! A function that returns the index of the default output device.
 		/*!
@@ -456,7 +440,7 @@ public:
   ~RtApiCore();
   RtAudio::Api getCurrentApi( void ) { return RtAudio::MACOSX_CORE; };
   unsigned int getDeviceCount( void );
-  RtAudio::DeviceInfo getDeviceInfo( unsigned int device );
+  RtDeviceInfo getDeviceInfo( unsigned int device );
   unsigned int getDefaultOutputDevice( void );
   unsigned int getDefaultInputDevice( void );
   void closeStream( void );
@@ -470,15 +454,15 @@ public:
   // which is not a member of RtAudio.  External use of this function
   // will most likely produce highly undesireable results!
   bool callbackEvent( AudioDeviceID deviceId,
-                      const AudioBufferList *inBufferList,
-                      const AudioBufferList *outBufferList );
+					  const AudioBufferList *inBufferList,
+					  const AudioBufferList *outBufferList );
 
   private:
 
-  bool probeDeviceOpen( unsigned int device, StreamMode mode, unsigned int channels, 
-                        unsigned int firstChannel, unsigned int sampleRate,
-                        RtAudioFormat format, unsigned int *bufferSize,
-                        RtAudio::StreamOptions *options );
+  bool probeDeviceOpen( unsigned int device, StreamMode mode, unsigned int channels,
+						unsigned int firstChannel, unsigned int sampleRate,
+						RtAudioFormat format, unsigned int *bufferSize,
+						RtAudio::StreamOptions *options );
   static const char* getErrorCode( OSStatus code );
 };
 
@@ -494,7 +478,7 @@ public:
   ~RtApiJack();
   RtAudio::Api getCurrentApi( void ) { return RtAudio::UNIX_JACK; };
   unsigned int getDeviceCount( void );
-  RtAudio::DeviceInfo getDeviceInfo( unsigned int device );
+  RtDeviceInfo getDeviceInfo( unsigned int device );
   void closeStream( void );
   void startStream( void );
   void stopStream( void );
@@ -510,9 +494,9 @@ public:
   private:
 
   bool probeDeviceOpen( unsigned int device, StreamMode mode, unsigned int channels, 
-                        unsigned int firstChannel, unsigned int sampleRate,
-                        RtAudioFormat format, unsigned int *bufferSize,
-                        RtAudio::StreamOptions *options );
+						unsigned int firstChannel, unsigned int sampleRate,
+						RtAudioFormat format, unsigned int *bufferSize,
+						RtAudio::StreamOptions *options );
 };
 
 #endif
@@ -527,7 +511,7 @@ public:
   ~RtApiAsio();
   RtAudio::Api getCurrentApi( void ) { return RtAudio::WINDOWS_ASIO; };
   unsigned int getDeviceCount( void );
-  RtAudio::DeviceInfo getDeviceInfo( unsigned int device );
+  RtDeviceInfo getDeviceInfo( unsigned int device );
   void closeStream( void );
   void startStream( void );
   void stopStream( void );
@@ -542,13 +526,13 @@ public:
 
   private:
 
-  std::vector<RtAudio::DeviceInfo> devices_;
+  std::vector<RtDeviceInfo> devices_;
   void saveDeviceInfo( void );
   bool coInitialized_;
   bool probeDeviceOpen( unsigned int device, StreamMode mode, unsigned int channels, 
-                        unsigned int firstChannel, unsigned int sampleRate,
-                        RtAudioFormat format, unsigned int *bufferSize,
-                        RtAudio::StreamOptions *options );
+						unsigned int firstChannel, unsigned int sampleRate,
+						RtAudioFormat format, unsigned int *bufferSize,
+						RtAudio::StreamOptions *options );
 };
 
 #endif
@@ -565,7 +549,7 @@ public:
   unsigned int getDeviceCount( void );
   unsigned int getDefaultOutputDevice( void );
   unsigned int getDefaultInputDevice( void );
-  RtAudio::DeviceInfo getDeviceInfo( unsigned int device );
+  RtDeviceInfo getDeviceInfo( unsigned int device );
   void closeStream( void );
   void startStream( void );
   void stopStream( void );
@@ -584,9 +568,9 @@ public:
   bool buffersRolling;
   long duplexPrerollBytes;
   bool probeDeviceOpen( unsigned int device, StreamMode mode, unsigned int channels, 
-                        unsigned int firstChannel, unsigned int sampleRate,
-                        RtAudioFormat format, unsigned int *bufferSize,
-                        RtAudio::StreamOptions *options );
+						unsigned int firstChannel, unsigned int sampleRate,
+						RtAudioFormat format, unsigned int *bufferSize,
+						RtAudio::StreamOptions *options );
 };
 
 #endif
@@ -605,7 +589,7 @@ public:
   ~RtApiOss();
   RtAudio::Api getCurrentApi() { return RtAudio::LINUX_OSS; };
   unsigned int getDeviceCount( void );
-  RtAudio::DeviceInfo getDeviceInfo( unsigned int device );
+  RtDeviceInfo getDeviceInfo( unsigned int device );
   void closeStream( void );
   void startStream( void );
   void stopStream( void );
@@ -620,9 +604,9 @@ public:
   private:
 
   bool probeDeviceOpen( unsigned int device, StreamMode mode, unsigned int channels, 
-                        unsigned int firstChannel, unsigned int sampleRate,
-                        RtAudioFormat format, unsigned int *bufferSize,
-                        RtAudio::StreamOptions *options );
+						unsigned int firstChannel, unsigned int sampleRate,
+						RtAudioFormat format, unsigned int *bufferSize,
+						RtAudio::StreamOptions *options );
 };
 
 #endif
@@ -636,7 +620,7 @@ public:
   RtApiDummy() { errorText_ = "RtApiDummy: This class provides no functionality."; error( Exception::WARNING ); };
   RtAudio::Api getCurrentApi( void ) { return RtAudio::RTAUDIO_DUMMY; };
   unsigned int getDeviceCount( void ) { return 0; };
-  RtAudio::DeviceInfo getDeviceInfo( unsigned int device ) { RtAudio::DeviceInfo info; return info; };
+  RtDeviceInfo getDeviceInfo( unsigned int device ) { RtDeviceInfo info; return info; };
   void closeStream( void ) {};
   void startStream( void ) {};
   void stopStream( void ) {};
