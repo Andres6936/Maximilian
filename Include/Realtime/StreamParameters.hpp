@@ -12,11 +12,22 @@ namespace Maximilian
 
 	private:
 
-	public:
+		/**
+		 * Device index (0 to getDeviceCount() - 1).
+		 */
+		unsigned int deviceId = 0;
 
-		unsigned int deviceId = 0;     /*!< Device index (0 to getDeviceCount() - 1). */
-		unsigned int nChannels = 2;    /*!< Number of channels. */
-		unsigned int firstChannel = 0; /*!< First channel index on device (default = 0). */
+		/**
+		 * Number of channels.
+		 */
+		unsigned int nChannels = 2;
+
+		/**
+		 * First channel index on device (default = 0).
+		 */
+		unsigned int firstChannel = 0;
+
+	public:
 
 		// Default constructor.
 		StreamParameters() = default;
