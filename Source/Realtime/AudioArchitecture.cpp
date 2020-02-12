@@ -994,3 +994,27 @@ void AudioArchitecture::byteSwapBuffer(char* buffer, unsigned int samples, Audio
 		}
 	}
 }
+
+// Getters
+
+unsigned int AudioArchitecture::getSampleRate() const
+{
+	return sampleRate;
+}
+
+unsigned int AudioArchitecture::getBufferFrames() const
+{
+	return bufferFrames;
+}
+
+// Setters
+
+void AudioArchitecture::setSampleRate(unsigned int _sampleRate)
+{
+	sampleRate = _sampleRate;
+}
+
+void AudioArchitecture::setBufferFrames(unsigned int _bufferFrames)
+{
+	bufferFrames = _bufferFrames;
+}

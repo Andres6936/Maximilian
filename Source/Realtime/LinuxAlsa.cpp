@@ -684,9 +684,12 @@ setFormat:
 		}
 	}
 
+	// Is needed the pointer for pass for argument to
+	// function { snd_pcm_hw_params_set_rate_near }
+	auto sampleRate = std::make_unique <unsigned int>(getSampleRate());
+
 	// Set the sample rate.
-	result = snd_pcm_hw_params_set_rate_near(phandle, hw_params, (unsigned int*)&sampleRate, 0);
-	if (result < 0)
+	if (snd_pcm_hw_params_set_rate_near(phandle, hw_params, sampleRate.get(), nullptr) < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting sample rate on device (" << name << "), "
@@ -737,7 +740,7 @@ setFormat:
 
 	// Set the buffer (or period) size.
 	int dir = 0;
-	snd_pcm_uframes_t periodSize = bufferFrames;
+	snd_pcm_uframes_t periodSize = getBufferFrames();
 	result = snd_pcm_hw_params_set_period_size_near(phandle, hw_params, &periodSize, &dir);
 	if (result < 0)
 	{
@@ -748,7 +751,7 @@ setFormat:
 		return FAILURE;
 	}
 
-	bufferFrames = periodSize;
+	setBufferFrames(periodSize);
 
 	// Set the buffer number, which in ALSA is referred to as the "period".
 	unsigned int periods = 0;
@@ -770,7 +773,7 @@ setFormat:
 
 	// If attempting to setup a duplex stream, the bufferSize parameter
 	// MUST be the same in both directions!
-	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT && bufferFrames != stream_.bufferSize)
+	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT && getBufferFrames() != stream_.bufferSize)
 	{
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: system error setting buffer size for duplex stream on device ("
 					 << name << ").";
@@ -778,7 +781,7 @@ setFormat:
 		return FAILURE;
 	}
 
-	stream_.bufferSize = bufferFrames;
+	stream_.bufferSize = getBufferFrames();
 
 	// Install the hardware configuration
 	result = snd_pcm_hw_params(phandle, hw_params);
@@ -800,7 +803,7 @@ setFormat:
 	snd_pcm_sw_params_t* sw_params = NULL;
 	snd_pcm_sw_params_alloca(&sw_params);
 	snd_pcm_sw_params_current(phandle, sw_params);
-	snd_pcm_sw_params_set_start_threshold(phandle, sw_params, bufferFrames);
+	snd_pcm_sw_params_set_start_threshold(phandle, sw_params, getBufferFrames());
 	snd_pcm_sw_params_set_stop_threshold(phandle, sw_params, ULONG_MAX);
 	snd_pcm_sw_params_set_silence_threshold(phandle, sw_params, 0);
 
@@ -877,7 +880,7 @@ setFormat:
 
 	// Allocate necessary internal buffers.
 	unsigned long bufferBytes;
-	bufferBytes = stream_.nUserChannels[index] * bufferFrames * formatBytes(stream_.userFormat);
+	bufferBytes = stream_.nUserChannels[index] * getBufferFrames() * formatBytes(stream_.userFormat);
 	stream_.userBuffer[index] = (char*)calloc(bufferBytes, 1);
 	if (stream_.userBuffer[index] == NULL)
 	{
@@ -902,7 +905,7 @@ setFormat:
 
 		if (makeBuffer)
 		{
-			bufferBytes *= bufferFrames;
+			bufferBytes *= getBufferFrames();
 			if (stream_.deviceBuffer)
 			{ free(stream_.deviceBuffer); }
 			stream_.deviceBuffer = (char*)calloc(bufferBytes, 1);
@@ -914,7 +917,7 @@ setFormat:
 		}
 	}
 
-	stream_.sampleRate = sampleRate;
+	stream_.sampleRate = getSampleRate();
 	stream_.nBuffers = periods;
 	stream_.device[index] = device;
 	stream_.state = StreamState::STREAM_STOPPED;

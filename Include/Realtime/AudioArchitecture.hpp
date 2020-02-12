@@ -20,18 +20,6 @@ namespace Maximilian
 	class AudioArchitecture
 	{
 
-	protected:
-
-		/**
-		 * The desired sample rate (sample frames per second).
-		 */
-		unsigned int sampleRate = 44'100;
-
-		/*
-		 * The desired internal buffer size in sample frames.
-		 */
-		unsigned int bufferFrames = 1'024;
-
 	private:
 
 		/**
@@ -53,6 +41,16 @@ namespace Maximilian
 		 * The device ID is an index value between 0 and getDeviceCount() - 1.
 		 */
 		StreamParameters inputParameters;
+
+		/**
+		 * The desired sample rate (sample frames per second).
+		 */
+		unsigned int sampleRate = 44'100;
+
+		/*
+		 * The desired internal buffer size in sample frames.
+		 */
+		unsigned int bufferFrames = 1'024;
 
 		void assertThatStreamIsNotOpen();
 
@@ -106,6 +104,13 @@ namespace Maximilian
 			showWarnings_ = value;
 		};
 
+		unsigned int getSampleRate() const;
+
+		unsigned int getBufferFrames() const;
+
+		void setSampleRate(unsigned int _sampleRate);
+
+		void setBufferFrames(unsigned int _bufferFrames);
 
 	protected:
 
