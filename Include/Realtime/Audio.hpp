@@ -1,6 +1,5 @@
-/************************************************************************/
-/*! \class RtAudio
-    \brief Realtime audio i/o C++ classes.
+/*
+    @brief Realtime audio i/o C++ classes.
 
     RtAudio provides a common API (Application Programming Interface)
     for realtime audio input/output across Linux (native ALSA, Jack,
@@ -36,7 +35,6 @@
     CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
     WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/************************************************************************/
 
 // RtAudio: Version 4.0.9
 
