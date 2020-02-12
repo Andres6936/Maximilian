@@ -64,7 +64,7 @@ int main()
 
 	try
 	{
-		audio.openStream(RTAUDIO_FLOAT64, &routing, (void*)&(data[0]));
+		audio.openStream(&routing, (void*)&(data[0]));
 
 		audio.startStream();
 	}

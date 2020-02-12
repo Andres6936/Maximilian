@@ -71,6 +71,8 @@ namespace Maximilian
 		 */
 		unsigned int bufferFrames = 1'024;
 
+		AudioFormat format = RTAUDIO_FLOAT64;
+
 		void assertThatStreamIsNotOpen();
 
 		void assertThatTheFormatOfBytesIsGreaterThatZero(AudioFormat _format);
@@ -91,7 +93,7 @@ namespace Maximilian
 
 		virtual DeviceInfo getDeviceInfo(int device) = 0;
 
-		void openStream(AudioFormat format, RtAudioCallback callback, void* userData);
+		void openStream(RtAudioCallback callback, void* userData);
 
 		virtual void closeStream();
 

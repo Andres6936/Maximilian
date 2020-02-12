@@ -194,12 +194,9 @@ Audio::~Audio() throw()
 	delete audioArchitecture;
 }
 
-void Audio::openStream(
-		AudioFormat format,
-		RtAudioCallback callback,
-		void* userData)
+void Audio::openStream(RtAudioCallback callback, void* userData)
 {
-	return audioArchitecture->openStream(format, callback, userData);
+	return audioArchitecture->openStream(callback, userData);
 }
 
 #if defined(__MACOSX_CORE__)

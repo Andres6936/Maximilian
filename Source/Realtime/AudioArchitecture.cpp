@@ -52,8 +52,7 @@ void AudioArchitecture::assertThatTheFormatOfBytesIsGreaterThatZero(const AudioF
 }
 
 
-void AudioArchitecture::openStream(AudioFormat format,
-		RtAudioCallback callback, void* userData)
+void AudioArchitecture::openStream(RtAudioCallback callback, void* userData)
 {
 	assertThatStreamIsNotOpen();
 	assertThatTheFormatOfBytesIsGreaterThatZero(format);
