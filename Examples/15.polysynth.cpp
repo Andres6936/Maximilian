@@ -98,6 +98,8 @@ void play(std::vector <double>& output)
 
 int main()
 {
+	setup();
+
 	Audio audio;
 
 	try
