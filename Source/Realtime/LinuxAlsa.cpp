@@ -17,7 +17,7 @@ public:
 	bool runnable = false;
 	bool synchronized = false;
 
-	snd_pcm_t* handles[2];
+	snd_pcm_t* handles[2] = { nullptr, nullptr };
 	pthread_cond_t runnable_cv;
 
 	std::array <bool, 2> xrun{ false, false };
@@ -999,7 +999,7 @@ void LinuxAlsa::closeStream()
 		return;
 	}
 
-	AlsaHandle* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
+	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
 
 	stream_.callbackInfo.isRunning = false;
 	pthread_mutex_lock(&stream_.mutex);
@@ -1139,8 +1139,9 @@ void LinuxAlsa::stopStream()
 	//}
 
 	int result = 0;
-	AlsaHandle* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
+	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
 	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
+
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
 		if (apiInfo->synchronized)
@@ -1199,7 +1200,7 @@ void LinuxAlsa::abortStream()
 
 	int result = 0;
 
-	AlsaHandle* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
+	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
 
 	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
@@ -1235,7 +1236,7 @@ unlock:
 
 void LinuxAlsa::callbackEvent()
 {
-	AlsaHandle* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
+	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
 
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
