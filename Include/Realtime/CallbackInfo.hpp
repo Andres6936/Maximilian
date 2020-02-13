@@ -20,9 +20,6 @@ namespace Maximilian
 
 		void* object = nullptr;    // Used as a "this" pointer.
 		pthread_t thread;
-		void* callback = nullptr;
-		void* userData = nullptr;
-		void* apiInfo = nullptr;   // void pointer for API specific callback information
 		bool isRunning = false;
 
 		// Default constructor.
