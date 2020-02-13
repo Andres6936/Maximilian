@@ -6,6 +6,7 @@
 #include "Definition/AudioFormat.hpp"
 
 #include <array>
+#include <vector>
 
 namespace Maximilian
 {
@@ -38,26 +39,29 @@ namespace Maximilian
 
 		void* apiHandle = nullptr;          // void pointer for API specific stream handle information
 
-		char* userBuffer[2] = { nullptr, nullptr };       // Playback and record, respectively.
 		char* deviceBuffer = nullptr;
-
 		bool userInterleaved = true;
 
 		unsigned int nBuffers = 0;
+
 		unsigned int sampleRate = 0;
 		unsigned int bufferSize = 0;
-
 		double streamTime = 0.0;         // Number of elapsed seconds since the stream started.
 
 		/**
 		 * Playback and record, respectively.
 		 */
-		std::array<bool, 2> doConvertBuffer = { false, false };
+		std::pair <std::vector <char>, std::vector <char>> userBuffer;
 
 		/**
 		 * Playback and record, respectively.
 		 */
-		std::array<bool, 2> deviceInterleaved = { true, true };
+		std::array <bool, 2> doConvertBuffer = { false, false };
+
+		/**
+		 * Playback and record, respectively.
+		 */
+		std::array <bool, 2> deviceInterleaved = { true, true };
 
 		/**
 		 * Playback and record, respectively.

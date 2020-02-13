@@ -872,11 +872,20 @@ setFormat:
 	// Allocate necessary internal buffers.
 	unsigned long bufferBytes;
 	bufferBytes = stream_.nUserChannels[index] * getBufferFrames() * formatBytes(stream_.userFormat);
-	stream_.userBuffer[index] = (char*)calloc(bufferBytes, 1);
-	if (stream_.userBuffer[index] == NULL)
+
+	if (index == 0)
 	{
-		errorText_ = "RtApiAlsa::probeDeviceOpen: error allocating user buffer memory.";
-		goto error;
+		stream_.userBuffer.first.resize(bufferBytes);
+	}
+	else if (index == 1)
+	{
+		stream_.userBuffer.second.resize(bufferBytes);
+	}
+	else
+	{
+		Levin::Error() << "Linux Alsa: probeDeviceOpen, The index is invalid." << Levin::endl;
+
+		throw Exception("IndexInvalidException");
 	}
 
 	if (stream_.doConvertBuffer[index])
@@ -998,14 +1007,6 @@ error:
 		stream_.apiHandle = 0;
 	}
 
-	for (auto& i : stream_.userBuffer)
-	{
-		if (i)
-		{
-			free(i);
-		}
-	}
-
 	if (stream_.deviceBuffer)
 	{
 		free(stream_.deviceBuffer);
@@ -1059,13 +1060,8 @@ void LinuxAlsa::closeStream()
 		stream_.apiHandle = 0;
 	}
 
-	for (auto& i : stream_.userBuffer)
-	{
-		if (i)
-		{
-			free(i);
-		}
-	}
+	stream_.userBuffer.first.clear();
+	stream_.userBuffer.second.clear();
 
 	if (stream_.deviceBuffer)
 	{
@@ -1294,6 +1290,11 @@ void LinuxAlsa::callbackEvent()
 
 	std::vector <double> data(2, 0);
 
+	std::vector <double> bufferConvert;
+	bufferConvert.resize(stream_.userBuffer.first.size());
+
+	int indexOfBuffer = 0;
+
 	// Write interleaved audio data.
 	for (int i = 0; i < stream_.bufferSize; i++)
 	{
@@ -1301,9 +1302,18 @@ void LinuxAlsa::callbackEvent()
 
 		for (int j = 0; j < 2; j++)
 		{
-			*(stream_.userBuffer[0])++ = data[j];
+			bufferConvert[indexOfBuffer] = data[j];
+			indexOfBuffer += 1;
 		}
 	}
+
+	char* test = (char*)bufferConvert.data();
+
+	for (int k = 0; k < bufferConvert.size(); ++k)
+	{
+		stream_.userBuffer.first[k] = test[k];
+	}
+
 
 	// End Callback Function
 
@@ -1339,7 +1349,7 @@ void LinuxAlsa::callbackEvent()
 		}
 		else
 		{
-			buffer = stream_.userBuffer[1];
+			buffer = stream_.userBuffer.second.data();
 			channels = stream_.nUserChannels[1];
 			format = stream_.userFormat;
 		}
@@ -1402,7 +1412,7 @@ void LinuxAlsa::callbackEvent()
 		// Do buffer conversion if necessary.
 		if (stream_.doConvertBuffer[1])
 		{
-			convertBuffer(stream_.userBuffer[1], stream_.deviceBuffer, stream_.convertInfo[1]);
+			convertBuffer(stream_.userBuffer.second.data(), stream_.deviceBuffer, stream_.convertInfo[1]);
 		}
 
 		// Check stream latency
@@ -1420,13 +1430,13 @@ tryOutput:
 		if (stream_.doConvertBuffer[0])
 		{
 			buffer = stream_.deviceBuffer;
-			convertBuffer(buffer, stream_.userBuffer[0], stream_.convertInfo[0]);
+			convertBuffer(buffer, stream_.userBuffer.first.data(), stream_.convertInfo[0]);
 			channels = stream_.nDeviceChannels[0];
 			format = stream_.deviceFormat[0];
 		}
 		else
 		{
-			buffer = stream_.userBuffer[0];
+			buffer = stream_.userBuffer.first.data();
 			channels = stream_.nUserChannels[0];
 			format = stream_.userFormat;
 		}
