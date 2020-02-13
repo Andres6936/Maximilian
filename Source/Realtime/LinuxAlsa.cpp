@@ -358,16 +358,6 @@ probeParameters:
 		info.nativeFormats = AudioFormat::Float64;
 	}
 
-	// Get the device name
-	char* cardname;
-
-	if (snd_card_get_name(card, &cardname) >= 0)
-	{
-		sprintf(name.data(), "hw:%s,%d", cardname, subDevice);
-	}
-
-	info.name = name.data();
-
 	// That's all ... close the device and return
 	snd_pcm_close(phandle);
 	info.probed = true;

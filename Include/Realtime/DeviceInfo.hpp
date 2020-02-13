@@ -19,7 +19,6 @@ namespace Maximilian
 	public:
 
 		bool probed = false;                  /*!< true if the device capabilities were successfully probed. */
-		std::string name;             /*!< Character string device identifier. */
 		unsigned int outputChannels = 0;  /*!< Maximum output channels supported by device. */
 		unsigned int inputChannels = 0;   /*!< Maximum input channels supported by device. */
 		unsigned int duplexChannels = 0;  /*!< Maximum simultaneous input/output channels supported by device. */
