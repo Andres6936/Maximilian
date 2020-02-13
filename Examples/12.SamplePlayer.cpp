@@ -29,7 +29,7 @@ int main()
 {
 	setup();
 
-	Audio audio(SupportedArchitectures::Windows_Ds);
+	Audio audio;
 
 	try
 	{

@@ -6,7 +6,7 @@ using namespace Maximilian;
 //
 Oscilation mySine;//One oscillator - can be called anything. Can be any of the available waveforms.
 
-void play(double* output)
+void play(std::vector <double>& output)
 {
 
 	output[0] = mySine.sinewave(440);
@@ -14,43 +14,13 @@ void play(double* output)
 
 }
 
-int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-		double streamTime, AudioStreamStatus status, void* userData)
-{
-
-	unsigned int i, j;
-	double* buffer = (double*)outputBuffer;
-	double* lastValues = (double*)userData;
-	//	double currentTime = (double) streamTime; Might come in handy for control
-	if (status)
-	{
-		std::cout << "Stream underflow detected!" << std::endl;
-	}
-	for (i = 0; i < nBufferFrames; i++)
-	{
-	}
-	// Write interleaved audio data.
-	for (i = 0; i < nBufferFrames; i++)
-	{
-		play(lastValues);
-		for (j = 0; j < Settings::CHANNELS; j++)
-		{
-			*buffer++ = lastValues[j];
-		}
-	}
-	return 0;
-}
-
 int main()
 {
-	Audio audio(SupportedArchitectures::Windows_Ds);
-
-	std::vector <double> data(Settings::CHANNELS, 0);
+	Audio audio;
 
 	try
 	{
-		audio.openStream(RTAUDIO_FLOAT64, &routing, (void*)&(data[0]));
-
+		audio.openStream(play);
 		audio.startStream();
 	}
 	catch (Exception& e)

@@ -26,7 +26,7 @@ void setup()
 
 }
 
-void play(double* output)
+void play(std::vector <double>& output)
 {
 
 	//notice that we feed in a value of 1. to create an envelope shape we can apply later.
@@ -64,46 +64,15 @@ void play(double* output)
 
 }
 
-
-int routing(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-		double streamTime, AudioStreamStatus status, void* userData)
-{
-
-	unsigned int i, j;
-	double* buffer = (double*)outputBuffer;
-	double* lastValues = (double*)userData;
-	//	double currentTime = (double) streamTime; Might come in handy for control
-	if (status)
-	{
-		std::cout << "Stream underflow detected!" << std::endl;
-	}
-	for (i = 0; i < nBufferFrames; i++)
-	{
-	}
-	// Write interleaved audio data.
-	for (i = 0; i < nBufferFrames; i++)
-	{
-		play(lastValues);
-		for (j = 0; j < Settings::CHANNELS; j++)
-		{
-			*buffer++ = lastValues[j];
-		}
-	}
-	return 0;
-}
-
 int main()
 {
 	setup();
 
-	Audio dac(SupportedArchitectures::Windows_Ds);
-
-	vector <double> data(Settings::CHANNELS, 0);
+	Audio dac;
 
 	try
 	{
-		dac.openStream(RTAUDIO_FLOAT64, , &routing, (void*)&(data[0]));
-
+		dac.openStream(play);
 		dac.startStream();
 	}
 	catch (Exception& e)
