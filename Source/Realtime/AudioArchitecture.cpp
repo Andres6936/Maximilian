@@ -148,29 +148,22 @@ void AudioArchitecture::verifyStream()
 
 unsigned int AudioArchitecture::formatBytes(AudioFormat _audioFormat)
 {
-	if (_audioFormat == AudioFormat::SInt16)
+	switch (_audioFormat)
 	{
-		return 2;
-	}
-	else if (_audioFormat == AudioFormat::SInt24 ||
-			 _audioFormat == AudioFormat::SInt32 ||
-			 _audioFormat == AudioFormat::Float32)
-	{
-		return 4;
-	}
-	else if (_audioFormat == AudioFormat::Float64)
-	{
-		return 8;
-	}
-	else if (_audioFormat == AudioFormat::SInt8)
-	{
-		return 1;
-	}
-	else
-	{
-		Levin::Error() << "FormatBytes: Undefined format." << Levin::endl;
 
-		throw Exception("UndefinedFormatBytesException");
+	case AudioFormat::SInt8:
+		return 1;
+
+	case AudioFormat::SInt16:
+		return 2;
+
+	case AudioFormat::SInt24:
+	case AudioFormat::SInt32:
+	case AudioFormat::Float32:
+		return 4;
+
+	case AudioFormat::Float64:
+		return 8;
 	}
 }
 
