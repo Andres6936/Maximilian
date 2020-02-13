@@ -1,12 +1,14 @@
 #include "Maximilian.hpp"
 
+using namespace Maximilian;
+
 //Bizarelly, this sounds a little bit like Kraftwerk's 'Metropolis', although it isn't. Funny that.
 
-maxiOsc sound, bass, timer, mod, lead, lead2, leadmod;//here are the synth bits
-maxiEnv envelope, leadenvelope;//some envelopes
-maxiFilter filter, filter2;//some filters
-maxiDelayline delay;//a delay
-convert mtof;//a method for converting midi notes to frequency
+Oscilation sound, bass, timer, mod, lead, lead2, leadmod;//here are the synth bits
+Env envelope, leadenvelope;//some envelopes
+Filter filter, filter2;//some filters
+DelayLine delay;//a delay
+Convert mtof;//a method for converting midi notes to frequency
 double bassout, leadout, delayout;//some variables to hold the data and pass it around
 int trigger, trigger2, newnote;//some control variables
 int currentCount, lastCount, playHead = 0, currentChord = 0;//some other control variables
@@ -33,7 +35,7 @@ void setup()
 
 }
 
-void play(double* output)
+void play(std::vector <double>& output)
 {//this is where the magic happens. Very slow magic.
 
 	currentCount = (int)timer.phasor(9);//this sets up a metronome that ticks every so often
@@ -78,4 +80,40 @@ void play(double* output)
 	output[0] = (bassout) / 2;//sum output
 	output[1] = (bassout) / 2;
 
+}
+
+
+int main()
+{
+	Audio audio;
+
+	try
+	{
+		audio.openStream(play);
+		audio.startStream();
+	}
+	catch (Exception& e)
+	{
+		e.printMessage();
+		exit(0);
+	}
+
+	char input;
+	std::cout << "\nMaximilian is playing ... press <enter> to quit.\n";
+	std::cin.get(input);
+
+	try
+	{
+		// Stop the stream
+		audio.stopStream();
+	}
+	catch (Exception& e)
+	{
+		e.printMessage();
+	}
+
+	if (audio.isStreamOpen())
+	{ audio.closeStream(); }
+
+	return 0;
 }

@@ -54,3 +54,6 @@ TARGET_LINK_LIBRARIES(Envelopes PRIVATE Maximilian)
 
 ADD_EXECUTABLE(SamplePlayer Examples/12.SamplePlayer.cpp)
 TARGET_LINK_LIBRARIES(SamplePlayer PRIVATE Maximilian)
+
+ADD_EXECUTABLE(Replicant Examples/16.Replicant.cpp)
+TARGET_LINK_LIBRARIES(Replicant PRIVATE Maximilian)
