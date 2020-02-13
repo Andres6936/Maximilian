@@ -12,6 +12,8 @@
 namespace Maximilian
 {
 
+	using Buffer = std::vector <char>;
+
 	enum class StreamState : char
 	{
 		STREAM_STOPPED,
@@ -43,7 +45,8 @@ namespace Maximilian
 		 */
 		std::any apiHandle;
 
-		char* deviceBuffer = nullptr;
+		Buffer deviceBuffer;
+
 		bool userInterleaved = true;
 
 		unsigned int nBuffers = 0;
@@ -55,7 +58,7 @@ namespace Maximilian
 		/**
 		 * Playback and record, respectively.
 		 */
-		std::pair <std::vector <char>, std::vector <char>> userBuffer;
+		std::pair <Buffer, Buffer> userBuffer;
 
 		/**
 		 * Playback and record, respectively.

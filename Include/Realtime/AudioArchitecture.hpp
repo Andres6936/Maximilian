@@ -208,7 +208,7 @@ namespace Maximilian
 		void convertBuffer(char* outBuffer, char* inBuffer, ConvertInfo& info);
 
 		//! Protected common method used to perform byte-swapping on buffers.
-		void byteSwapBuffer(char* buffer, unsigned int samples, AudioFormat format);
+		static void byteSwapBuffer(char* buffer, unsigned int samples, AudioFormat format);
 
 		//! Protected common method that sets up the parameters for buffer conversion.
 		void setConvertInfo(StreamMode mode, unsigned int firstChannel);

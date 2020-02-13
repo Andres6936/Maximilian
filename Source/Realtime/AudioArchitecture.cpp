@@ -288,7 +288,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 	// the lower three bytes of a 32-bit integer.
 
 	// Clear our device buffer when in/out duplex device channels are different
-	if (outBuffer == stream_.deviceBuffer && stream_.mode == StreamMode::DUPLEX &&
+	if (outBuffer == stream_.deviceBuffer.data() && stream_.mode == StreamMode::DUPLEX &&
 		(stream_.nDeviceChannels[0] < stream_.nDeviceChannels[1]))
 	{
 		memset(outBuffer, 0, stream_.bufferSize * info.outJump * formatBytes(info.outFormat));

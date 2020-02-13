@@ -869,7 +869,7 @@ setFormat:
 		bufferBytes = stream_.nDeviceChannels[index] * formatBytes(stream_.deviceFormat[index]);
 		if (mode == StreamMode::INPUT)
 		{
-			if (stream_.mode == StreamMode::OUTPUT && stream_.deviceBuffer)
+			if (stream_.mode == StreamMode::OUTPUT and not stream_.deviceBuffer.empty())
 			{
 				unsigned long bytesOut = stream_.nDeviceChannels[0] * formatBytes(stream_.deviceFormat[0]);
 				if (bufferBytes <= bytesOut)
@@ -880,14 +880,9 @@ setFormat:
 		if (makeBuffer)
 		{
 			bufferBytes *= getBufferFrames();
-			if (stream_.deviceBuffer)
-			{ free(stream_.deviceBuffer); }
-			stream_.deviceBuffer = (char*)calloc(bufferBytes, 1);
-			if (stream_.deviceBuffer == NULL)
-			{
-				errorText_ = "RtApiAlsa::probeDeviceOpen: error allocating device buffer memory.";
-				goto error;
-			}
+
+			stream_.deviceBuffer.clear();
+			stream_.deviceBuffer.resize(bufferBytes);
 		}
 	}
 
@@ -981,11 +976,7 @@ error:
 	if (apiInfo.handles[1])
 	{ snd_pcm_close(apiInfo.handles[1]); }
 
-	if (stream_.deviceBuffer)
-	{
-		free(stream_.deviceBuffer);
-		stream_.deviceBuffer = 0;
-	}
+	stream_.deviceBuffer.clear();
 
 	return FAILURE;
 }
@@ -1044,11 +1035,7 @@ void LinuxAlsa::closeStream()
 	stream_.userBuffer.first.clear();
 	stream_.userBuffer.second.clear();
 
-	if (stream_.deviceBuffer)
-	{
-		free(stream_.deviceBuffer);
-		stream_.deviceBuffer = 0;
-	}
+	stream_.deviceBuffer.clear();
 
 	stream_.mode = StreamMode::UNINITIALIZED;
 	stream_.state = StreamState::STREAM_CLOSED;
@@ -1336,7 +1323,7 @@ void LinuxAlsa::callbackEvent()
 		// Setup parameters.
 		if (stream_.doConvertBuffer[1])
 		{
-			buffer = stream_.deviceBuffer;
+			buffer = stream_.deviceBuffer.data();
 			channels = stream_.nDeviceChannels[1];
 			format = stream_.deviceFormat[1];
 		}
@@ -1405,7 +1392,7 @@ void LinuxAlsa::callbackEvent()
 		// Do buffer conversion if necessary.
 		if (stream_.doConvertBuffer[1])
 		{
-			convertBuffer(stream_.userBuffer.second.data(), stream_.deviceBuffer, stream_.convertInfo[1]);
+			convertBuffer(stream_.userBuffer.second.data(), stream_.deviceBuffer.data(), stream_.convertInfo[1]);
 		}
 
 		// Check stream latency
@@ -1422,7 +1409,7 @@ tryOutput:
 		// Setup parameters and do buffer conversion if necessary.
 		if (stream_.doConvertBuffer[0])
 		{
-			buffer = stream_.deviceBuffer;
+			buffer = stream_.deviceBuffer.data();
 			convertBuffer(buffer, stream_.userBuffer.first.data(), stream_.convertInfo[0]);
 			channels = stream_.nDeviceChannels[0];
 			format = stream_.deviceFormat[0];
