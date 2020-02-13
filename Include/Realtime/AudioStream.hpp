@@ -38,7 +38,10 @@ namespace Maximilian
 	public:
 
 
-		std::any apiHandle;          // void pointer for API specific stream handle information
+		/**
+		 * void pointer for API specific stream handle information
+		 */
+		std::any apiHandle;
 
 		char* deviceBuffer = nullptr;
 		bool userInterleaved = true;
