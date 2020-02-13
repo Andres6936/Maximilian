@@ -1052,10 +1052,19 @@ void LinuxAlsa::closeStream()
 	if (apiInfo)
 	{
 		pthread_cond_destroy(&apiInfo->runnable_cv);
+
 		if (apiInfo->handles[0])
-		{ snd_pcm_close(apiInfo->handles[0]); }
+		{
+			snd_pcm_close(apiInfo->handles[0]);
+		}
+
 		if (apiInfo->handles[1])
-		{ snd_pcm_close(apiInfo->handles[1]); }
+		{
+			snd_pcm_close(apiInfo->handles[1]);
+		}
+
+		snd_config_update_free_global();
+
 		delete apiInfo;
 		stream_.apiHandle = 0;
 	}
