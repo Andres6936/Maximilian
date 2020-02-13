@@ -1075,40 +1075,35 @@ void LinuxAlsa::startStream()
 
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		snd_pcm_state_t state = snd_pcm_state(handle[0]);
-		if (state != SND_PCM_STATE_PREPARED)
-		{
-			if (int e = snd_pcm_prepare(handle[0]) < 0)
-			{
-				Levin::Error() << "RtApiAlsa::startStream: error preparing output pcm device, "
-							   << snd_strerror(e) << "." << Levin::endl;
-
-				unlockMutex();
-
-				throw Exception("InvalidUseException");
-			}
-		}
+		prepareStateOfDevice(handle[0]);
 	}
 
 	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
 	{
-		snd_pcm_state_t state = snd_pcm_state(handle[1]);
-		if (state != SND_PCM_STATE_PREPARED)
-		{
-			if (int e = snd_pcm_prepare(handle[1]) < 0)
-			{
-				Levin::Error() << "Linux Alsa: startStream: error preparing input pcm device, "
-							   << snd_strerror(e) << "." << Levin::endl;
-
-				unlockMutex();
-
-				throw Exception("InvalidUseException");
-			}
-		}
+		prepareStateOfDevice(handle[1]);
 	}
 
 	stream_.state = StreamState::STREAM_RUNNING;
 	unlockMutex();
+}
+
+template <class Device>
+void LinuxAlsa::prepareStateOfDevice(Device _device)
+{
+	snd_pcm_state_t state = snd_pcm_state(_device);
+
+	if (state != SND_PCM_STATE_PREPARED)
+	{
+		if (int e = snd_pcm_prepare(_device) < 0)
+		{
+			Levin::Error() << "Linux Alsa: error preparing pcm device, "
+						   << snd_strerror(e) << "." << Levin::endl;
+
+			unlockMutex();
+
+			throw Exception("InvalidUseException");
+		}
+	}
 }
 
 void LinuxAlsa::unlockMutex()

@@ -52,6 +52,9 @@ namespace Maximilian
 				unsigned int channels,
 				unsigned int firstChannel) override;
 
+		template <class Device>
+		void prepareStateOfDevice(Device _device);
+
 		void unlockMutex();
 	};
 }
