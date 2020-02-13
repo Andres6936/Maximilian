@@ -1279,12 +1279,12 @@ void LinuxAlsa::callbackEvent()
 
 	if (stream_.mode != StreamMode::INPUT && apiInfo->xrun[0] == true)
 	{
-		status = AudioStreamStatus::RTAUDIO_OUTPUT_UNDERFLOW;
+		status = AudioStreamStatus::Underflow;
 		apiInfo->xrun[0] = false;
 	}
 	if (stream_.mode != StreamMode::OUTPUT && apiInfo->xrun[1] == true)
 	{
-		status = AudioStreamStatus::RTAUDIO_INPUT_OVERFLOW;
+		status = AudioStreamStatus::Overflow;
 		apiInfo->xrun[1] = false;
 	}
 
