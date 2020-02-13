@@ -5,6 +5,7 @@
 #include "CallbackInfo.hpp"
 #include "Definition/AudioFormat.hpp"
 
+#include <any>
 #include <array>
 #include <vector>
 
@@ -37,7 +38,7 @@ namespace Maximilian
 	public:
 
 
-		void* apiHandle = nullptr;          // void pointer for API specific stream handle information
+		std::any apiHandle;          // void pointer for API specific stream handle information
 
 		char* deviceBuffer = nullptr;
 		bool userInterleaved = true;

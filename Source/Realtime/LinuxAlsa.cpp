@@ -830,34 +830,18 @@ setFormat:
 	}
 
 	// Allocate the ApiHandle if necessary and then save.
-	AlsaHandle* apiInfo = 0;
-	if (stream_.apiHandle == 0)
-	{
-		try
-		{
-			apiInfo = (AlsaHandle*)new AlsaHandle;
-		}
-		catch (std::bad_alloc&)
-		{
-			errorText_ = "RtApiAlsa::probeDeviceOpen: error allocating AlsaHandle memory.";
-			goto error;
-		}
+	AlsaHandle apiInfo;
 
-		if (pthread_cond_init(&apiInfo->runnable_cv, NULL))
-		{
-			errorText_ = "RtApiAlsa::probeDeviceOpen: error initializing pthread condition variable.";
-			goto error;
-		}
-
-		stream_.apiHandle = (void*)apiInfo;
-		apiInfo->handles[0] = 0;
-		apiInfo->handles[1] = 0;
-	}
-	else
+	if (pthread_cond_init(&apiInfo.runnable_cv, NULL))
 	{
-		apiInfo = (AlsaHandle*)stream_.apiHandle;
+		errorText_ = "RtApiAlsa::probeDeviceOpen: error initializing pthread condition variable.";
+		goto error;
 	}
-	apiInfo->handles[index] = phandle;
+
+	apiInfo.handles[0] = 0;
+	apiInfo.handles[1] = 0;
+
+	apiInfo.handles[index] = phandle;
 
 	// Allocate necessary internal buffers.
 	unsigned long bufferBytes;
@@ -922,10 +906,10 @@ setFormat:
 		// We had already set up an output stream.
 		stream_.mode = StreamMode::DUPLEX;
 		// Link the streams if possible.
-		apiInfo->synchronized = false;
-		if (snd_pcm_link(apiInfo->handles[0], apiInfo->handles[1]) == 0)
+		apiInfo.synchronized = false;
+		if (snd_pcm_link(apiInfo.handles[0], apiInfo.handles[1]) == 0)
 		{
-			apiInfo->synchronized = true;
+			apiInfo.synchronized = true;
 		}
 		else
 		{
@@ -972,6 +956,8 @@ setFormat:
 		pthread_attr_setschedpolicy( &attr, SCHED_OTHER );
 #endif
 
+		stream_.apiHandle = apiInfo;
+
 		stream_.callbackInfo.isRunning = true;
 		result = pthread_create(&stream_.callbackInfo.thread, &attr, alsaCallbackHandler, &stream_.callbackInfo);
 		pthread_attr_destroy(&attr);
@@ -986,16 +972,14 @@ setFormat:
 	return SUCCESS;
 
 error:
-	if (apiInfo)
-	{
-		pthread_cond_destroy(&apiInfo->runnable_cv);
-		if (apiInfo->handles[0])
-		{ snd_pcm_close(apiInfo->handles[0]); }
-		if (apiInfo->handles[1])
-		{ snd_pcm_close(apiInfo->handles[1]); }
-		delete apiInfo;
-		stream_.apiHandle = 0;
-	}
+
+	pthread_cond_destroy(&apiInfo.runnable_cv);
+
+	if (apiInfo.handles[0])
+	{ snd_pcm_close(apiInfo.handles[0]); }
+
+	if (apiInfo.handles[1])
+	{ snd_pcm_close(apiInfo.handles[1]); }
 
 	if (stream_.deviceBuffer)
 	{
@@ -1015,7 +999,8 @@ void LinuxAlsa::closeStream()
 		return;
 	}
 
-	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
+	AlsaHandle* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
+
 	stream_.callbackInfo.isRunning = false;
 	pthread_mutex_lock(&stream_.mutex);
 	if (stream_.state == StreamState::STREAM_STOPPED)
@@ -1054,9 +1039,6 @@ void LinuxAlsa::closeStream()
 		}
 
 		snd_config_update_free_global();
-
-		delete apiInfo;
-		stream_.apiHandle = 0;
 	}
 
 	stream_.userBuffer.first.clear();
@@ -1087,7 +1069,8 @@ void LinuxAlsa::startStream()
 
 	pthread_mutex_lock(&stream_.mutex);
 
-	auto apiInfo = (AlsaHandle*)stream_.apiHandle;
+	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
+
 	auto handle = (snd_pcm_t**)apiInfo->handles;
 
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
@@ -1130,7 +1113,8 @@ void LinuxAlsa::startStream()
 
 void LinuxAlsa::unlockMutex()
 {
-	auto apiInfo = (AlsaHandle*)stream_.apiHandle;
+	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
+
 	apiInfo->runnable = true;
 	pthread_cond_signal(&apiInfo->runnable_cv);
 	pthread_mutex_unlock(&stream_.mutex);
@@ -1155,7 +1139,7 @@ void LinuxAlsa::stopStream()
 	//}
 
 	int result = 0;
-	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
+	AlsaHandle* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
 	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
@@ -1214,7 +1198,9 @@ void LinuxAlsa::abortStream()
 	//}
 
 	int result = 0;
-	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
+
+	AlsaHandle* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
+
 	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
@@ -1249,7 +1235,8 @@ unlock:
 
 void LinuxAlsa::callbackEvent()
 {
-	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
+	AlsaHandle* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
+
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
 		pthread_mutex_lock(&stream_.mutex);
