@@ -56,51 +56,6 @@
 
 namespace Maximilian
 {
-
-	/*!
-		   All RtAudio clients must create a function of type RtAudioCallback
-		   to read and/or write data from/to the audio stream.  When the
-		   underlying audio system is ready for new input or output data, this
-		   function will be invoked.
-
-		   \param outputBuffer For output (or duplex) streams, the client
-				  should write \c nFrames of audio sample frames into this
-				  buffer.  This argument should be recast to the datatype
-				  specified when the stream was opened.  For input-only
-				  streams, this argument will be NULL.
-
-		   \param inputBuffer For input (or duplex) streams, this buffer will
-				  hold \c nFrames of input audio sample frames.  This
-				  argument should be recast to the datatype specified when the
-				  stream was opened.  For output-only streams, this argument
-				  will be NULL.
-
-		   \param nFrames The number of sample frames of input or output
-				  data in the buffers.  The actual buffer size in bytes is
-				  dependent on the data type and number of channels in use.
-
-		   \param streamTime The number of seconds that have elapsed since the
-				  stream was started.
-
-		   \param status If non-zero, this argument indicates a data overflow
-				  or underflow condition for the stream.  The particular
-				  condition can be determined by comparison with the
-				  RtAudioStreamStatus flags.
-
-		   \param userData A pointer to optional data provided by the client
-				  when opening the stream (default = NULL).
-
-		   To continue normal stream operation, the RtAudioCallback function
-		   should return a value of zero.  To stop the stream and drain the
-		   output buffer, the function should return a value of one.  To abort
-		   the stream immediately, the client should return a value of two.
-		 */
-	typedef int (* RtAudioCallback)(void* outputBuffer, void* inputBuffer,
-			unsigned int nFrames,
-			double streamTime,
-			AudioStreamStatus status,
-			void* userData);
-
 	class AudioArchitecture;
 
 	class Audio

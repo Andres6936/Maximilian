@@ -44,7 +44,7 @@ void AudioArchitecture::openStream(void _functionUser(std::vector <double>&))
 			outputParameters.getNChannels(),
 			outputParameters.getFirstChannel());
 
-	play = _functionUser;
+	audioCallback = _functionUser;
 
 	if (result == false)
 	{ error(Exception::SYSTEM_ERROR); }
@@ -920,11 +920,6 @@ unsigned int AudioArchitecture::getBufferFrames() const
 
 // Setters
 
-void AudioArchitecture::setSampleRate(unsigned int _sampleRate)
-{
-	sampleRate = _sampleRate;
-}
-
 void AudioArchitecture::setBufferFrames(unsigned int _bufferFrames)
 {
 	bufferFrames = _bufferFrames;
@@ -943,11 +938,6 @@ int AudioArchitecture::getOptionsPriority() const
 unsigned int AudioArchitecture::getNumberOfBuffersOptions() const
 {
 	return options.getNumberOfBuffers();
-}
-
-void AudioArchitecture::setNumberOfBuffersOptions(unsigned int _numberOfBuffers)
-{
-	options.setNumberOfBuffers(_numberOfBuffers);
 }
 
 AudioFormat AudioArchitecture::getAudioFormat() const

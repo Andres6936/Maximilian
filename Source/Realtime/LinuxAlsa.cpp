@@ -1307,7 +1307,7 @@ void LinuxAlsa::callbackEvent()
 	// Write interleaved audio data.
 	for (int i = 0; i < stream_.bufferSize; i++)
 	{
-		play(data);
+		audioCallback(data);
 
 		for (int j = 0; j < 2; j++)
 		{

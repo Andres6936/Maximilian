@@ -43,16 +43,6 @@ namespace Maximilian
 		StreamParameters outputParameters;
 
 		/**
-		 * Specifies input stream parameters to use when opening a
-		 * stream, including a device ID, number of channels, and
-		 * starting channel number.  For output-only streams, this
-		 * argument should be NULL.
-		 *
-		 * The device ID is an index value between 0 and getDeviceCount() - 1.
-		 */
-		StreamParameters inputParameters;
-
-		/**
 		 *  Enum that content various global stream options, including
 		 *  a list of OR'ed RtAudioStreamFlags and a suggested number
 		 *  of stream buffers that can be used to control stream latency.
@@ -152,18 +142,24 @@ namespace Maximilian
 
 		// Setters
 
-		void setSampleRate(unsigned int _sampleRate);
-
 		void setBufferFrames(unsigned int _bufferFrames);
-
-		void setNumberOfBuffersOptions(unsigned int _numberOfBuffers);
 
 	protected:
 
 		static const unsigned int MAX_SAMPLE_RATES;
 		static const unsigned int SAMPLE_RATES[];
 
-		std::function <void(std::vector <double>&)> play;
+		/**
+		 * All Audio clients must create a function of this
+		 * type to write data to the audio stream.
+		 * When the underlying audio system is ready for new
+		 * output data, this function will be invoked.
+
+		   \param Buffer For output (or duplex) streams, the client
+				  should write \c nFrames of audio sample frames into this
+				  buffer.
+		 */
+		std::function <void(std::vector <double>&)> audioCallback;
 
 		enum
 		{
