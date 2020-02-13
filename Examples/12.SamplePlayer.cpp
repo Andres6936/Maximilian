@@ -31,12 +31,9 @@ int main()
 
 	Audio audio(SupportedArchitectures::Windows_Ds);
 
-	std::vector <double> data(Settings::CHANNELS, 0);
-
 	try
 	{
 		audio.openStream(play);
-
 		audio.startStream();
 	}
 	catch (Exception& e)
