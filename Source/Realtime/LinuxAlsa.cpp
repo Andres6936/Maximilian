@@ -1262,7 +1262,6 @@ void LinuxAlsa::callbackEvent()
 	}
 
 	int doStopStream = 0;
-	double streamTime = getStreamTime();
 
 	AudioStreamStatus status = AudioStreamStatus::None;
 
@@ -1286,6 +1285,7 @@ void LinuxAlsa::callbackEvent()
 
 	// Start Callback Function
 
+	// Left and Right channel
 	std::vector <double> data(2, 0);
 
 	std::vector <double> bufferConvert;
