@@ -1,17 +1,20 @@
 #include "Maximilian.hpp"
 
+using namespace Maximilian;
+
 //This shows how to use maximilian to build a polyphonic synth.
 
 //These are the synthesiser bits
-maxiOsc VCO1[6], VCO2[6], LFO1[6], LFO2[6];
+Oscilation VCO1[6], VCO2[6], LFO1[6], LFO2[6];
 
-maxiFilter VCF[6];
+Filter VCF[6];
 
-maxiEnv ADSR[6];
+Env ADSR[6];
 
 //This is a bunch of control signals so that we can hear something
 
-maxiOsc timer;//this is the metronome
+Oscilation timer;//this is the metronome
+
 int currentCount, lastCount, voice = 0;//these values are used to check if we have a new beat this sample
 
 //and these are some variables we can use to pass stuff around
@@ -33,7 +36,7 @@ void setup()
 	}
 }
 
-void play(double* output)
+void play(std::vector <double>& output)
 {
 
 	mix = 0;//we're adding up the samples each update and it makes sense to clear them each time first.
@@ -91,4 +94,39 @@ void play(double* output)
 		ADSR[i].trigger = 0;
 	}
 
+}
+
+int main()
+{
+	Audio audio;
+
+	try
+	{
+		audio.openStream(play);
+		audio.startStream();
+	}
+	catch (Exception& e)
+	{
+		e.printMessage();
+		exit(0);
+	}
+
+	char input;
+	std::cout << "\nMaximilian is playing ... press <enter> to quit.\n";
+	std::cin.get(input);
+
+	try
+	{
+		// Stop the stream
+		audio.stopStream();
+	}
+	catch (Exception& e)
+	{
+		e.printMessage();
+	}
+
+	if (audio.isStreamOpen())
+	{ audio.closeStream(); }
+
+	return 0;
 }

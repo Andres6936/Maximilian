@@ -57,3 +57,6 @@ TARGET_LINK_LIBRARIES(SamplePlayer PRIVATE Maximilian)
 
 ADD_EXECUTABLE(Replicant Examples/16.Replicant.cpp)
 TARGET_LINK_LIBRARIES(Replicant PRIVATE Maximilian)
+
+ADD_EXECUTABLE(Polysynth Examples/15.polysynth.cpp)
+TARGET_LINK_LIBRARIES(Polysynth PRIVATE Maximilian)
