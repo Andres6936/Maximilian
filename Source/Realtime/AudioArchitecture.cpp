@@ -141,8 +141,9 @@ void AudioArchitecture::verifyStream()
 {
 	if (stream_.state == StreamState::STREAM_CLOSED)
 	{
-		errorText_ = "RtApi:: a stream is not open!";
-		error(Exception::INVALID_USE);
+		Levin::Error() << "Audio Architecture: a stream is not open." << Levin::endl;
+
+		throw Exception("StreamIsNotOpenException");
 	}
 }
 

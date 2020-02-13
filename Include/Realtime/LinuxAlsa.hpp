@@ -51,6 +51,8 @@ namespace Maximilian
 				StreamMode mode,
 				unsigned int channels,
 				unsigned int firstChannel) override;
+
+		void unlockMutex();
 	};
 }
 

@@ -1078,61 +1078,63 @@ void LinuxAlsa::startStream()
 	// This method calls snd_pcm_prepare if the device isn't already in that state.
 
 	verifyStream();
+
 	if (stream_.state == StreamState::STREAM_RUNNING)
 	{
-		errorText_ = "RtApiAlsa::startStream(): the stream is already running!";
-		error(Exception::WARNING);
+		Levin::Warn() << "Linux Alsa: startStream(): the stream is already running." << Levin::endl;
+		// Exit function
 		return;
 	}
 
 	pthread_mutex_lock(&stream_.mutex);
 
-	int result = 0;
-	snd_pcm_state_t state;
-	AlsaHandle* apiInfo = (AlsaHandle*)stream_.apiHandle;
-	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
+	auto apiInfo = (AlsaHandle*)stream_.apiHandle;
+	auto handle = (snd_pcm_t**)apiInfo->handles;
+
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		state = snd_pcm_state(handle[0]);
+		snd_pcm_state_t state = snd_pcm_state(handle[0]);
 		if (state != SND_PCM_STATE_PREPARED)
 		{
-			result = snd_pcm_prepare(handle[0]);
-			if (result < 0)
+			if (int e = snd_pcm_prepare(handle[0]) < 0)
 			{
-				errorStream_ << "RtApiAlsa::startStream: error preparing output pcm device, " << snd_strerror(result)
-							 << ".";
-				errorText_ = errorStream_.str();
-				goto unlock;
+				Levin::Error() << "RtApiAlsa::startStream: error preparing output pcm device, "
+							   << snd_strerror(e) << "." << Levin::endl;
+
+				unlockMutex();
+
+				throw Exception("InvalidUseException");
 			}
 		}
 	}
 
 	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
 	{
-		state = snd_pcm_state(handle[1]);
+		snd_pcm_state_t state = snd_pcm_state(handle[1]);
 		if (state != SND_PCM_STATE_PREPARED)
 		{
-			result = snd_pcm_prepare(handle[1]);
-			if (result < 0)
+			if (int e = snd_pcm_prepare(handle[1]) < 0)
 			{
-				errorStream_ << "RtApiAlsa::startStream: error preparing input pcm device, " << snd_strerror(result)
-							 << ".";
-				errorText_ = errorStream_.str();
-				goto unlock;
+				Levin::Error() << "Linux Alsa: startStream: error preparing input pcm device, "
+							   << snd_strerror(e) << "." << Levin::endl;
+
+				unlockMutex();
+
+				throw Exception("InvalidUseException");
 			}
 		}
 	}
 
 	stream_.state = StreamState::STREAM_RUNNING;
+	unlockMutex();
+}
 
-unlock:
+void LinuxAlsa::unlockMutex()
+{
+	auto apiInfo = (AlsaHandle*)stream_.apiHandle;
 	apiInfo->runnable = true;
 	pthread_cond_signal(&apiInfo->runnable_cv);
 	pthread_mutex_unlock(&stream_.mutex);
-
-	if (result >= 0)
-	{ return; }
-	error(Exception::SYSTEM_ERROR);
 }
 
 void LinuxAlsa::stopStream()
