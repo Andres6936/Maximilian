@@ -3,8 +3,8 @@
 
 namespace Maximilian
 {
-	/*! \typedef typedef unsigned long RtAudioStreamStatus;
-			\brief RtAudio stream status (over- or underflow) flags.
+	/**
+	 * @brief Stream status (over- or underflow) flags.
 
 			Notification of a stream over- or underflow is indicated by a
 			non-zero stream \c status argument in the RtAudioCallback function.
@@ -14,17 +14,14 @@ namespace Maximilian
 			- \e RTAUDIO_INPUT_OVERFLOW:   Input data was discarded because of an overflow condition at the driver.
 			- \e RTAUDIO_OUTPUT_UNDERFLOW: The output buffer ran low, likely producing a break in the output sound.
 		*/
-	using AudioStreamStatus = unsigned int;
-
-	/**
-	 * Input data was discarded because of an overflow condition at the driver.
-	 */
-	static constexpr AudioStreamStatus RTAUDIO_INPUT_OVERFLOW = 0x1;
-
-	/**
-	 * The output buffer ran low, likely causing a gap in the output sound.
-	 */
-	static constexpr AudioStreamStatus RTAUDIO_OUTPUT_UNDERFLOW = 0x2;
+	enum class AudioStreamStatus : unsigned int
+	{
+		None,
+		// Input data was discarded because of an overflow condition at the driver.
+				RTAUDIO_INPUT_OVERFLOW,
+		// The output buffer ran low, likely causing a gap in the output sound.
+				RTAUDIO_OUTPUT_UNDERFLOW,
+	};
 }
 
 #endif //MAXIMILIAN_AUDIOSTREAMSTATUS_HPP

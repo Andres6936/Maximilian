@@ -1274,19 +1274,26 @@ void LinuxAlsa::callbackEvent()
 
 	int doStopStream = 0;
 	double streamTime = getStreamTime();
-	AudioStreamStatus status = 0;
+
+	AudioStreamStatus status = AudioStreamStatus::None;
+
 	if (stream_.mode != StreamMode::INPUT && apiInfo->xrun[0] == true)
 	{
-		status |= RTAUDIO_OUTPUT_UNDERFLOW;
+		status = AudioStreamStatus::RTAUDIO_OUTPUT_UNDERFLOW;
 		apiInfo->xrun[0] = false;
 	}
 	if (stream_.mode != StreamMode::OUTPUT && apiInfo->xrun[1] == true)
 	{
-		status |= RTAUDIO_INPUT_OVERFLOW;
+		status = AudioStreamStatus::RTAUDIO_INPUT_OVERFLOW;
 		apiInfo->xrun[1] = false;
 	}
 
-	// TODO: Verify Overflow and Underflow
+	if (status != AudioStreamStatus::None)
+	{
+		Levin::Error() << "An Underflow or Overflow has been produced." << Levin::endl;
+
+		throw Exception("UnderflowOrOverflowException");
+	}
 
 	// Start Callback Function
 
