@@ -505,14 +505,15 @@ namespace Maximilian
 		}
 
 		// return a printable summary of the wav file
-		char* getSummary()
+		void getSummary()
 		{
-			char* summary = new char[250];
-			sprintf(summary,
-					" Format: %d\n Channels: %d\n SampleRate: %d\n ByteRate: %d\n BlockAlign: %d\n BitsPerSample: %d\n DataSize: %d\n",
-					myFormat, myChannels, mySampleRate, myByteRate, myBlockAlign, myBitsPerSample, myDataSize);
-			cout << myDataSize;
-			return summary;
+			Levin::Info() << "Format: " << myFormat << Levin::endl;
+			Levin::Info() << "Channels: " << myChannels << Levin::endl;
+			Levin::Info() << "Data Size: " << myDataSize << Levin::endl;
+			Levin::Info() << "Byte Rate: " << myByteRate << Levin::endl;
+			Levin::Info() << "Block Align: " << myBlockAlign << Levin::endl;
+			Levin::Info() << "Sample Rate: " << mySampleRate << Levin::endl;
+			Levin::Info() << "Bits Per Sample: " << myBitsPerSample << Levin::endl;
 		}
 
 		void normalise(float maxLevel = 0.99);  //0 < maxLevel < 1.0

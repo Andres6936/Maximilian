@@ -7,11 +7,12 @@ using namespace Maximilian;
 Clip beats; //We give our sample a name. It's called beats this time. We could have loads of them, but they have to have different names.
 
 void setup()
-{//some inits
+{
 
-	beats.load(
-			"/home/andres6936/CLionProjects/Maximilian/beat2.wav");//load in your samples. Provide the full path to a wav file.
-	printf("Summary:\n%s", beats.getSummary());//get info on samples if you like.
+	// load in your samples. Provide the full path to a wav file.
+	beats.load("/home/andres6936/CLionProjects/Maximilian/beat2.wav");
+	//get info on samples if you like.
+	beats.getSummary();
 
 }
 
