@@ -337,33 +337,41 @@ namespace Maximilian
 		}
 	};
 
-	class Sample
+	class Clip
 	{
 
 	private:
-		string myPath;
+
+		short myBlockAlign;
+		short myFormat;
+
 		int myChunkSize;
 		int mySubChunk1Size;
 		int readChannel;
-		short myFormat;
 		int myByteRate;
-		short myBlockAlign;
-		double position, recordPosition;
+
+		double position;
+		double recordPosition;
 		double speed;
 		double output;
+
+		std::string myPath;
+
 		LaggingExponential <double> loopRecordLag;
 
 	public:
-		int myDataSize;
+
+		short myBitsPerSample;
 		short myChannels;
+
+		int myDataSize;
 		int mySampleRate;
+
 		long length;
 
 		long getLength();
 
 		void setLength(unsigned long numSamples);
-
-		short myBitsPerSample;
 
 
 		//	char* 	myData;
@@ -371,7 +379,7 @@ namespace Maximilian
 
 		// get/set for the Path property
 
-		~Sample()
+		~Clip()
 		{
 			//		if (myData) free(myData);
 			if (temp)
@@ -380,11 +388,11 @@ namespace Maximilian
 
 		}
 
-		Sample() : temp(nullptr), position(0), recordPosition(0), myChannels(1), mySampleRate(Settings::SAMPLE_RATE)
+		Clip() : temp(nullptr), position(0), recordPosition(0), myChannels(1), mySampleRate(Settings::SAMPLE_RATE)
 		{
 		};
 
-		Sample& operator=(const Sample& source)
+		Clip& operator=(const Clip& source)
 		{
 			if (this == &source)
 			{
@@ -998,7 +1006,7 @@ namespace Maximilian
 		Oscilation LFO2;
 		Oscilation LFO3;
 		Oscilation LFO4;
-		Sample samples[32];
+		Clip samples[32];
 		Env envelopes[32];
 		Distortion distort;
 		StateVariableFilter filters[32];

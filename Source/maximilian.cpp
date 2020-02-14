@@ -992,7 +992,7 @@ double* Mixer::ambisonic(double input, double eight[8], double x, double y, doub
 }
 
 //This is the maxiSample load function. It just calls read.
-bool Sample::load(string fileName, int channel)
+bool Clip::load(string fileName, int channel)
 {
 	myPath = fileName;
 	readChannel = channel;
@@ -1000,7 +1000,7 @@ bool Sample::load(string fileName, int channel)
 }
 
 // This is for OGG loading
-bool Sample::loadOgg(string fileName, int channel)
+bool Clip::loadOgg(string fileName, int channel)
 {
 #ifdef VORBIS
 																															bool result;
@@ -1032,14 +1032,14 @@ bool Sample::loadOgg(string fileName, int channel)
 }
 
 //This sets the playback position to the start of a sample
-void Sample::trigger()
+void Clip::trigger()
 {
 	position = 0;
 	recordPosition = 0;
 }
 
 //This is the main read function.
-bool Sample::read()
+bool Clip::read()
 {
 	bool result;
 	ifstream inFile(myPath.c_str(), ios::in | ios::binary);
@@ -1130,7 +1130,7 @@ bool Sample::read()
 }
 
 //This plays back at the correct speed. Always loops.
-double Sample::play()
+double Clip::play()
 {
 	position++;
 	if ((long)position >= length)
@@ -1139,13 +1139,13 @@ double Sample::play()
 	return output;
 }
 
-void Sample::setPosition(double newPos)
+void Clip::setPosition(double newPos)
 {
 	position = Map::clamp <double>(newPos, 0.0, 1.0) * length;
 }
 
 //start end and points are between 0 and 1
-double Sample::playLoop(double start, double end)
+double Clip::playLoop(double start, double end)
 {
 	position++;
 	if (position < length * start)
@@ -1156,7 +1156,7 @@ double Sample::playLoop(double start, double end)
 	return output;
 }
 
-double Sample::playUntil(double end)
+double Clip::playUntil(double end)
 {
 	position++;
 	if ((long)position < length * end)
@@ -1172,7 +1172,7 @@ double Sample::playUntil(double end)
 
 
 //This plays back at the correct speed. Only plays once. To retrigger, you have to manually reset the position
-double Sample::playOnce()
+double Clip::playOnce()
 {
 	position++;
 	if ((long)position < length)
@@ -1188,7 +1188,7 @@ double Sample::playOnce()
 }
 
 //Same as above but takes a speed value specified as a ratio, with 1.0 as original speed
-double Sample::playOnce(double speed)
+double Clip::playOnce(double speed)
 {
 	position = position + ((speed * chandiv) / (Maximilian::Settings::SAMPLE_RATE / mySampleRate));
 	double remainder = position - (long)position;
@@ -1205,7 +1205,7 @@ double Sample::playOnce(double speed)
 }
 
 //As above but looping
-double Sample::play(double speed)
+double Clip::play(double speed)
 {
 	double remainder;
 	long a, b;
@@ -1264,13 +1264,13 @@ double Sample::play(double speed)
 }
 
 //placeholder
-double Sample::play(double frequency, double start, double end)
+double Clip::play(double frequency, double start, double end)
 {
 	return play(frequency, start, end, position);
 }
 
 //This allows you to say how often a second you want a specific chunk of audio to play
-double Sample::play(double frequency, double start, double end, double& pos)
+double Clip::play(double frequency, double start, double end, double& pos)
 {
 	double remainder;
 	if (end >= length)
@@ -1344,7 +1344,7 @@ double Sample::play(double frequency, double start, double end, double& pos)
 
 
 //Same as above. better cubic inerpolation. Cobbled together from various (pd externals, yehar, other places).
-double Sample::play4(double frequency, double start, double end)
+double Clip::play4(double frequency, double start, double end)
 {
 	double remainder;
 	double a, b, c, d, a1, a2, a3;
@@ -1445,7 +1445,7 @@ double Sample::play4(double frequency, double start, double end)
 
 
 //You don't need to worry about this stuff.
-double Sample::bufferPlay(unsigned char& bufferin, long length)
+double Clip::bufferPlay(unsigned char& bufferin, long length)
 {
 	double remainder;
 	short* buffer = (short*)&bufferin;
@@ -1458,7 +1458,7 @@ double Sample::bufferPlay(unsigned char& bufferin, long length)
 	return (output);
 }
 
-double Sample::bufferPlay(unsigned char& bufferin, double speed, long length)
+double Clip::bufferPlay(unsigned char& bufferin, double speed, long length)
 {
 	double remainder;
 	long a, b;
@@ -1517,7 +1517,7 @@ double Sample::bufferPlay(unsigned char& bufferin, double speed, long length)
 	return (output);
 }
 
-double Sample::bufferPlay(unsigned char& bufferin, double frequency, double start, double end)
+double Clip::bufferPlay(unsigned char& bufferin, double frequency, double start, double end)
 {
 	double remainder;
 	length = end;
@@ -1589,7 +1589,7 @@ double Sample::bufferPlay(unsigned char& bufferin, double frequency, double star
 }
 
 //better cubic inerpolation. Cobbled together from various (pd externals, yehar, other places).
-double Sample::bufferPlay4(unsigned char& bufferin, double frequency, double start, double end)
+double Clip::bufferPlay4(unsigned char& bufferin, double frequency, double start, double end)
 {
 	double remainder;
 	double a, b, c, d, a1, a2, a3;
@@ -1690,12 +1690,12 @@ double Sample::bufferPlay4(unsigned char& bufferin, double frequency, double sta
 }
 
 
-long Sample::getLength()
+long Clip::getLength()
 {
 	return (length = myDataSize * 0.5);
 }
 
-void Sample::setLength(unsigned long numSamples)
+void Clip::setLength(unsigned long numSamples)
 {
 	cout << "Length: " << numSamples << endl;
 	short* newData = (short*)malloc(sizeof(short) * numSamples);
@@ -1711,17 +1711,17 @@ void Sample::setLength(unsigned long numSamples)
 	recordPosition = 0;
 }
 
-void Sample::clear()
+void Clip::clear()
 {
 	memset(temp, 0, myDataSize);
 }
 
-void Sample::reset()
+void Clip::reset()
 {
 	position = 0;
 }
 
-void Sample::normalise(float maxLevel)
+void Clip::normalise(float maxLevel)
 {
 	short maxValue = 0;
 	for (int i = 0; i < length; i++)
@@ -1738,7 +1738,7 @@ void Sample::normalise(float maxLevel)
 	}
 }
 
-void Sample::autoTrim(float alpha, float threshold, bool trimStart, bool trimEnd)
+void Clip::autoTrim(float alpha, float threshold, bool trimStart, bool trimEnd)
 {
 
 	int startMarker = 0;

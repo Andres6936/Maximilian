@@ -4,7 +4,7 @@
 
 using namespace Maximilian;
 
-Sample beats; //We give our sample a name. It's called beats this time. We could have loads of them, but they have to have different names.
+Clip beats; //We give our sample a name. It's called beats this time. We could have loads of them, but they have to have different names.
 
 void setup()
 {//some inits
