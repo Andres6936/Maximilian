@@ -19,9 +19,10 @@ void setup()
 void play(std::vector <double>& output)
 {
 	//output[0]=beats.play();//just play the file. Looping is default for all play functions.
-	output[0] = beats.play(0.68);//play the file with a speed setting. 1. is normal speed.
+	//output[0] = beats.play(0.68);//play the file with a speed setting. 1. is normal speed.
 	//output[0]=beats.play(0.5,0,44100);//linear interpolationplay with a frequency input, start point and end point. Useful for syncing.
 	//output[0]=beats.play4(0.5,0,44100);//cubic interpolation play with a frequency input, start point and end point. Useful for syncing.
+	output[0] = beats.playOnce();
 
 	output[1] = output[0];
 }
