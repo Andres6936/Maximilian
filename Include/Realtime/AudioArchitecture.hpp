@@ -68,6 +68,9 @@ namespace Maximilian
 
 		void assertThatStreamIsNotOpen();
 
+		template <typename T, typename O, typename I>
+		void formatBufferTo(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
+
 	public:
 
 		AudioArchitecture();
