@@ -158,6 +158,9 @@ unsigned int AudioArchitecture::formatBytes(AudioFormat _audioFormat)
 	case AudioFormat::Float64:
 		return 8;
 	}
+
+	// Code inaccessible
+	return 0;
 }
 
 void AudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChannel)
