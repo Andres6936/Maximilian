@@ -276,9 +276,14 @@ void AudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChanne
 	}
 }
 
+template <typename O, typename I>
+void AudioArchitecture::formatBufferWithoutScale(O* outBuffer, I* inBuffer, ConvertInfo& info)
+{
+
+}
 
 template <typename T, typename O, typename I>
-void AudioArchitecture::formatBufferTo(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
+void AudioArchitecture::formatBufferToScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
 {
 	for (unsigned int i = 0; i < stream_.bufferSize; i++)
 	{
@@ -295,7 +300,7 @@ void AudioArchitecture::formatBufferTo(T _scale, O* outBuffer, I* inBuffer, Conv
 }
 
 template <typename T, typename O, typename I>
-void AudioArchitecture::formatBufferOf24BitsTo(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
+void AudioArchitecture::formatBufferOf24BitsToScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
 {
 	for (unsigned int i = 0; i < stream_.bufferSize; i++)
 	{
@@ -333,28 +338,28 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 			auto* in = (signed char*)inBuffer;
 			Float64 scale = 1.0 / 127.5;
 
-			formatBufferTo(scale, out, in, info);
+			formatBufferToScale(scale, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt16)
 		{
 			auto* in = (Int16*)inBuffer;
 			Float64 scale = 1.0 / 32767.5;
 
-			formatBufferTo(scale, out, in, info);
+			formatBufferToScale(scale, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt24)
 		{
-			Int32* in = (Int32*)inBuffer;
+			auto* in = (Int32*)inBuffer;
 			Float64 scale = 1.0 / 8388607.5;
 
-			formatBufferOf24BitsTo(scale, out, in, info);
+			formatBufferOf24BitsToScale(scale, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt32)
 		{
-			Int32* in = (Int32*)inBuffer;
+			auto* in = (Int32*)inBuffer;
 			Float64 scale = 1.0 / 2147483647.5;
 
-			formatBufferTo(scale, out, in, info);
+			formatBufferToScale(scale, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::Float32)
 		{
@@ -390,31 +395,31 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 
 		if (info.inFormat == AudioFormat::SInt8)
 		{
-			signed char* in = (signed char*)inBuffer;
-			Float32 scale = (Float32)(1.0 / 127.5);
+			auto* in = (signed char*)inBuffer;
+			auto scale = (Float32)(1.0 / 127.5);
 
-			formatBufferTo(scale, out, in, info);
+			formatBufferToScale(scale, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt16)
 		{
-			Int16* in = (Int16*)inBuffer;
-			Float32 scale = (Float32)(1.0 / 32767.5);
+			auto* in = (Int16*)inBuffer;
+			auto scale = (Float32)(1.0 / 32767.5);
 
-			formatBufferTo(scale, out, in, info);
+			formatBufferToScale(scale, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt24)
 		{
-			Int32* in = (Int32*)inBuffer;
-			Float32 scale = (Float32)(1.0 / 8388607.5);
+			auto* in = (Int32*)inBuffer;
+			auto scale = (Float32)(1.0 / 8388607.5);
 
-			formatBufferOf24BitsTo(scale, out, in, info);
+			formatBufferOf24BitsToScale(scale, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt32)
 		{
-			Int32* in = (Int32*)inBuffer;
-			Float32 scale = (Float32)(1.0 / 2147483647.5);
+			auto* in = (Int32*)inBuffer;
+			auto scale = (Float32)(1.0 / 2147483647.5);
 
-			formatBufferTo(scale, out, in, info);
+			formatBufferToScale(scale, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::Float32)
 		{
