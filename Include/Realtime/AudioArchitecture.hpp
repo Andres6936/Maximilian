@@ -72,6 +72,9 @@ namespace Maximilian
 		void formatBufferWithoutScale(O* outBuffer, I* inBuffer, ConvertInfo& info);
 
 		template <typename T, typename O, typename I>
+		void formatBufferWithScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
+
+		template <typename T, typename O, typename I>
 		void formatBufferToScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
 
 		template <typename T, typename O, typename I>
