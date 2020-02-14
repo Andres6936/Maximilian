@@ -71,6 +71,9 @@ namespace Maximilian
 		template <typename T, typename O, typename I>
 		void formatBufferTo(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
 
+		template <typename T, typename O, typename I>
+		void formatBufferOf24BitsTo(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
+
 	public:
 
 		AudioArchitecture();

@@ -294,6 +294,23 @@ void AudioArchitecture::formatBufferTo(T _scale, O* outBuffer, I* inBuffer, Conv
 	}
 }
 
+template <typename T, typename O, typename I>
+void AudioArchitecture::formatBufferOf24BitsTo(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
+{
+	for (unsigned int i = 0; i < stream_.bufferSize; i++)
+	{
+		for (unsigned int j = 0; j < info.channels; j++)
+		{
+			outBuffer[info.outOffset[j]] = (T)(inBuffer[info.inOffset[j]] & 0x00FFFFFF);
+			outBuffer[info.outOffset[j]] += 0.5;
+			outBuffer[info.outOffset[j]] *= _scale;
+		}
+
+		inBuffer += info.inJump;
+		outBuffer += info.outJump;
+	}
+}
+
 void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertInfo& info)
 {
 	// This function does format conversion, input/output channel compensation, and
@@ -329,17 +346,8 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		{
 			Int32* in = (Int32*)inBuffer;
 			Float64 scale = 1.0 / 8388607.5;
-			for (unsigned int i = 0; i < stream_.bufferSize; i++)
-			{
-				for (unsigned int j = 0; j < info.channels; j++)
-				{
-					out[info.outOffset[j]] = (Float64)(in[info.inOffset[j]] & 0x00ffffff);
-					out[info.outOffset[j]] += 0.5;
-					out[info.outOffset[j]] *= scale;
-				}
-				in += info.inJump;
-				out += info.outJump;
-			}
+
+			formatBufferOf24BitsTo(scale, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt32)
 		{
@@ -398,17 +406,8 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		{
 			Int32* in = (Int32*)inBuffer;
 			Float32 scale = (Float32)(1.0 / 8388607.5);
-			for (unsigned int i = 0; i < stream_.bufferSize; i++)
-			{
-				for (unsigned int j = 0; j < info.channels; j++)
-				{
-					out[info.outOffset[j]] = (Float32)(in[info.inOffset[j]] & 0x00ffffff);
-					out[info.outOffset[j]] += 0.5;
-					out[info.outOffset[j]] *= scale;
-				}
-				in += info.inJump;
-				out += info.outJump;
-			}
+
+			formatBufferOf24BitsTo(scale, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt32)
 		{
