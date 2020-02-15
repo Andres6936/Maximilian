@@ -1071,7 +1071,7 @@ void LinuxAlsa::startStream()
 	}
 
 	stream_.state = StreamState::STREAM_RUNNING;
-	unlockMutex();
+	unlockMutexOfAPIHandle();
 }
 
 template <class Device>
@@ -1086,14 +1086,14 @@ void LinuxAlsa::prepareStateOfDevice(Device _device)
 			Levin::Error() << "Linux Alsa: error preparing pcm device, "
 						   << snd_strerror(e) << "." << Levin::endl;
 
-			unlockMutex();
+			unlockMutexOfAPIHandle();
 
 			throw Exception("InvalidUseException");
 		}
 	}
 }
 
-void LinuxAlsa::unlockMutex()
+void LinuxAlsa::unlockMutexOfAPIHandle()
 {
 	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
 
@@ -1269,10 +1269,13 @@ void LinuxAlsa::callbackEvent()
 
 	// The state might change while waiting on a mutex.
 	if (stream_.state == StreamState::STREAM_STOPPED)
-	{ goto unlock; }
+	{
+		unlockMutex();
+		return;
+	}
 
 	int result;
-	char* buffer;
+	std::vector <char> buffer;
 	int channels;
 	snd_pcm_t** handle;
 	snd_pcm_sframes_t frames;
@@ -1285,13 +1288,13 @@ void LinuxAlsa::callbackEvent()
 		// Setup parameters.
 		if (stream_.doConvertBuffer[1])
 		{
-			buffer = stream_.deviceBuffer.data();
+			buffer = stream_.deviceBuffer;
 			channels = stream_.nDeviceChannels[1];
 			format = stream_.deviceFormat[1];
 		}
 		else
 		{
-			buffer = stream_.userBuffer.second.data();
+			buffer = stream_.userBuffer.second;
 			channels = stream_.nUserChannels[1];
 			format = stream_.userFormat;
 		}
@@ -1299,17 +1302,7 @@ void LinuxAlsa::callbackEvent()
 		// Read samples from device in interleaved/non-interleaved format.
 		if (stream_.deviceInterleaved[1])
 		{
-			result = snd_pcm_readi(handle[1], buffer, stream_.bufferSize);
-		}
-		else
-		{
-			void* bufs[channels];
-			size_t offset = stream_.bufferSize * formatBytes(format);
-			for (int i = 0; i < channels; i++)
-			{
-				bufs[i] = (void*)(buffer + (i * offset));
-			}
-			result = snd_pcm_readn(handle[1], bufs, stream_.bufferSize);
+			result = snd_pcm_readi(handle[1], buffer.data(), stream_.bufferSize);
 		}
 
 		if (result < (int)stream_.bufferSize)
@@ -1348,7 +1341,7 @@ void LinuxAlsa::callbackEvent()
 		// Do byte swapping if necessary.
 		if (stream_.doByteSwap[1])
 		{
-			byteSwapBuffer(buffer, stream_.bufferSize * channels, format);
+			byteSwapBuffer(buffer.data(), stream_.bufferSize * channels, format);
 		}
 
 		// Do buffer conversion if necessary.
@@ -1371,14 +1364,14 @@ tryOutput:
 		// Setup parameters and do buffer conversion if necessary.
 		if (stream_.doConvertBuffer[0])
 		{
-			buffer = stream_.deviceBuffer.data();
-			convertBuffer(buffer, stream_.userBuffer.first.data(), stream_.convertInfo[0]);
+			buffer = stream_.deviceBuffer;
+			convertBuffer(buffer.data(), stream_.userBuffer.first.data(), stream_.convertInfo[0]);
 			channels = stream_.nDeviceChannels[0];
 			format = stream_.deviceFormat[0];
 		}
 		else
 		{
-			buffer = stream_.userBuffer.first.data();
+			buffer = stream_.userBuffer.first;
 			channels = stream_.nUserChannels[0];
 			format = stream_.userFormat;
 		}
@@ -1386,23 +1379,13 @@ tryOutput:
 		// Do byte swapping if necessary.
 		if (stream_.doByteSwap[0])
 		{
-			byteSwapBuffer(buffer, stream_.bufferSize * channels, format);
+			byteSwapBuffer(buffer.data(), stream_.bufferSize * channels, format);
 		}
 
 		// Write samples to device in interleaved/non-interleaved format.
 		if (stream_.deviceInterleaved[0])
 		{
-			result = snd_pcm_writei(handle[0], buffer, stream_.bufferSize);
-		}
-		else
-		{
-			void* bufs[channels];
-			size_t offset = stream_.bufferSize * formatBytes(format);
-			for (int i = 0; i < channels; i++)
-			{
-				bufs[i] = (void*)(buffer + (i * offset));
-			}
-			result = snd_pcm_writen(handle[0], bufs, stream_.bufferSize);
+			result = snd_pcm_writei(handle[0], buffer.data(), stream_.bufferSize);
 		}
 
 		if (result < (int)stream_.bufferSize)
@@ -1434,8 +1417,11 @@ tryOutput:
 				errorStream_ << "RtApiAlsa::callbackEvent: audio write error, " << snd_strerror(result) << ".";
 				errorText_ = errorStream_.str();
 			}
+
 			error(Exception::WARNING);
-			goto unlock;
+
+			unlockMutex();
+			return;
 		}
 
 		// Check stream latency
@@ -1444,10 +1430,7 @@ tryOutput:
 		{ stream_.latency[0] = frames; }
 	}
 
-unlock:
-	pthread_mutex_unlock(&stream_.mutex);
-
-	AudioArchitecture::tickStreamTime();
+	unlockMutex();
 }
 
 void LinuxAlsa::startCallbackFunction()
@@ -1478,4 +1461,11 @@ void LinuxAlsa::startCallbackFunction()
 	{
 		stream_.userBuffer.first[k] = test[k];
 	}
+}
+
+void LinuxAlsa::unlockMutex()
+{
+	pthread_mutex_unlock(&stream_.mutex);
+
+	AudioArchitecture::tickStreamTime();
 }

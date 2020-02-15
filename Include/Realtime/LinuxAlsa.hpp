@@ -58,6 +58,8 @@ namespace Maximilian
 		void prepareStateOfDevice(Device _device);
 
 		void unlockMutex();
+
+		void unlockMutexOfAPIHandle();
 	};
 }
 
