@@ -1356,33 +1356,7 @@ void LinuxAlsa::tryInput(Device _handle, Handle apiInfo)
 		result = snd_pcm_readi(_handle[1], buffer.data(), stream_.bufferSize);
 	}
 
-	if (result < (int)stream_.bufferSize)
-	{
-		// Either an error or overrun occured.
-		if (result == -EPIPE)
-		{
-			snd_pcm_state_t state = snd_pcm_state(_handle[1]);
-			if (state == SND_PCM_STATE_XRUN)
-			{
-				apiInfo->xrun[1] = true;
-
-				if (int e = snd_pcm_prepare(_handle[1]) < 0)
-				{
-					Levin::Error() << "Linux Alsa: error preparing device after overrun, "
-								   << snd_strerror(e) << "." << Levin::endl;
-				}
-			}
-			else
-			{
-				Levin::Error() << "Linux Alsa: error, current state is " << snd_pcm_state_name(state)
-							   << ", " << snd_strerror(result) << "." << Levin::endl;
-			}
-		}
-		else
-		{
-			Levin::Error() << "Linux Alsa: audio read error, " << snd_strerror(result) << "." << Levin::endl;
-		}
-	}
+	verifyUnderRunOrError(_handle[1], apiInfo, 1, result);
 
 	// Do byte swapping if necessary.
 	if (stream_.doByteSwap[1])
@@ -1443,17 +1417,29 @@ void LinuxAlsa::tryOutput(Handle _handle, Info apiInfo)
 		result = snd_pcm_writei(_handle[0], buffer.data(), stream_.bufferSize);
 	}
 
+	verifyUnderRunOrError(_handle[0], apiInfo, 0, result);
+
+	// Check stream latency
+	result = snd_pcm_delay(_handle[0], &frames);
+
+	if (result == 0 && frames > 0)
+	{ stream_.latency[0] = frames; }
+}
+
+template <class Handle, class Info>
+void LinuxAlsa::verifyUnderRunOrError(Handle _handle, Info apiInfo, int index, int result)
+{
 	if (result < (int)stream_.bufferSize)
 	{
 		// Either an error or underrun occured.
 		if (result == -EPIPE)
 		{
-			snd_pcm_state_t state = snd_pcm_state(_handle[0]);
+			snd_pcm_state_t state = snd_pcm_state(_handle);
 			if (state == SND_PCM_STATE_XRUN)
 			{
-				apiInfo->xrun[0] = true;
+				apiInfo->xrun[index] = true;
 
-				if (int e = snd_pcm_prepare(_handle[0]) < 0)
+				if (int e = snd_pcm_prepare(_handle) < 0)
 				{
 					Levin::Error() << "Linux Alsa: error preparing device after overrun, "
 								   << snd_strerror(e) << "." << Levin::endl;
@@ -1470,16 +1456,4 @@ void LinuxAlsa::tryOutput(Handle _handle, Info apiInfo)
 			Levin::Error() << "Linux Alsa: audio write error, " << snd_strerror(result) << "." << Levin::endl;
 		}
 	}
-
-	// Check stream latency
-	result = snd_pcm_delay(_handle[0], &frames);
-
-	if (result == 0 && frames > 0)
-	{ stream_.latency[0] = frames; }
-}
-
-template <class Handle>
-void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int result)
-{
-
 }
