@@ -1165,55 +1165,47 @@ unlock:
 void LinuxAlsa::abortStream()
 {
 	verifyStream();
+
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
-		errorText_ = "RtApiAlsa::abortStream(): the stream is already stopped!";
-		error(Exception::WARNING);
+		Levin::Warn() << "Linux Alsa: abortStream, the stream is already stopped." << Levin::endl;
 		return;
 	}
 
 	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_lock(&stream_.mutex);
 
-	//if ( stream_.state == STREAM_STOPPED ) {
-	//  MUTEX_UNLOCK( &stream_.mutex );
-	//  return;
-	//}
-
 	int result = 0;
 
 	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
 
-	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
+	auto** handle = (snd_pcm_t**)apiInfo->handles;
+
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		result = snd_pcm_drop(handle[0]);
-		if (result < 0)
+		if (int e = snd_pcm_drop(handle[0]) < 0)
 		{
-			errorStream_ << "RtApiAlsa::abortStream: error aborting output pcm device, " << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
-			goto unlock;
+			Levin::Error() << "Linux Alsa: abortStream, error aborting output pcm device, "
+						   << snd_strerror(e) << "." << Levin::endl;
+
+			pthread_mutex_unlock(&stream_.mutex);
+			throw Exception("ErrorAbortingOutputException");
 		}
 	}
 
 	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
 	{
-		result = snd_pcm_drop(handle[1]);
-		if (result < 0)
+		if (snd_pcm_drop(handle[1]) < 0)
 		{
-			errorStream_ << "RtApiAlsa::abortStream: error aborting input pcm device, " << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
-			goto unlock;
+			Levin::Error() << "Linux Alsa: abortStream, error aborting input pcm device, "
+						   << snd_strerror(result) << "." << Levin::endl;
+
+			pthread_mutex_unlock(&stream_.mutex);
+			throw Exception("ErrorAbortingInputException");
 		}
 	}
 
-unlock:
-	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_unlock(&stream_.mutex);
-
-	if (result >= 0)
-	{ return; }
-	error(Exception::SYSTEM_ERROR);
 }
 
 void LinuxAlsa::callbackEvent()
