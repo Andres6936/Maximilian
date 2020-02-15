@@ -1368,19 +1368,19 @@ void LinuxAlsa::tryInput(Device _handle, Handle apiInfo)
 
 				if (int e = snd_pcm_prepare(_handle[1]) < 0)
 				{
-					Levin::Error() << "Linux Alsa: tryInput: error preparing device after overrun, "
+					Levin::Error() << "Linux Alsa: error preparing device after overrun, "
 								   << snd_strerror(e) << "." << Levin::endl;
 				}
 			}
 			else
 			{
-				Levin::Error() << "Linux Alsa: tryInput: error, current state is " << snd_pcm_state_name(state)
+				Levin::Error() << "Linux Alsa: error, current state is " << snd_pcm_state_name(state)
 							   << ", " << snd_strerror(result) << "." << Levin::endl;
 			}
 		}
 		else
 		{
-			Levin::Error() << "Linux Alsa: tryInput: audio read error, " << snd_strerror(result) << "." << Levin::endl;
+			Levin::Error() << "Linux Alsa: audio read error, " << snd_strerror(result) << "." << Levin::endl;
 		}
 	}
 
@@ -1452,31 +1452,23 @@ void LinuxAlsa::tryOutput(Handle _handle, Info apiInfo)
 			if (state == SND_PCM_STATE_XRUN)
 			{
 				apiInfo->xrun[0] = true;
-				result = snd_pcm_prepare(_handle[0]);
-				if (result < 0)
+
+				if (int e = snd_pcm_prepare(_handle[0]) < 0)
 				{
-					errorStream_ << "RtApiAlsa::callbackEvent: error preparing device after underrun, "
-								 << snd_strerror(result) << ".";
-					errorText_ = errorStream_.str();
+					Levin::Error() << "Linux Alsa: error preparing device after overrun, "
+								   << snd_strerror(e) << "." << Levin::endl;
 				}
 			}
 			else
 			{
-				errorStream_ << "RtApiAlsa::callbackEvent: error, current state is " << snd_pcm_state_name(state)
-							 << ", " << snd_strerror(result) << ".";
-				errorText_ = errorStream_.str();
+				Levin::Error() << "Linux Alsa: error, current state is " << snd_pcm_state_name(state)
+							   << ", " << snd_strerror(result) << "." << Levin::endl;
 			}
 		}
 		else
 		{
-			errorStream_ << "RtApiAlsa::callbackEvent: audio write error, " << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
+			Levin::Error() << "Linux Alsa: audio write error, " << snd_strerror(result) << "." << Levin::endl;
 		}
-
-		error(Exception::WARNING);
-
-		unlockMutex();
-		return;
 	}
 
 	// Check stream latency
@@ -1484,4 +1476,10 @@ void LinuxAlsa::tryOutput(Handle _handle, Info apiInfo)
 
 	if (result == 0 && frames > 0)
 	{ stream_.latency[0] = frames; }
+}
+
+template <class Handle>
+void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int result)
+{
+
 }

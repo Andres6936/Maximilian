@@ -63,6 +63,9 @@ namespace Maximilian
 		template <class Device>
 		void prepareStateOfDevice(Device _device);
 
+		template <class Handle>
+		void verifyUnderRunOrError(Handle _handle, int result);
+
 		void unlockMutex();
 
 		void unlockMutexOfAPIHandle();
