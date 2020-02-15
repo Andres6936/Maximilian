@@ -1370,20 +1370,13 @@ void LinuxAlsa::tryInput(Device _handle, Handle apiInfo)
 		convertBuffer(stream_.userBuffer.second.data(), stream_.deviceBuffer.data(), stream_.convertInfo[1]);
 	}
 
-	long frames = 0;
 	// Check stream latency
-	result = snd_pcm_delay(_handle[1], &frames);
-
-	if (result == 0 && frames > 0)
-	{
-		stream_.latency[1] = frames;
-	}
+	checkStreamLatencyOf(_handle[1], 1);
 }
 
 template <class Handle, class Info>
 void LinuxAlsa::tryOutput(Handle _handle, Info apiInfo)
 {
-	long frames = 0;
 	int channels = 0;
 	int result = 0;
 
@@ -1420,10 +1413,7 @@ void LinuxAlsa::tryOutput(Handle _handle, Info apiInfo)
 	verifyUnderRunOrError(_handle[0], apiInfo, 0, result);
 
 	// Check stream latency
-	result = snd_pcm_delay(_handle[0], &frames);
-
-	if (result == 0 && frames > 0)
-	{ stream_.latency[0] = frames; }
+	checkStreamLatencyOf(_handle[0], 0);
 }
 
 template <class Handle, class Info>
@@ -1455,5 +1445,17 @@ void LinuxAlsa::verifyUnderRunOrError(Handle _handle, Info apiInfo, int index, i
 		{
 			Levin::Error() << "Linux Alsa: audio write/read error, " << snd_strerror(result) << "." << Levin::endl;
 		}
+	}
+}
+
+template <class Handle>
+void LinuxAlsa::checkStreamLatencyOf(Handle _handle, int index)
+{
+	long frames = 0;
+	int result = snd_pcm_delay(_handle, &frames);
+
+	if (result == 0 && frames > 0)
+	{
+		stream_.latency[index] = frames;
 	}
 }

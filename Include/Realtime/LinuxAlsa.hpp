@@ -44,15 +44,22 @@ namespace Maximilian
 
 		std::vector <DeviceInfo> devices_;
 
-		void saveDeviceInfo();
-
 		bool probeDeviceOpen(
 				unsigned int device,
 				StreamMode mode,
 				unsigned int channels,
 				unsigned int firstChannel) override;
 
+		void saveDeviceInfo();
+
 		void startCallbackFunction();
+
+		void unlockMutex();
+
+		void unlockMutexOfAPIHandle();
+
+		template <class Handle>
+		void checkStreamLatencyOf(Handle _handle, int index);
 
 		template <class Handle, class Info>
 		void tryInput(Handle _handle, Info apiInfo);
@@ -65,10 +72,6 @@ namespace Maximilian
 
 		template <class Handle, class Info>
 		void verifyUnderRunOrError(Handle _handle, Info apiInfo, int index, int result);
-
-		void unlockMutex();
-
-		void unlockMutexOfAPIHandle();
 	};
 }
 
