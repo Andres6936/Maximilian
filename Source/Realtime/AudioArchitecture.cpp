@@ -357,6 +357,54 @@ void AudioArchitecture::formatBufferOf24BitsToScale(T _scale, O* outBuffer, I* i
 	}
 }
 
+template <typename T, typename O, typename I>
+void AudioArchitecture::formatBufferAccordToTypesOfDate(T, O* outBuffer, I* inBuffer, ConvertInfo& info)
+{
+	auto* out = (T*)outBuffer;
+
+	if (info.inFormat == AudioFormat::SInt8)
+	{
+		auto* in = (signed char*)inBuffer;
+		T scale = 1.0 / 127.5;
+
+		formatBufferToScale(scale, out, in, info);
+	}
+	else if (info.inFormat == AudioFormat::SInt16)
+	{
+		auto* in = (Int16*)inBuffer;
+		T scale = 1.0 / 32767.5;
+
+		formatBufferToScale(scale, out, in, info);
+	}
+	else if (info.inFormat == AudioFormat::SInt24)
+	{
+		auto* in = (Int32*)inBuffer;
+		T scale = 1.0 / 8388607.5;
+
+		formatBufferOf24BitsToScale(scale, out, in, info);
+	}
+	else if (info.inFormat == AudioFormat::SInt32)
+	{
+		auto* in = (Int32*)inBuffer;
+		T scale = 1.0 / 2147483647.5;
+
+		formatBufferToScale(scale, out, in, info);
+	}
+	else if (info.inFormat == AudioFormat::Float32)
+	{
+		auto* in = (Float32*)inBuffer;
+
+		formatBufferWithoutScale(in, out, info);
+	}
+	else if (info.inFormat == AudioFormat::Float64)
+	{
+		// Channel compensation and/or (de)interleaving only.
+		auto* in = (Float64*)inBuffer;
+
+		formatBufferWithoutScale(in, out, info);
+	}
+}
+
 void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertInfo& info)
 {
 	// This function does format conversion, input/output channel compensation, and
@@ -372,95 +420,11 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 
 	if (info.outFormat == AudioFormat::Float64)
 	{
-		auto* out = (Float64*)outBuffer;
-
-		if (info.inFormat == AudioFormat::SInt8)
-		{
-			auto* in = (signed char*)inBuffer;
-			Float64 scale = 1.0 / 127.5;
-
-			formatBufferToScale(scale, out, in, info);
-		}
-		else if (info.inFormat == AudioFormat::SInt16)
-		{
-			auto* in = (Int16*)inBuffer;
-			Float64 scale = 1.0 / 32767.5;
-
-			formatBufferToScale(scale, out, in, info);
-		}
-		else if (info.inFormat == AudioFormat::SInt24)
-		{
-			auto* in = (Int32*)inBuffer;
-			Float64 scale = 1.0 / 8388607.5;
-
-			formatBufferOf24BitsToScale(scale, out, in, info);
-		}
-		else if (info.inFormat == AudioFormat::SInt32)
-		{
-			auto* in = (Int32*)inBuffer;
-			Float64 scale = 1.0 / 2147483647.5;
-
-			formatBufferToScale(scale, out, in, info);
-		}
-		else if (info.inFormat == AudioFormat::Float32)
-		{
-			auto* in = (Float32*)inBuffer;
-
-			formatBufferWithoutScale(in, out, info);
-		}
-		else if (info.inFormat == AudioFormat::Float64)
-		{
-			// Channel compensation and/or (de)interleaving only.
-			auto* in = (Float64*)inBuffer;
-
-			formatBufferWithoutScale(in, out, info);
-		}
+		formatBufferAccordToTypesOfDate((Float64)1.0f, outBuffer, inBuffer, info);
 	}
 	else if (info.outFormat == AudioFormat::Float32)
 	{
-		auto* out = (Float32*)outBuffer;
-
-		if (info.inFormat == AudioFormat::SInt8)
-		{
-			auto* in = (signed char*)inBuffer;
-			auto scale = (Float32)(1.0 / 127.5);
-
-			formatBufferToScale(scale, out, in, info);
-		}
-		else if (info.inFormat == AudioFormat::SInt16)
-		{
-			auto* in = (Int16*)inBuffer;
-			auto scale = (Float32)(1.0 / 32767.5);
-
-			formatBufferToScale(scale, out, in, info);
-		}
-		else if (info.inFormat == AudioFormat::SInt24)
-		{
-			auto* in = (Int32*)inBuffer;
-			auto scale = (Float32)(1.0 / 8388607.5);
-
-			formatBufferOf24BitsToScale(scale, out, in, info);
-		}
-		else if (info.inFormat == AudioFormat::SInt32)
-		{
-			auto* in = (Int32*)inBuffer;
-			auto scale = (Float32)(1.0 / 2147483647.5);
-
-			formatBufferToScale(scale, out, in, info);
-		}
-		else if (info.inFormat == AudioFormat::Float32)
-		{
-			// Channel compensation and/or (de)interleaving only.
-			auto* in = (Float32*)inBuffer;
-
-			formatBufferWithoutScale(in, out, info);
-		}
-		else if (info.inFormat == AudioFormat::Float64)
-		{
-			auto* in = (Float64*)inBuffer;
-
-			formatBufferWithoutScale(in, out, info);
-		}
+		formatBufferAccordToTypesOfDate((Float32)1.0f, outBuffer, inBuffer, info);
 	}
 	else if (info.outFormat == AudioFormat::SInt32)
 	{
