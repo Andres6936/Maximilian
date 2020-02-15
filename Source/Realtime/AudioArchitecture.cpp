@@ -308,6 +308,22 @@ void AudioArchitecture::formatBufferWithScale(T _scale, O* outBuffer, I* inBuffe
 }
 
 template <typename T, typename O, typename I>
+void
+AudioArchitecture::formatBufferOf24BitsWithScale(T _scale, T _bitwise, O* outBuffer, I* inBuffer, ConvertInfo& info)
+{
+	for (unsigned int i = 0; i < stream_.bufferSize; i++)
+	{
+		for (unsigned int j = 0; j < info.channels; j++)
+		{
+			outBuffer[info.outOffset[j]] = (O)((inBuffer[info.inOffset[j]] >> _scale) & _bitwise);
+		}
+
+		inBuffer += info.inJump;
+		outBuffer += info.outJump;
+	}
+}
+
+template <typename T, typename O, typename I>
 void AudioArchitecture::formatBufferToScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
 {
 	for (unsigned int i = 0; i < stream_.bufferSize; i++)
@@ -605,29 +621,15 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		}
 		else if (info.inFormat == AudioFormat::SInt24)
 		{
-			Int32* in = (Int32*)inBuffer;
-			for (unsigned int i = 0; i < stream_.bufferSize; i++)
-			{
-				for (unsigned int j = 0; j < info.channels; j++)
-				{
-					out[info.outOffset[j]] = (Int16)((in[info.inOffset[j]] >> 8) & 0x0000ffff);
-				}
-				in += info.inJump;
-				out += info.outJump;
-			}
+			auto* in = (Int32*)inBuffer;
+
+			formatBufferOf24BitsWithScale(8, 0x0000FFFF, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt32)
 		{
-			Int32* in = (Int32*)inBuffer;
-			for (unsigned int i = 0; i < stream_.bufferSize; i++)
-			{
-				for (unsigned int j = 0; j < info.channels; j++)
-				{
-					out[info.outOffset[j]] = (Int16)((in[info.inOffset[j]] >> 16) & 0x0000ffff);
-				}
-				in += info.inJump;
-				out += info.outJump;
-			}
+			auto* in = (Int32*)inBuffer;
+
+			formatBufferOf24BitsWithScale(16, 0x0000FFFF, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::Float32)
 		{
@@ -655,42 +657,21 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 		}
 		if (info.inFormat == AudioFormat::SInt16)
 		{
-			Int16* in = (Int16*)inBuffer;
-			for (unsigned int i = 0; i < stream_.bufferSize; i++)
-			{
-				for (unsigned int j = 0; j < info.channels; j++)
-				{
-					out[info.outOffset[j]] = (signed char)((in[info.inOffset[j]] >> 8) & 0x00ff);
-				}
-				in += info.inJump;
-				out += info.outJump;
-			}
+			auto* in = (Int16*)inBuffer;
+
+			formatBufferOf24BitsWithScale(8, 0x00FF, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt24)
 		{
-			Int32* in = (Int32*)inBuffer;
-			for (unsigned int i = 0; i < stream_.bufferSize; i++)
-			{
-				for (unsigned int j = 0; j < info.channels; j++)
-				{
-					out[info.outOffset[j]] = (signed char)((in[info.inOffset[j]] >> 16) & 0x000000ff);
-				}
-				in += info.inJump;
-				out += info.outJump;
-			}
+			auto* in = (Int32*)inBuffer;
+
+			formatBufferOf24BitsWithScale(16, 0x000000FF, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::SInt32)
 		{
-			Int32* in = (Int32*)inBuffer;
-			for (unsigned int i = 0; i < stream_.bufferSize; i++)
-			{
-				for (unsigned int j = 0; j < info.channels; j++)
-				{
-					out[info.outOffset[j]] = (signed char)((in[info.inOffset[j]] >> 24) & 0x000000ff);
-				}
-				in += info.inJump;
-				out += info.outJump;
-			}
+			auto* in = (Int32*)inBuffer;
+
+			formatBufferOf24BitsWithScale(24, 0x000000FF, out, in, info);
 		}
 		else if (info.inFormat == AudioFormat::Float32)
 		{

@@ -68,11 +68,14 @@ namespace Maximilian
 
 		void assertThatStreamIsNotOpen();
 
+		template <typename T, typename O, typename I>
+		void formatBufferWithScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
+
 		template <typename O, typename I>
 		void formatBufferWithoutScale(O* outBuffer, I* inBuffer, ConvertInfo& info);
 
 		template <typename T, typename O, typename I>
-		void formatBufferWithScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
+		void formatBufferOf24BitsWithScale(T _scale, T _bitwise, O* outBuffer, I* inBuffer, ConvertInfo& info);
 
 		template <typename T, typename O, typename I>
 		void formatBufferToScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
