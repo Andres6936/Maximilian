@@ -1431,7 +1431,7 @@ void LinuxAlsa::verifyUnderRunOrError(Handle _handle, Info apiInfo, int index, i
 {
 	if (result < (int)stream_.bufferSize)
 	{
-		// Either an error or underrun occured.
+		// Either an error or under-run occurred.
 		if (result == -EPIPE)
 		{
 			snd_pcm_state_t state = snd_pcm_state(_handle);
