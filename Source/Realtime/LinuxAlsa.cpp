@@ -1115,17 +1115,13 @@ void LinuxAlsa::stopStream()
 	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_lock(&stream_.mutex);
 
-	//if ( stream_.state == STREAM_STOPPED ) {
-	//  MUTEX_UNLOCK( &stream_.mutex );
-	//  return;
-	//}
-
-	int result = 0;
 	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
+	auto** handle = (snd_pcm_t**)apiInfo->handles;
 
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
+		int result = 0;
+
 		if (apiInfo->synchronized)
 		{
 			result = snd_pcm_drop(handle[0]);
@@ -1134,32 +1130,23 @@ void LinuxAlsa::stopStream()
 		{
 			result = snd_pcm_drain(handle[0]);
 		}
+
 		if (result < 0)
 		{
-			errorStream_ << "RtApiAlsa::stopStream: error draining output pcm device, " << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
-			goto unlock;
+			Levin::Error() << "Linux Alsa: stopStream, error draining output pcm device, "
+						   << snd_strerror(result) << "." << Levin::endl;
+
+			pthread_mutex_unlock(&stream_.mutex);
+			throw Exception("ErrorDropHandleException");
 		}
 	}
 
 	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
 	{
-		result = snd_pcm_drop(handle[1]);
-		if (result < 0)
-		{
-			errorStream_ << "RtApiAlsa::stopStream: error stopping input pcm device, " << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
-			goto unlock;
-		}
+		dropHandle(handle[1]);
 	}
 
-unlock:
-	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_unlock(&stream_.mutex);
-
-	if (result >= 0)
-	{ return; }
-	error(Exception::SYSTEM_ERROR);
 }
 
 void LinuxAlsa::abortStream()
@@ -1197,11 +1184,11 @@ void LinuxAlsa::dropHandle(Handle _handle)
 {
 	if (int e = snd_pcm_drop(_handle) < 0)
 	{
-		Levin::Error() << "Linux Alsa: abortStream, error aborting pcm device, "
+		Levin::Error() << "Linux Alsa: error stopping stream in pcm device, "
 					   << snd_strerror(e) << "." << Levin::endl;
 
 		pthread_mutex_unlock(&stream_.mutex);
-		throw Exception("ErrorAbortingHandleException");
+		throw Exception("ErrorDropHandleException");
 	}
 }
 
