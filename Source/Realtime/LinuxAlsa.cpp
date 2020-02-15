@@ -1175,37 +1175,34 @@ void LinuxAlsa::abortStream()
 	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_lock(&stream_.mutex);
 
-	int result = 0;
-
 	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
 
 	auto** handle = (snd_pcm_t**)apiInfo->handles;
 
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		if (int e = snd_pcm_drop(handle[0]) < 0)
-		{
-			Levin::Error() << "Linux Alsa: abortStream, error aborting output pcm device, "
-						   << snd_strerror(e) << "." << Levin::endl;
-
-			pthread_mutex_unlock(&stream_.mutex);
-			throw Exception("ErrorAbortingOutputException");
-		}
+		dropHandle(handle[0]);
 	}
 
 	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
 	{
-		if (snd_pcm_drop(handle[1]) < 0)
-		{
-			Levin::Error() << "Linux Alsa: abortStream, error aborting input pcm device, "
-						   << snd_strerror(result) << "." << Levin::endl;
-
-			pthread_mutex_unlock(&stream_.mutex);
-			throw Exception("ErrorAbortingInputException");
-		}
+		dropHandle(handle[1]);
 	}
 
 	pthread_mutex_unlock(&stream_.mutex);
+}
+
+template <class Handle>
+void LinuxAlsa::dropHandle(Handle _handle)
+{
+	if (int e = snd_pcm_drop(_handle) < 0)
+	{
+		Levin::Error() << "Linux Alsa: abortStream, error aborting pcm device, "
+					   << snd_strerror(e) << "." << Levin::endl;
+
+		pthread_mutex_unlock(&stream_.mutex);
+		throw Exception("ErrorAbortingHandleException");
+	}
 }
 
 void LinuxAlsa::callbackEvent()

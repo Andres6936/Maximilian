@@ -59,6 +59,9 @@ namespace Maximilian
 		void unlockMutexOfAPIHandle();
 
 		template <class Handle>
+		void dropHandle(Handle _handle);
+
+		template <class Handle>
 		void checkStreamLatencyOf(Handle _handle, int index);
 
 		template <class Handle, class Info>
