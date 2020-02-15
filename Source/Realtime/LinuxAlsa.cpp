@@ -1453,7 +1453,7 @@ void LinuxAlsa::verifyUnderRunOrError(Handle _handle, Info apiInfo, int index, i
 		}
 		else
 		{
-			Levin::Error() << "Linux Alsa: audio write error, " << snd_strerror(result) << "." << Levin::endl;
+			Levin::Error() << "Linux Alsa: audio write/read error, " << snd_strerror(result) << "." << Levin::endl;
 		}
 	}
 }
