@@ -1243,8 +1243,6 @@ void LinuxAlsa::callbackEvent()
 		return;
 	}
 
-	int doStopStream = 0;
-
 	AudioStreamStatus status = AudioStreamStatus::None;
 
 	if (stream_.mode != StreamMode::INPUT && apiInfo->xrun[0] == true)
@@ -1265,17 +1263,7 @@ void LinuxAlsa::callbackEvent()
 		throw Exception("UnderflowOrOverflowException");
 	}
 
-	// Start Callback Function
-
 	startCallbackFunction();
-
-	// End Callback Function
-
-	if (doStopStream == 2)
-	{
-		abortStream();
-		return;
-	}
 
 	pthread_mutex_lock(&stream_.mutex);
 
@@ -1460,8 +1448,6 @@ unlock:
 	pthread_mutex_unlock(&stream_.mutex);
 
 	AudioArchitecture::tickStreamTime();
-	if (doStopStream == 1)
-	{ this->stopStream(); }
 }
 
 void LinuxAlsa::startCallbackFunction()
