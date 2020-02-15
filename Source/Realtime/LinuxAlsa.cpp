@@ -1330,7 +1330,6 @@ void LinuxAlsa::unlockMutex()
 template <class Device, class Handle>
 void LinuxAlsa::tryInput(Device _handle, Handle apiInfo)
 {
-	long frames = 0;
 	int channels = 0;
 	int result = 0;
 
@@ -1366,30 +1365,23 @@ void LinuxAlsa::tryInput(Device _handle, Handle apiInfo)
 			if (state == SND_PCM_STATE_XRUN)
 			{
 				apiInfo->xrun[1] = true;
-				result = snd_pcm_prepare(_handle[1]);
-				if (result < 0)
+
+				if (int e = snd_pcm_prepare(_handle[1]) < 0)
 				{
-					errorStream_ << "RtApiAlsa::callbackEvent: error preparing device after overrun, "
-								 << snd_strerror(result) << ".";
-					errorText_ = errorStream_.str();
+					Levin::Error() << "Linux Alsa: tryInput: error preparing device after overrun, "
+								   << snd_strerror(e) << "." << Levin::endl;
 				}
 			}
 			else
 			{
-				errorStream_ << "RtApiAlsa::callbackEvent: error, current state is " << snd_pcm_state_name(state)
-							 << ", " << snd_strerror(result) << ".";
-				errorText_ = errorStream_.str();
+				Levin::Error() << "Linux Alsa: tryInput: error, current state is " << snd_pcm_state_name(state)
+							   << ", " << snd_strerror(result) << "." << Levin::endl;
 			}
 		}
 		else
 		{
-			errorStream_ << "RtApiAlsa::callbackEvent: audio read error, " << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
+			Levin::Error() << "Linux Alsa: tryInput: audio read error, " << snd_strerror(result) << "." << Levin::endl;
 		}
-
-		error(Exception::WARNING);
-
-		tryOutput(_handle, apiInfo);
 	}
 
 	// Do byte swapping if necessary.
@@ -1404,10 +1396,14 @@ void LinuxAlsa::tryInput(Device _handle, Handle apiInfo)
 		convertBuffer(stream_.userBuffer.second.data(), stream_.deviceBuffer.data(), stream_.convertInfo[1]);
 	}
 
+	long frames = 0;
 	// Check stream latency
 	result = snd_pcm_delay(_handle[1], &frames);
+
 	if (result == 0 && frames > 0)
-	{ stream_.latency[1] = frames; }
+	{
+		stream_.latency[1] = frames;
+	}
 }
 
 template <class Handle, class Info>
