@@ -68,6 +68,9 @@ namespace Maximilian
 
 		void assertThatStreamIsNotOpen();
 
+		template <typename T, typename O, typename I>
+		void formatBufferAccordToTypesOfDate(T _type, O* outBuffer, I* inBuffer, ConvertInfo& info);
+
 		template <typename O, typename I>
 		void formatBufferWithoutScale(O* outBuffer, I* inBuffer, ConvertInfo& info);
 
