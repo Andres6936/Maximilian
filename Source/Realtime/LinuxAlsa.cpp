@@ -1267,33 +1267,7 @@ void LinuxAlsa::callbackEvent()
 
 	// Start Callback Function
 
-	// Left and Right channel
-	std::vector <double> data(2, 0);
-
-	std::vector <double> bufferConvert;
-	bufferConvert.resize(stream_.userBuffer.first.size());
-
-	int indexOfBuffer = 0;
-
-	// Write interleaved audio data.
-	for (int i = 0; i < stream_.bufferSize; i++)
-	{
-		audioCallback(data);
-
-		for (int j = 0; j < 2; j++)
-		{
-			bufferConvert[indexOfBuffer] = data[j];
-			indexOfBuffer += 1;
-		}
-	}
-
-	char* test = (char*)bufferConvert.data();
-
-	for (int k = 0; k < bufferConvert.size(); ++k)
-	{
-		stream_.userBuffer.first[k] = test[k];
-	}
-
+	startCallbackFunction();
 
 	// End Callback Function
 
@@ -1488,4 +1462,34 @@ unlock:
 	AudioArchitecture::tickStreamTime();
 	if (doStopStream == 1)
 	{ this->stopStream(); }
+}
+
+void LinuxAlsa::startCallbackFunction()
+{
+	// Left and Right channel
+	std::vector <double> data(2, 0);
+
+	std::vector <double> bufferConvert;
+	bufferConvert.resize(stream_.userBuffer.first.size());
+
+	int indexOfBuffer = 0;
+
+	// Write interleaved audio data.
+	for (int i = 0; i < stream_.bufferSize; i++)
+	{
+		audioCallback(data);
+
+		for (int j = 0; j < 2; j++)
+		{
+			bufferConvert[indexOfBuffer] = data[j];
+			indexOfBuffer += 1;
+		}
+	}
+
+	char* test = (char*)bufferConvert.data();
+
+	for (int k = 0; k < bufferConvert.size(); ++k)
+	{
+		stream_.userBuffer.first[k] = test[k];
+	}
 }

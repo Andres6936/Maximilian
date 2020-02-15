@@ -52,6 +52,8 @@ namespace Maximilian
 				unsigned int channels,
 				unsigned int firstChannel) override;
 
+		void startCallbackFunction();
+
 		template <class Device>
 		void prepareStateOfDevice(Device _device);
 
