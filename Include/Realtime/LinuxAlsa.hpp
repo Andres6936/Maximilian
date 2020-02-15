@@ -54,6 +54,12 @@ namespace Maximilian
 
 		void startCallbackFunction();
 
+		template <class Handle, class Info>
+		void tryInput(Handle _handle, Info apiInfo);
+
+		template <class Handle, class Info>
+		void tryOutput(Handle _handle, Info apiInfo);
+
 		template <class Device>
 		void prepareStateOfDevice(Device _device);
 
