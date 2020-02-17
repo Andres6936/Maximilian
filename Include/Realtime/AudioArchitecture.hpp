@@ -161,8 +161,6 @@ namespace Maximilian
 
 	protected:
 
-		static constexpr short MAX_SAMPLE_RATES = 14;
-
 		static constexpr std::array <unsigned int, 14> SAMPLE_RATES = {
 				4000, 5512, 8000, 9600, 11025, 16000, 22050,
 				32000, 44100, 48000, 88200, 96000, 176400, 192000

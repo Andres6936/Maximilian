@@ -278,14 +278,14 @@ probeParameters:
 	}
 
 	// Test our discrete set of sample rate values.
-	info.sampleRates.clear();
-	for (unsigned int i = 0; i < MAX_SAMPLE_RATES; i++)
+	for (unsigned int rate : SAMPLE_RATES)
 	{
-		if (snd_pcm_hw_params_test_rate(phandle, params, SAMPLE_RATES[i], 0) == 0)
+		if (snd_pcm_hw_params_test_rate(phandle, params, rate, 0) == 0)
 		{
-			info.sampleRates.push_back(SAMPLE_RATES[i]);
+			info.sampleRates.push_back(rate);
 		}
 	}
+
 	if (info.sampleRates.empty())
 	{
 		snd_pcm_close(phandle);
