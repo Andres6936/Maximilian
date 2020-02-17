@@ -184,7 +184,7 @@ captureProbe:
 
 	if (not AlsaHandle::isAvailableForCapture(*handle, *pcminfo))
 	{
-		Levin::Warn() << "Not support for capture found in the device: " << name.data() << Levin::endl;
+		Levin::Debug() << "Not support for capture found in the device: " << name.data() << Levin::endl;
 		// Close the handle
 		snd_ctl_close(handle);
 
