@@ -181,12 +181,11 @@ DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	snd_pcm_close(phandle);
 
 captureProbe:
-	// Now try for capture
-	stream = SND_PCM_STREAM_CAPTURE;
-	snd_pcm_info_set_stream(pcminfo, stream);
 
-	if (snd_ctl_pcm_info(handle, pcminfo) < 0)
+	if (not AlsaHandle::isAvailableForCapture(*handle, *pcminfo))
 	{
+		Levin::Warn() << "Not support for capture found in the device: " << name.data() << Levin::endl;
+		// Close the handle
 		snd_ctl_close(handle);
 
 		// Device probably doesn't support capture.
@@ -197,7 +196,7 @@ captureProbe:
 
 	snd_ctl_close(handle);
 
-	if (int e = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
+	if (int e = snd_pcm_open(&phandle, name.data(), SND_PCM_STREAM_CAPTURE, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
 	{
 		snd_config_update_free_global();
 		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("

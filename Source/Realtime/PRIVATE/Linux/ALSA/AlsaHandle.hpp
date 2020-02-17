@@ -22,6 +22,8 @@ namespace Maximilian
 		std::array <bool, 2> xrun{ false, false };
 
 		AlsaHandle() = default;
+
+		static bool isAvailableForCapture(snd_ctl_t& handle, snd_pcm_info_t& info);
 	};
 }
 
