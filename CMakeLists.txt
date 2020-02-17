@@ -13,6 +13,7 @@ IF ($<CONFIG:Debug>)
 ENDIF ()
 
 INCLUDE_DIRECTORIES(Include)
+INCLUDE_DIRECTORIES(Source/Realtime/PRIVATE)
 
 # Added the library Levin for purpose of log
 INCLUDE_DIRECTORIES(Library)
@@ -28,7 +29,12 @@ ADD_LIBRARY(Maximilian
         Source/Realtime/AudioArchitecture.cpp
         Source/Realtime/LinuxAlsa.cpp
         Source/Realtime/AudioStream.cpp
-        Source/Realtime/ConvertInfo.cpp Source/Realtime/CallbackInfo.cpp Include/Realtime/CallbackInfo.hpp Include/Definition/AudioStreamStatus.hpp Include/Definition/AudioStreamFlags.hpp Include/Enum/SupportedArchitectures.hpp Source/Realtime/DeviceInfo.cpp Include/Realtime/DeviceInfo.hpp Source/Realtime/StreamParameters.cpp Include/Realtime/StreamParameters.hpp Source/Realtime/StreamOptions.cpp Include/Realtime/StreamOptions.hpp)
+        Source/Realtime/ConvertInfo.cpp
+        Source/Realtime/CallbackInfo.cpp
+        Source/Realtime/DeviceInfo.cpp
+        Source/Realtime/StreamParameters.cpp
+        Source/Realtime/StreamOptions.cpp
+        Source/Realtime/PRIVATE/Linux/ALSA/AlsaHandle.cpp)
 
 TARGET_LINK_LIBRARIES(Maximilian PRIVATE pthread asound)
 # Link to Maximilian the library Levin

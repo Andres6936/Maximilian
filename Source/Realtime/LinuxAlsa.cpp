@@ -1,4 +1,5 @@
 #include "Realtime/LinuxAlsa.hpp"
+#include "PRIVATE/Linux/ALSA/AlsaHandle.hpp"
 
 #include <alsa/asoundlib.h>
 
@@ -6,25 +7,6 @@
 #include <climits>
 
 using namespace Maximilian;
-
-// A structure to hold various information related to the ALSA API
-// implementation.
-class AlsaHandle
-{
-
-public:
-
-	bool runnable = false;
-	bool synchronized = false;
-
-	snd_pcm_t* handles[2] = { nullptr, nullptr };
-	pthread_cond_t runnable_cv;
-
-	std::array <bool, 2> xrun{ false, false };
-
-	AlsaHandle() = default;
-};
-
 
 extern "C" void* alsaCallbackHandler(void* ptr)
 {
