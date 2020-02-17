@@ -236,27 +236,10 @@ captureProbe:
 	snd_pcm_close(phandle);
 
 	// If device opens for both playback and capture, we determine the channels.
-	if (info.outputChannels > 0 && info.inputChannels > 0)
-	{
-		if (info.outputChannels > info.inputChannels)
-		{
-			info.duplexChannels = info.inputChannels;
-		}
-		else
-		{
-			info.duplexChannels = info.outputChannels;
-		}
-	}
+	info.determineChannelsForDuplexMode();
 
 	// ALSA doesn't provide default devices so we'll use the first available one.
-	if (device == 0 && info.outputChannels > 0)
-	{
-		info.isDefaultOutput = true;
-	}
-	if (device == 0 && info.inputChannels > 0)
-	{
-		info.isDefaultInput = true;
-	}
+	info.determineChannelsForDefaultByDevice(device);
 
 probeParameters:
 	// At this point, we just need to figure out the supported data

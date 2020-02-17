@@ -30,6 +30,10 @@ namespace Maximilian
 		// Default constructor.
 		DeviceInfo() = default;
 
+		void determineChannelsForDuplexMode();
+
+		void determineChannelsForDefaultByDevice(int device);
+
 	};
 }
 
