@@ -189,8 +189,7 @@ captureProbe:
 		snd_ctl_close(handle);
 
 		// Device probably doesn't support capture.
-		if (info.outputChannels == 0)
-		{ return info; }
+		if (info.outputChannels == 0) return info;
 		goto probeParameters;
 	}
 
@@ -202,8 +201,7 @@ captureProbe:
 		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("
 					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
 
-		if (info.outputChannels == 0)
-		{ return info; }
+		if (info.outputChannels == 0) return info;
 		goto probeParameters;
 	}
 
@@ -240,7 +238,14 @@ captureProbe:
 	// If device opens for both playback and capture, we determine the channels.
 	if (info.outputChannels > 0 && info.inputChannels > 0)
 	{
-		info.duplexChannels = (info.outputChannels > info.inputChannels) ? info.inputChannels : info.outputChannels;
+		if (info.outputChannels > info.inputChannels)
+		{
+			info.duplexChannels = info.inputChannels;
+		}
+		else
+		{
+			info.duplexChannels = info.outputChannels;
+		}
 	}
 
 	// ALSA doesn't provide default devices so we'll use the first available one.
