@@ -1,6 +1,8 @@
 #ifndef MAXIMILIAN_ALSAHANDLE_HPP
 #define MAXIMILIAN_ALSAHANDLE_HPP
 
+#include "Realtime/DeviceInfo.hpp"
+
 #include <array>
 #include <alsa/asoundlib.h>
 
@@ -24,6 +26,8 @@ namespace Maximilian
 		AlsaHandle() = default;
 
 		static bool isAvailableForCapture(snd_ctl_t& handle, snd_pcm_info_t& info);
+
+		static void probeSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params, DeviceInfo& info);
 	};
 }
 

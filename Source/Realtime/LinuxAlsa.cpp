@@ -102,7 +102,6 @@ DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	}
 
 	DeviceInfo info;
-	info.probed = false;
 
 	int subDevice = device;
 
@@ -296,40 +295,10 @@ probeParameters:
 	}
 
 	// Probe the supported data formats ... we don't care about endian-ness just yet
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S8) == 0)
-	{
-		info.nativeFormats = AudioFormat::SInt8;
-	}
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S16) == 0)
-	{
-		info.nativeFormats = AudioFormat::SInt16;
-	}
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S24) == 0)
-	{
-		info.nativeFormats = AudioFormat::SInt24;
-	}
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S32) == 0)
-	{
-		info.nativeFormats = AudioFormat::SInt32;
-	}
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_FLOAT) == 0)
-	{
-		info.nativeFormats = AudioFormat::Float32;
-	}
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_FLOAT64) == 0)
-	{
-		info.nativeFormats = AudioFormat::Float64;
-	}
+	AlsaHandle::probeSupportedDateFormats(*phandle, *params, info);
 
 	// That's all ... close the device and return
 	snd_pcm_close(phandle);
-	info.probed = true;
 	return info;
 }
 
