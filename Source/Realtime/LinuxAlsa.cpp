@@ -277,13 +277,7 @@ probeParameters:
 	}
 
 	// Test our discrete set of sample rate values.
-	for (unsigned int rate : SAMPLE_RATES)
-	{
-		if (snd_pcm_hw_params_test_rate(phandle, params, rate, 0) == 0)
-		{
-			info.sampleRates.push_back(rate);
-		}
-	}
+	AlsaHandle::testSupportedDateFormats(*phandle, *params, SAMPLE_RATES, info);
 
 	if (info.sampleRates.empty())
 	{
@@ -295,7 +289,7 @@ probeParameters:
 	}
 
 	// Probe the supported data formats ... we don't care about endian-ness just yet
-	AlsaHandle::probeSupportedDateFormats(*phandle, *params, info);
+	AlsaHandle::setSupportedDateFormats(*phandle, *params, info);
 
 	// That's all ... close the device and return
 	snd_pcm_close(phandle);

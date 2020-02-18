@@ -27,7 +27,10 @@ namespace Maximilian
 
 		static bool isAvailableForCapture(snd_ctl_t& handle, snd_pcm_info_t& info);
 
-		static void probeSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params, DeviceInfo& info);
+		static void testSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params,
+				const std::array <unsigned int, 14>& rates, DeviceInfo& info);
+
+		static void setSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params, DeviceInfo& info);
 	};
 }
 

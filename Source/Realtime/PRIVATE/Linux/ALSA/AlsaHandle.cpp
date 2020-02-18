@@ -12,7 +12,19 @@ bool Maximilian::AlsaHandle::isAvailableForCapture(snd_ctl_t& handle, snd_pcm_in
 	return true;
 }
 
-void Maximilian::AlsaHandle::probeSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params, DeviceInfo& info)
+void Maximilian::AlsaHandle::testSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params,
+		const std::array <unsigned int, 14>& rates, DeviceInfo& info)
+{
+	for (unsigned int rate : rates)
+	{
+		if (snd_pcm_hw_params_test_rate(&handle, &params, rate, 0) == 0)
+		{
+			info.sampleRates.push_back(rate);
+		}
+	}
+}
+
+void Maximilian::AlsaHandle::setSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params, DeviceInfo& info)
 {
 	if (snd_pcm_hw_params_test_format(&handle, &params, SND_PCM_FORMAT_S8) == 0)
 	{
