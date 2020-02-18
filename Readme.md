@@ -1,11 +1,4 @@
-                      .__        .__.__  .__               
-  _____ _____  ___  __|__| _____ |__|  | |__|____    ____  
- /     \\__  \ \  \/  /  |/     \|  |  | |  \__  \  /    \ 
-|  Y Y  \/ __ \_>    <|  |  Y Y  \  |  |_|  |/ __ \|   |  \
-|__|_|  (____  /__/\_ \__|__|_|  /__|____/__(____  /___|  /
-      \/     \/      \/        \/                \/     \/ 
-
-::::::::::::::::::::::::::What's Maximilian?
+## What's Maximilian?
 
 Maximilian is an audio synthesis and signal processing library written in C++. It's cross-platform compatible with MacOS, Windows, Linux and IOS systems.  The main features are:
 
@@ -22,31 +15,31 @@ Maximilian is an audio synthesis and signal processing library written in C++. I
 - example projects for Windows and MacOS, using command line and OpenFrameworks environments
 
 
-:::::::::::::::::::::::::::BASIC EXAMPLES
+### BASIC EXAMPLES
 
 You can choose between using RTAudio and PortAudio drivers in player.h by uncommenting the appropriate line.  To use PortAudio, you will need to compile the portAudio library from http://http://www.portaudio.com/ and link it with your executable.
 
 Examples demonstrating different features can be found in the maximilian_examples folder.  To try them, replace the contents of main.cpp with the contents of a tutorial file and compile.
 
 
-:::MAC OSX XCODE PROJECT
+#### MAC OSX XCODE PROJECT
 
 You can run the examples using the 'maximilianTest' XCode 3 project provided.
 
 
-::WINDOWS VISUAL STUDIO 2010 PROJECT
+#### WINDOWS VISUAL STUDIO 2010 PROJECT
 
 This is in the maximilianTestWindowsVS2010 folder. You will need to install the DirectX SDK, so that the program can use DirectSound.
 
 
-:::COMMAND LINE COMPILATION IN MACOSX
+#### COMMAND LINE COMPILATION IN MACOSX
 
 > g++ -Wall -D__MACOSX_CORE__ -o maximilian main.cpp RtAudio.cpp player.cpp maximilian.cpp -framework CoreAudio -framework CoreFoundation -lpthread
 
 > ./maximilian
 
 
-::COMMAND LINE COMPILATION IN LINUX
+#### COMMAND LINE COMPILATION IN LINUX
 
 With OSS:
 > g++ -Wall -D__LINUX_OSS__ -o maximilian main.cpp RtAudio.cpp player.cpp maximilian.cpp -lpthread
@@ -62,7 +55,7 @@ then:
 
 
 
-:::::::::::::::::::::::::::OPENFRAMEWORKS
+#### OPENFRAMEWORKS
 
 Maximilian works well with the OpenFrameworks C++ creative coding toolkit (http://www.openframeworks.cc).
 
