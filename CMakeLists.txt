@@ -5,10 +5,10 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 
-# Reference: 10.1. Simple Boolean Logic {Craig Scott - Professional CMake}
-IF ($<CONFIG:Debug>)
-    # Support to Coverage Metrics {gcov} only in
-    # mode of Debug configuration
+# Support to Coverage Metrics {gcov} only in
+# mode of Debug configuration
+IF (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    MESSAGE("Support to Coverage - ON")
     SET(CMAKE_CXX_FLAGS "--coverage")
 ENDIF ()
 

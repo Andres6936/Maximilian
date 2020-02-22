@@ -484,88 +484,34 @@ foundDevice:
 
 	// Determine how to set the device format.
 	stream_.userFormat = getAudioFormat();
-	snd_pcm_format_t deviceFormat = SND_PCM_FORMAT_UNKNOWN;
+	snd_pcm_format_t deviceFormat;
 
-	if (getAudioFormat() == AudioFormat::SInt8)
+	const std::vector <std::pair <snd_pcm_format_t, AudioFormat>> equivalentFormats = {
+
+			{ SND_PCM_FORMAT_FLOAT64, AudioFormat::Float64 },
+			{ SND_PCM_FORMAT_FLOAT,   AudioFormat::Float32 },
+			{ SND_PCM_FORMAT_S32,     AudioFormat::SInt32 },
+			{ SND_PCM_FORMAT_S24,     AudioFormat::SInt24 },
+			{ SND_PCM_FORMAT_S16,     AudioFormat::SInt16 },
+			{ SND_PCM_FORMAT_S8,      AudioFormat::SInt8 }
+	};
+
+	for (auto& format : equivalentFormats)
 	{
-		deviceFormat = SND_PCM_FORMAT_S8;
-	}
-	else if (getAudioFormat() == AudioFormat::SInt16)
-	{
-		deviceFormat = SND_PCM_FORMAT_S16;
-	}
-	else if (getAudioFormat() == AudioFormat::SInt24)
-	{
-		deviceFormat = SND_PCM_FORMAT_S24;
-	}
-	else if (getAudioFormat() == AudioFormat::SInt32)
-	{
-		deviceFormat = SND_PCM_FORMAT_S32;
-	}
-	else if (getAudioFormat() == AudioFormat::Float32)
-	{
-		deviceFormat = SND_PCM_FORMAT_FLOAT;
-	}
-	else if (getAudioFormat() == AudioFormat::Float64)
-	{
-		deviceFormat = SND_PCM_FORMAT_FLOAT64;
+		if (snd_pcm_hw_params_test_format(phandle, hw_params, format.first) == 0)
+		{
+			deviceFormat = format.first;
+			stream_.deviceFormat[index] = format.second;
+			break;
+		}
 	}
 
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
+	if (deviceFormat == SND_PCM_FORMAT_UNKNOWN)
 	{
-		stream_.deviceFormat[index] = getAudioFormat();
-		goto setFormat;
+		Levin::Severe() << "Linux Alsa: Data format not supported." << Levin::endl;
+		throw Exception("DataFormatNotSupportedException");
 	}
 
-	// The user requested format is not natively supported by the device.
-	deviceFormat = SND_PCM_FORMAT_FLOAT64;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::Float64;
-		goto setFormat;
-	}
-
-	deviceFormat = SND_PCM_FORMAT_FLOAT;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::Float32;
-		goto setFormat;
-	}
-
-	deviceFormat = SND_PCM_FORMAT_S32;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::SInt32;
-		goto setFormat;
-	}
-
-	deviceFormat = SND_PCM_FORMAT_S24;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::SInt24;
-		goto setFormat;
-	}
-
-	deviceFormat = SND_PCM_FORMAT_S16;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::SInt16;
-		goto setFormat;
-	}
-
-	deviceFormat = SND_PCM_FORMAT_S8;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::SInt8;
-		goto setFormat;
-	}
-
-	// If we get here, no supported format was found.
-	errorStream_ << "RtApiAlsa::probeDeviceOpen: pcm device " << device << " data format not supported by RtAudio.";
-	errorText_ = errorStream_.str();
-	return FAILURE;
-
-setFormat:
 	result = snd_pcm_hw_params_set_format(phandle, hw_params, deviceFormat);
 	if (result < 0)
 	{
