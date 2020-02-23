@@ -1,6 +1,15 @@
 #include "AlsaHandle.hpp"
 
-bool Maximilian::AlsaHandle::isAvailableForCapture(snd_ctl_t& handle, snd_pcm_info_t& info)
+#include "Levin/Log.h"
+
+using namespace Maximilian;
+
+AlsaHandle::AlsaHandle() noexcept
+{
+	determineTheNumberOfDevices();
+}
+
+bool AlsaHandle::isAvailableForCapture(snd_ctl_t& handle, snd_pcm_info_t& info)
 {
 	snd_pcm_info_set_stream(&info, SND_PCM_STREAM_CAPTURE);
 
@@ -12,7 +21,7 @@ bool Maximilian::AlsaHandle::isAvailableForCapture(snd_ctl_t& handle, snd_pcm_in
 	return true;
 }
 
-void Maximilian::AlsaHandle::testSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params,
+void AlsaHandle::testSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params,
 		const std::array <unsigned int, 14>& rates, DeviceInfo& info)
 {
 	for (unsigned int rate : rates)
@@ -24,7 +33,7 @@ void Maximilian::AlsaHandle::testSupportedDateFormats(snd_pcm_t& handle, snd_pcm
 	}
 }
 
-void Maximilian::AlsaHandle::setSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params, DeviceInfo& info)
+void AlsaHandle::setSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params, DeviceInfo& info)
 {
 	if (snd_pcm_hw_params_test_format(&handle, &params, SND_PCM_FORMAT_S8) == 0)
 	{
@@ -51,3 +60,61 @@ void Maximilian::AlsaHandle::setSupportedDateFormats(snd_pcm_t& handle, snd_pcm_
 		info.nativeFormats = AudioFormat::Float64;
 	}
 }
+
+void AlsaHandle::determineTheNumberOfDevices()
+{
+	// Count cards and devices
+	int card = -1;
+	snd_card_next(&card);
+
+	snd_ctl_t* handle = nullptr;
+
+	if (card >= 0)
+	{
+		std::array <char, 64> name{ };
+
+		sprintf(name.data(), "hw:%d", card);
+
+		if (int e = snd_ctl_open(&handle, name.data(), 0) < 0)
+		{
+			Levin::Warn() << "Linux Alsa: getDeviceCount(): ";
+			Levin::Warn() << "Control open, card = " << card << ", ";
+			Levin::Warn() << snd_strerror(e) << "." << Levin::endl;
+
+			snd_ctl_close(handle);
+		}
+
+		int subDevice = -1;
+
+		while (true)
+		{
+			if (int e = snd_ctl_pcm_next_device(handle, &subDevice) < 0)
+			{
+				Levin::Warn() << "Linux Alsa: getDeviceCount(): ";
+				Levin::Warn() << "Control next device, card = " << card;
+				Levin::Warn() << ", " << snd_strerror(e) << "." << Levin::endl;
+				break;
+			}
+
+			if (subDevice < 0)
+			{
+				break;
+			}
+
+			this->numberOfDevices += 1;
+		}
+	}
+
+	if (handle != nullptr)
+	{
+		snd_ctl_close(handle);
+		// Free the cache for avoid memory leak
+		snd_config_update_free_global();
+	}
+}
+
+UInt8 AlsaHandle::getNumberOfDevices() const
+{
+	return numberOfDevices;
+}
+

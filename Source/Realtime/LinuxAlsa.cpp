@@ -32,61 +32,7 @@ LinuxAlsa::~LinuxAlsa()
 
 unsigned int LinuxAlsa::getDeviceCount()
 {
-	unsigned numberOfDevices = 0;
-
-	// Count cards and devices
-	int card = -1;
-	snd_card_next(&card);
-
-	snd_ctl_t* handle = nullptr;
-
-	if (card >= 0)
-	{
-		std::array <char, 64> name{ };
-
-		sprintf(name.data(), "hw:%d", card);
-
-		if (int e = snd_ctl_open(&handle, name.data(), 0) < 0)
-		{
-			Levin::Warn() << "Linux Alsa: getDeviceCount(): ";
-			Levin::Warn() << "Control open, card = " << card << ", ";
-			Levin::Warn() << snd_strerror(e) << "." << Levin::endl;
-
-			snd_ctl_close(handle);
-
-			// Return zero device in this point
-			return numberOfDevices;
-		}
-
-		int subDevice = -1;
-
-		while (true)
-		{
-			if (int e = snd_ctl_pcm_next_device(handle, &subDevice) < 0)
-			{
-				Levin::Warn() << "Linux Alsa: getDeviceCount(): ";
-				Levin::Warn() << "Control next device, card = " << card;
-				Levin::Warn() << ", " << snd_strerror(e) << "." << Levin::endl;
-				break;
-			}
-
-			if (subDevice < 0)
-			{
-				break;
-			}
-
-			numberOfDevices++;
-		}
-	}
-
-	if (handle != nullptr)
-	{
-		snd_ctl_close(handle);
-		// Free the cache for avoid memory leak
-		snd_config_update_free_global();
-	}
-
-	return numberOfDevices;
+	return alsaHandle.getNumberOfDevices();
 }
 
 DeviceInfo LinuxAlsa::getDeviceInfo(int device)
