@@ -5,7 +5,6 @@
 #include "CallbackInfo.hpp"
 #include "Definition/AudioFormat.hpp"
 
-#include <any>
 #include <array>
 #include <vector>
 
@@ -38,12 +37,6 @@ namespace Maximilian
 	private:
 
 	public:
-
-
-		/**
-		 * void pointer for API specific stream handle information
-		 */
-		std::any apiHandle;
 
 		Buffer deviceBuffer;
 

@@ -764,8 +764,6 @@ foundDevice:
 		pthread_attr_setschedpolicy( &attr, SCHED_OTHER );
 #endif
 
-		stream_.apiHandle = alsaHandle;
-
 		stream_.callbackInfo.isRunning = true;
 		result = pthread_create(&stream_.callbackInfo.thread, &attr, alsaCallbackHandler, &stream_.callbackInfo);
 		pthread_attr_destroy(&attr);
