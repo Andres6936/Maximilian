@@ -64,17 +64,17 @@ namespace Maximilian
 		template <class Handle>
 		void checkStreamLatencyOf(Handle _handle, int index);
 
-		template <class Handle, class Info>
-		void tryInput(Handle _handle, Info apiInfo);
+		template <class Handle>
+		void tryInput(Handle _handle);
 
-		template <class Handle, class Info>
-		void tryOutput(Handle _handle, Info apiInfo);
+		template <class Handle>
+		void tryOutput(Handle _handle);
 
 		template <class Device>
 		void prepareStateOfDevice(Device _device);
 
-		template <class Handle, class Info>
-		void verifyUnderRunOrError(Handle _handle, Info apiInfo, int index, int result);
+		template <class Handle>
+		void verifyUnderRunOrError(Handle _handle, int index, int result);
 	};
 }
 

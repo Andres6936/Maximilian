@@ -1028,17 +1028,14 @@ void LinuxAlsa::callbackEvent()
 		return;
 	}
 
-	snd_pcm_t** handle;
-	handle = (snd_pcm_t**)apiInfo->handles;
-
 	if (stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		tryInput(handle, apiInfo);
+		tryInput(alsaHandle.handles[1]);
 	}
 
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		tryOutput(handle, apiInfo);
+		tryOutput(alsaHandle.handles[0]);
 	}
 
 	unlockMutex();
@@ -1081,8 +1078,8 @@ void LinuxAlsa::unlockMutex()
 	AudioArchitecture::tickStreamTime();
 }
 
-template <class Device, class Handle>
-void LinuxAlsa::tryInput(Device _handle, Handle apiInfo)
+template <class Device>
+void LinuxAlsa::tryInput(Device _handle)
 {
 	int channels = 0;
 	int result = 0;
@@ -1107,10 +1104,10 @@ void LinuxAlsa::tryInput(Device _handle, Handle apiInfo)
 	// Read samples from device in interleaved/non-interleaved format.
 	if (stream_.deviceInterleaved[1])
 	{
-		result = snd_pcm_readi(_handle[1], buffer.data(), stream_.bufferSize);
+		result = snd_pcm_readi(_handle, buffer.data(), stream_.bufferSize);
 	}
 
-	verifyUnderRunOrError(_handle[1], apiInfo, 1, result);
+	verifyUnderRunOrError(_handle, 1, result);
 
 	// Do byte swapping if necessary.
 	if (stream_.doByteSwap[1])
@@ -1125,11 +1122,11 @@ void LinuxAlsa::tryInput(Device _handle, Handle apiInfo)
 	}
 
 	// Check stream latency
-	checkStreamLatencyOf(_handle[1], 1);
+	checkStreamLatencyOf(_handle, 1);
 }
 
-template <class Handle, class Info>
-void LinuxAlsa::tryOutput(Handle _handle, Info apiInfo)
+template <class Handle>
+void LinuxAlsa::tryOutput(Handle _handle)
 {
 	int channels = 0;
 	int result = 0;
@@ -1161,17 +1158,17 @@ void LinuxAlsa::tryOutput(Handle _handle, Info apiInfo)
 	// Write samples to device in interleaved/non-interleaved format.
 	if (stream_.deviceInterleaved[0])
 	{
-		result = snd_pcm_writei(_handle[0], buffer.data(), stream_.bufferSize);
+		result = snd_pcm_writei(_handle, buffer.data(), stream_.bufferSize);
 	}
 
-	verifyUnderRunOrError(_handle[0], apiInfo, 0, result);
+	verifyUnderRunOrError(_handle, 0, result);
 
 	// Check stream latency
-	checkStreamLatencyOf(_handle[0], 0);
+	checkStreamLatencyOf(_handle, 0);
 }
 
-template <class Handle, class Info>
-void LinuxAlsa::verifyUnderRunOrError(Handle _handle, Info apiInfo, int index, int result)
+template <class Handle>
+void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, int result)
 {
 	if (result < (int)stream_.bufferSize)
 	{
@@ -1181,7 +1178,14 @@ void LinuxAlsa::verifyUnderRunOrError(Handle _handle, Info apiInfo, int index, i
 			snd_pcm_state_t state = snd_pcm_state(_handle);
 			if (state == SND_PCM_STATE_XRUN)
 			{
-				apiInfo->xrun[index] = true;
+				if (index == 0)
+				{
+					alsaHandle.setXRunPlayback(true);
+				}
+				else
+				{
+					alsaHandle.setXRunRecord(true);
+				}
 
 				if (int e = snd_pcm_prepare(_handle) < 0)
 				{
