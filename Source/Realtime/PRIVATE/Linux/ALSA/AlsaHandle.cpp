@@ -67,13 +67,14 @@ void AlsaHandle::determineTheNumberOfDevices()
 	int card = -1;
 	snd_card_next(&card);
 
+	// Can't use smart point in a abstract data type, aka: incomplete type.
 	snd_ctl_t* handle = nullptr;
 
 	if (card >= 0)
 	{
 		std::array <char, 64> name{ };
 
-		sprintf(name.data(), "hw:%d", card);
+		std::sprintf(name.data(), "hw:%d", card);
 
 		if (int e = snd_ctl_open(&handle, name.data(), 0) < 0)
 		{
@@ -96,13 +97,15 @@ void AlsaHandle::determineTheNumberOfDevices()
 				break;
 			}
 
-			if (subDevice < 0)
-			{
-				break;
-			}
+			if (subDevice < 0) break;
 
 			this->numberOfDevices += 1;
 		}
+	}
+	else
+	{
+		Levin::Error() << "Linux Alsa: determineTheNumberOfDevices(): ";
+		Levin::Error() << "Can't determine the number of devices." << Levin::endl;
 	}
 
 	if (handle != nullptr)
