@@ -72,13 +72,10 @@ namespace Maximilian
 		void formatBufferAccordToTypesOfDate(T _type, O* outBuffer, I* inBuffer, ConvertInfo& info);
 
 		template <typename T, typename O, typename I>
-		void formatBufferWithScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
+		void formatBufferWithBitwise(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
 
 		template <typename O, typename I>
 		void formatBufferWithoutScale(O* outBuffer, I* inBuffer, ConvertInfo& info);
-
-		template <typename T, typename O, typename I>
-		void formatBufferOf24BitsWithScale(T _scale, T _bitwise, O* outBuffer, I* inBuffer, ConvertInfo& info);
 
 		template <typename T, typename O, typename I>
 		void formatBufferToScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
@@ -163,8 +160,6 @@ namespace Maximilian
 		void setBufferFrames(unsigned int _bufferFrames);
 
 	protected:
-
-		static constexpr short MAX_SAMPLE_RATES = 14;
 
 		static constexpr std::array <unsigned int, 14> SAMPLE_RATES = {
 				4000, 5512, 8000, 9600, 11025, 16000, 22050,

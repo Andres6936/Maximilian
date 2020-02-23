@@ -18,7 +18,6 @@ namespace Maximilian
 
 	public:
 
-		bool probed = false;                  /*!< true if the device capabilities were successfully probed. */
 		unsigned int outputChannels = 0;  /*!< Maximum output channels supported by device. */
 		unsigned int inputChannels = 0;   /*!< Maximum input channels supported by device. */
 		unsigned int duplexChannels = 0;  /*!< Maximum simultaneous input/output channels supported by device. */
@@ -29,6 +28,10 @@ namespace Maximilian
 
 		// Default constructor.
 		DeviceInfo() = default;
+
+		void determineChannelsForDuplexMode();
+
+		void determineChannelsForDefaultByDevice(int device);
 
 	};
 }

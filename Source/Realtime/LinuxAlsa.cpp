@@ -1,4 +1,5 @@
 #include "Realtime/LinuxAlsa.hpp"
+#include "PRIVATE/Linux/ALSA/AlsaHandle.hpp"
 
 #include <alsa/asoundlib.h>
 
@@ -6,25 +7,6 @@
 #include <climits>
 
 using namespace Maximilian;
-
-// A structure to hold various information related to the ALSA API
-// implementation.
-class AlsaHandle
-{
-
-public:
-
-	bool runnable = false;
-	bool synchronized = false;
-
-	snd_pcm_t* handles[2] = { nullptr, nullptr };
-	pthread_cond_t runnable_cv;
-
-	std::array <bool, 2> xrun{ false, false };
-
-	AlsaHandle() = default;
-};
-
 
 extern "C" void* alsaCallbackHandler(void* ptr)
 {
@@ -50,66 +32,7 @@ LinuxAlsa::~LinuxAlsa()
 
 unsigned int LinuxAlsa::getDeviceCount()
 {
-	unsigned numberOfDevices = 0;
-
-	// Count cards and devices
-	int card = -1;
-	snd_card_next(&card);
-
-	snd_ctl_t* handle = nullptr;
-
-	if (card >= 0)
-	{
-		std::array <char, 64> name{ };
-
-		sprintf(name.data(), "hw:%d", card);
-
-		int result = snd_ctl_open(&handle, name.data(), 0);
-
-		if (result < 0)
-		{
-			Levin::Warn() << "Linux Alsa: getDeviceCount, control open, card = " << card
-						  << ", " << snd_strerror(result) << "." << Levin::endl;
-
-			snd_ctl_close(handle);
-			// Free the cache for avoid memory leak
-			snd_config_update_free_global();
-			snd_card_next(&card);
-
-			// Return zero device in this point
-			return numberOfDevices;
-		}
-
-		int subDevice = -1;
-
-		while (true)
-		{
-			result = snd_ctl_pcm_next_device(handle, &subDevice);
-
-			if (result < 0)
-			{
-				Levin::Warn() << "Linux Alsa: getDeviceCount, control next device, card = " << card
-							  << ", " << snd_strerror(result) << "." << Levin::endl;
-				break;
-			}
-
-			if (subDevice < 0)
-			{
-				break;
-			}
-
-			numberOfDevices++;
-		}
-	}
-
-	if (handle != nullptr)
-	{
-		snd_ctl_close(handle);
-		// Free the cache for avoid memory leak
-		snd_config_update_free_global();
-	}
-
-	return numberOfDevices;
+	return alsaHandle.getNumberOfDevices();
 }
 
 DeviceInfo LinuxAlsa::getDeviceInfo(int device)
@@ -120,7 +43,6 @@ DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	}
 
 	DeviceInfo info;
-	info.probed = false;
 
 	int subDevice = device;
 
@@ -199,30 +121,27 @@ DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	snd_pcm_close(phandle);
 
 captureProbe:
-	// Now try for capture
-	stream = SND_PCM_STREAM_CAPTURE;
-	snd_pcm_info_set_stream(pcminfo, stream);
 
-	if (snd_ctl_pcm_info(handle, pcminfo) < 0)
+	if (not AlsaHandle::isAvailableForCapture(*handle, *pcminfo))
 	{
+		Levin::Debug() << "Not support for capture found in the device: " << name.data() << Levin::endl;
+		// Close the handle
 		snd_ctl_close(handle);
 
 		// Device probably doesn't support capture.
-		if (info.outputChannels == 0)
-		{ return info; }
+		if (info.outputChannels == 0) return info;
 		goto probeParameters;
 	}
 
 	snd_ctl_close(handle);
 
-	if (int e = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
+	if (int e = snd_pcm_open(&phandle, name.data(), SND_PCM_STREAM_CAPTURE, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
 	{
 		snd_config_update_free_global();
 		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("
 					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
 
-		if (info.outputChannels == 0)
-		{ return info; }
+		if (info.outputChannels == 0) return info;
 		goto probeParameters;
 	}
 
@@ -257,20 +176,10 @@ captureProbe:
 	snd_pcm_close(phandle);
 
 	// If device opens for both playback and capture, we determine the channels.
-	if (info.outputChannels > 0 && info.inputChannels > 0)
-	{
-		info.duplexChannels = (info.outputChannels > info.inputChannels) ? info.inputChannels : info.outputChannels;
-	}
+	info.determineChannelsForDuplexMode();
 
 	// ALSA doesn't provide default devices so we'll use the first available one.
-	if (device == 0 && info.outputChannels > 0)
-	{
-		info.isDefaultOutput = true;
-	}
-	if (device == 0 && info.inputChannels > 0)
-	{
-		info.isDefaultInput = true;
-	}
+	info.determineChannelsForDefaultByDevice(device);
 
 probeParameters:
 	// At this point, we just need to figure out the supported data
@@ -309,14 +218,8 @@ probeParameters:
 	}
 
 	// Test our discrete set of sample rate values.
-	info.sampleRates.clear();
-	for (unsigned int i = 0; i < MAX_SAMPLE_RATES; i++)
-	{
-		if (snd_pcm_hw_params_test_rate(phandle, params, SAMPLE_RATES[i], 0) == 0)
-		{
-			info.sampleRates.push_back(SAMPLE_RATES[i]);
-		}
-	}
+	AlsaHandle::testSupportedDateFormats(*phandle, *params, SAMPLE_RATES, info);
+
 	if (info.sampleRates.empty())
 	{
 		snd_pcm_close(phandle);
@@ -327,40 +230,10 @@ probeParameters:
 	}
 
 	// Probe the supported data formats ... we don't care about endian-ness just yet
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S8) == 0)
-	{
-		info.nativeFormats = AudioFormat::SInt8;
-	}
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S16) == 0)
-	{
-		info.nativeFormats = AudioFormat::SInt16;
-	}
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S24) == 0)
-	{
-		info.nativeFormats = AudioFormat::SInt24;
-	}
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_S32) == 0)
-	{
-		info.nativeFormats = AudioFormat::SInt32;
-	}
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_FLOAT) == 0)
-	{
-		info.nativeFormats = AudioFormat::Float32;
-	}
-
-	if (snd_pcm_hw_params_test_format(phandle, params, SND_PCM_FORMAT_FLOAT64) == 0)
-	{
-		info.nativeFormats = AudioFormat::Float64;
-	}
+	AlsaHandle::setSupportedDateFormats(*phandle, *params, info);
 
 	// That's all ... close the device and return
 	snd_pcm_close(phandle);
-	info.probed = true;
 	return info;
 }
 
@@ -552,88 +425,34 @@ foundDevice:
 
 	// Determine how to set the device format.
 	stream_.userFormat = getAudioFormat();
-	snd_pcm_format_t deviceFormat = SND_PCM_FORMAT_UNKNOWN;
+	snd_pcm_format_t deviceFormat;
 
-	if (getAudioFormat() == AudioFormat::SInt8)
+	const std::vector <std::pair <snd_pcm_format_t, AudioFormat>> equivalentFormats = {
+
+			{ SND_PCM_FORMAT_FLOAT64, AudioFormat::Float64 },
+			{ SND_PCM_FORMAT_FLOAT,   AudioFormat::Float32 },
+			{ SND_PCM_FORMAT_S32,     AudioFormat::SInt32 },
+			{ SND_PCM_FORMAT_S24,     AudioFormat::SInt24 },
+			{ SND_PCM_FORMAT_S16,     AudioFormat::SInt16 },
+			{ SND_PCM_FORMAT_S8,      AudioFormat::SInt8 }
+	};
+
+	for (auto& format : equivalentFormats)
 	{
-		deviceFormat = SND_PCM_FORMAT_S8;
-	}
-	else if (getAudioFormat() == AudioFormat::SInt16)
-	{
-		deviceFormat = SND_PCM_FORMAT_S16;
-	}
-	else if (getAudioFormat() == AudioFormat::SInt24)
-	{
-		deviceFormat = SND_PCM_FORMAT_S24;
-	}
-	else if (getAudioFormat() == AudioFormat::SInt32)
-	{
-		deviceFormat = SND_PCM_FORMAT_S32;
-	}
-	else if (getAudioFormat() == AudioFormat::Float32)
-	{
-		deviceFormat = SND_PCM_FORMAT_FLOAT;
-	}
-	else if (getAudioFormat() == AudioFormat::Float64)
-	{
-		deviceFormat = SND_PCM_FORMAT_FLOAT64;
+		if (snd_pcm_hw_params_test_format(phandle, hw_params, format.first) == 0)
+		{
+			deviceFormat = format.first;
+			stream_.deviceFormat[index] = format.second;
+			break;
+		}
 	}
 
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
+	if (deviceFormat == SND_PCM_FORMAT_UNKNOWN)
 	{
-		stream_.deviceFormat[index] = getAudioFormat();
-		goto setFormat;
+		Levin::Severe() << "Linux Alsa: Data format not supported." << Levin::endl;
+		throw Exception("DataFormatNotSupportedException");
 	}
 
-	// The user requested format is not natively supported by the device.
-	deviceFormat = SND_PCM_FORMAT_FLOAT64;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::Float64;
-		goto setFormat;
-	}
-
-	deviceFormat = SND_PCM_FORMAT_FLOAT;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::Float32;
-		goto setFormat;
-	}
-
-	deviceFormat = SND_PCM_FORMAT_S32;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::SInt32;
-		goto setFormat;
-	}
-
-	deviceFormat = SND_PCM_FORMAT_S24;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::SInt24;
-		goto setFormat;
-	}
-
-	deviceFormat = SND_PCM_FORMAT_S16;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::SInt16;
-		goto setFormat;
-	}
-
-	deviceFormat = SND_PCM_FORMAT_S8;
-	if (snd_pcm_hw_params_test_format(phandle, hw_params, deviceFormat) == 0)
-	{
-		stream_.deviceFormat[index] = AudioFormat::SInt8;
-		goto setFormat;
-	}
-
-	// If we get here, no supported format was found.
-	errorStream_ << "RtApiAlsa::probeDeviceOpen: pcm device " << device << " data format not supported by RtAudio.";
-	errorText_ = errorStream_.str();
-	return FAILURE;
-
-setFormat:
 	result = snd_pcm_hw_params_set_format(phandle, hw_params, deviceFormat);
 	if (result < 0)
 	{
@@ -829,19 +648,14 @@ setFormat:
 		stream_.doConvertBuffer[index] = true;
 	}
 
-	// Allocate the ApiHandle if necessary and then save.
-	AlsaHandle apiInfo;
-
-	if (pthread_cond_init(&apiInfo.runnable_cv, NULL))
+	if (index == 0)
 	{
-		errorText_ = "RtApiAlsa::probeDeviceOpen: error initializing pthread condition variable.";
-		goto error;
+		alsaHandle.setTheHandleForPlayback(phandle);
 	}
-
-	apiInfo.handles[0] = 0;
-	apiInfo.handles[1] = 0;
-
-	apiInfo.handles[index] = phandle;
+	else
+	{
+		alsaHandle.setTheHandleForRecord(phandle);
+	}
 
 	// Allocate necessary internal buffers.
 	unsigned long bufferBytes;
@@ -901,10 +715,9 @@ setFormat:
 		// We had already set up an output stream.
 		stream_.mode = StreamMode::DUPLEX;
 		// Link the streams if possible.
-		apiInfo.synchronized = false;
-		if (snd_pcm_link(apiInfo.handles[0], apiInfo.handles[1]) == 0)
+		if (snd_pcm_link(alsaHandle.getHandleForPlayback(), alsaHandle.getHandleForRecord()) == 0)
 		{
-			apiInfo.synchronized = true;
+			alsaHandle.setSynchronized(true);
 		}
 		else
 		{
@@ -951,8 +764,6 @@ setFormat:
 		pthread_attr_setschedpolicy( &attr, SCHED_OTHER );
 #endif
 
-		stream_.apiHandle = apiInfo;
-
 		stream_.callbackInfo.isRunning = true;
 		result = pthread_create(&stream_.callbackInfo.thread, &attr, alsaCallbackHandler, &stream_.callbackInfo);
 		pthread_attr_destroy(&attr);
@@ -968,14 +779,6 @@ setFormat:
 
 error:
 
-	pthread_cond_destroy(&apiInfo.runnable_cv);
-
-	if (apiInfo.handles[0])
-	{ snd_pcm_close(apiInfo.handles[0]); }
-
-	if (apiInfo.handles[1])
-	{ snd_pcm_close(apiInfo.handles[1]); }
-
 	stream_.deviceBuffer.clear();
 
 	return FAILURE;
@@ -990,14 +793,12 @@ void LinuxAlsa::closeStream()
 		return;
 	}
 
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-
 	stream_.callbackInfo.isRunning = false;
 	pthread_mutex_lock(&stream_.mutex);
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
-		apiInfo->runnable = true;
-		pthread_cond_signal(&apiInfo->runnable_cv);
+		alsaHandle.setRunnable(true);
+		alsaHandle.waitThreadForSignal();
 	}
 	pthread_mutex_unlock(&stream_.mutex);
 	pthread_join(stream_.callbackInfo.thread, NULL);
@@ -1007,29 +808,12 @@ void LinuxAlsa::closeStream()
 		stream_.state = StreamState::STREAM_STOPPED;
 		if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 		{
-			snd_pcm_drop(apiInfo->handles[0]);
+			snd_pcm_drop(alsaHandle.handles[0]);
 		}
 		if (stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX)
 		{
-			snd_pcm_drop(apiInfo->handles[1]);
+			snd_pcm_drop(alsaHandle.handles[1]);
 		}
-	}
-
-	if (apiInfo)
-	{
-		pthread_cond_destroy(&apiInfo->runnable_cv);
-
-		if (apiInfo->handles[0])
-		{
-			snd_pcm_close(apiInfo->handles[0]);
-		}
-
-		if (apiInfo->handles[1])
-		{
-			snd_pcm_close(apiInfo->handles[1]);
-		}
-
-		snd_config_update_free_global();
 	}
 
 	stream_.userBuffer.first.clear();
@@ -1056,22 +840,18 @@ void LinuxAlsa::startStream()
 
 	pthread_mutex_lock(&stream_.mutex);
 
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-
-	auto handle = (snd_pcm_t**)apiInfo->handles;
-
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		prepareStateOfDevice(handle[0]);
+		prepareStateOfDevice(alsaHandle.handles[0]);
 	}
 
-	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
+	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !alsaHandle.isSynchronized())
 	{
-		prepareStateOfDevice(handle[1]);
+		prepareStateOfDevice(alsaHandle.handles[1]);
 	}
 
 	stream_.state = StreamState::STREAM_RUNNING;
-	unlockMutex();
+	unlockMutexOfAPIHandle();
 }
 
 template <class Device>
@@ -1086,19 +866,17 @@ void LinuxAlsa::prepareStateOfDevice(Device _device)
 			Levin::Error() << "Linux Alsa: error preparing pcm device, "
 						   << snd_strerror(e) << "." << Levin::endl;
 
-			unlockMutex();
+			unlockMutexOfAPIHandle();
 
 			throw Exception("InvalidUseException");
 		}
 	}
 }
 
-void LinuxAlsa::unlockMutex()
+void LinuxAlsa::unlockMutexOfAPIHandle()
 {
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-
-	apiInfo->runnable = true;
-	pthread_cond_signal(&apiInfo->runnable_cv);
+	alsaHandle.setRunnable(true);
+	alsaHandle.waitThreadForSignal();
 	pthread_mutex_unlock(&stream_.mutex);
 }
 
@@ -1115,117 +893,85 @@ void LinuxAlsa::stopStream()
 	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_lock(&stream_.mutex);
 
-	//if ( stream_.state == STREAM_STOPPED ) {
-	//  MUTEX_UNLOCK( &stream_.mutex );
-	//  return;
-	//}
-
-	int result = 0;
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
-
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		if (apiInfo->synchronized)
+		int result = 0;
+
+		if (alsaHandle.isSynchronized())
 		{
-			result = snd_pcm_drop(handle[0]);
+			result = snd_pcm_drop(alsaHandle.handles[0]);
 		}
 		else
 		{
-			result = snd_pcm_drain(handle[0]);
+			result = snd_pcm_drain(alsaHandle.handles[0]);
 		}
+
 		if (result < 0)
 		{
-			errorStream_ << "RtApiAlsa::stopStream: error draining output pcm device, " << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
-			goto unlock;
+			Levin::Error() << "Linux Alsa: stopStream, error draining output pcm device, "
+						   << snd_strerror(result) << "." << Levin::endl;
+
+			pthread_mutex_unlock(&stream_.mutex);
+			throw Exception("ErrorDropHandleException");
 		}
 	}
 
-	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
+	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !alsaHandle.isSynchronized())
 	{
-		result = snd_pcm_drop(handle[1]);
-		if (result < 0)
-		{
-			errorStream_ << "RtApiAlsa::stopStream: error stopping input pcm device, " << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
-			goto unlock;
-		}
+		dropHandle(alsaHandle.handles[1]);
 	}
 
-unlock:
-	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_unlock(&stream_.mutex);
-
-	if (result >= 0)
-	{ return; }
-	error(Exception::SYSTEM_ERROR);
 }
 
 void LinuxAlsa::abortStream()
 {
 	verifyStream();
+
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
-		errorText_ = "RtApiAlsa::abortStream(): the stream is already stopped!";
-		error(Exception::WARNING);
+		Levin::Warn() << "Linux Alsa: abortStream, the stream is already stopped." << Levin::endl;
 		return;
 	}
 
 	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_lock(&stream_.mutex);
 
-	//if ( stream_.state == STREAM_STOPPED ) {
-	//  MUTEX_UNLOCK( &stream_.mutex );
-	//  return;
-	//}
-
-	int result = 0;
-
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-
-	snd_pcm_t** handle = (snd_pcm_t**)apiInfo->handles;
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		result = snd_pcm_drop(handle[0]);
-		if (result < 0)
-		{
-			errorStream_ << "RtApiAlsa::abortStream: error aborting output pcm device, " << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
-			goto unlock;
-		}
+		dropHandle(alsaHandle.handles[0]);
 	}
 
-	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
+	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !alsaHandle.isSynchronized())
 	{
-		result = snd_pcm_drop(handle[1]);
-		if (result < 0)
-		{
-			errorStream_ << "RtApiAlsa::abortStream: error aborting input pcm device, " << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
-			goto unlock;
-		}
+		dropHandle(alsaHandle.handles[1]);
 	}
 
-unlock:
-	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_unlock(&stream_.mutex);
+}
 
-	if (result >= 0)
-	{ return; }
-	error(Exception::SYSTEM_ERROR);
+template <class Handle>
+void LinuxAlsa::dropHandle(Handle _handle)
+{
+	if (int e = snd_pcm_drop(_handle) < 0)
+	{
+		Levin::Error() << "Linux Alsa: error stopping stream in pcm device, "
+					   << snd_strerror(e) << "." << Levin::endl;
+
+		pthread_mutex_unlock(&stream_.mutex);
+		throw Exception("ErrorDropHandleException");
+	}
 }
 
 void LinuxAlsa::callbackEvent()
 {
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
 		pthread_mutex_lock(&stream_.mutex);
-		while (!apiInfo->runnable)
+
+		while (!alsaHandle.isRunnable())
 		{
-			pthread_cond_wait(&apiInfo->runnable_cv, &stream_.mutex);
+			alsaHandle.waitThreadForCondition(stream_.mutex);
 		}
 
 		if (stream_.state != StreamState::STREAM_RUNNING)
@@ -1243,19 +989,17 @@ void LinuxAlsa::callbackEvent()
 		return;
 	}
 
-	int doStopStream = 0;
-
 	AudioStreamStatus status = AudioStreamStatus::None;
 
-	if (stream_.mode != StreamMode::INPUT && apiInfo->xrun[0] == true)
+	if (stream_.mode != StreamMode::INPUT && alsaHandle.isXRunPlayback() == true)
 	{
 		status = AudioStreamStatus::Underflow;
-		apiInfo->xrun[0] = false;
+		alsaHandle.setXRunPlayback(false);
 	}
-	if (stream_.mode != StreamMode::OUTPUT && apiInfo->xrun[1] == true)
+	if (stream_.mode != StreamMode::OUTPUT && alsaHandle.isXRunRecord() == true)
 	{
 		status = AudioStreamStatus::Overflow;
-		apiInfo->xrun[1] = false;
+		alsaHandle.setXRunRecord(false);
 	}
 
 	if (status != AudioStreamStatus::None)
@@ -1265,8 +1009,32 @@ void LinuxAlsa::callbackEvent()
 		throw Exception("UnderflowOrOverflowException");
 	}
 
-	// Start Callback Function
+	startCallbackFunction();
 
+	pthread_mutex_lock(&stream_.mutex);
+
+	// The state might change while waiting on a mutex.
+	if (stream_.state == StreamState::STREAM_STOPPED)
+	{
+		unlockMutex();
+		return;
+	}
+
+	if (stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX)
+	{
+		tryInput(alsaHandle.handles[1]);
+	}
+
+	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
+	{
+		tryOutput(alsaHandle.handles[0]);
+	}
+
+	unlockMutex();
+}
+
+void LinuxAlsa::startCallbackFunction()
+{
 	// Left and Right channel
 	std::vector <double> data(2, 0);
 
@@ -1293,199 +1061,151 @@ void LinuxAlsa::callbackEvent()
 	{
 		stream_.userBuffer.first[k] = test[k];
 	}
+}
 
-
-	// End Callback Function
-
-	if (doStopStream == 2)
-	{
-		abortStream();
-		return;
-	}
-
-	pthread_mutex_lock(&stream_.mutex);
-
-	// The state might change while waiting on a mutex.
-	if (stream_.state == StreamState::STREAM_STOPPED)
-	{ goto unlock; }
-
-	int result;
-	char* buffer;
-	int channels;
-	snd_pcm_t** handle;
-	snd_pcm_sframes_t frames;
-	AudioFormat format;
-	handle = (snd_pcm_t**)apiInfo->handles;
-
-	if (stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX)
-	{
-
-		// Setup parameters.
-		if (stream_.doConvertBuffer[1])
-		{
-			buffer = stream_.deviceBuffer.data();
-			channels = stream_.nDeviceChannels[1];
-			format = stream_.deviceFormat[1];
-		}
-		else
-		{
-			buffer = stream_.userBuffer.second.data();
-			channels = stream_.nUserChannels[1];
-			format = stream_.userFormat;
-		}
-
-		// Read samples from device in interleaved/non-interleaved format.
-		if (stream_.deviceInterleaved[1])
-		{
-			result = snd_pcm_readi(handle[1], buffer, stream_.bufferSize);
-		}
-		else
-		{
-			void* bufs[channels];
-			size_t offset = stream_.bufferSize * formatBytes(format);
-			for (int i = 0; i < channels; i++)
-			{
-				bufs[i] = (void*)(buffer + (i * offset));
-			}
-			result = snd_pcm_readn(handle[1], bufs, stream_.bufferSize);
-		}
-
-		if (result < (int)stream_.bufferSize)
-		{
-			// Either an error or overrun occured.
-			if (result == -EPIPE)
-			{
-				snd_pcm_state_t state = snd_pcm_state(handle[1]);
-				if (state == SND_PCM_STATE_XRUN)
-				{
-					apiInfo->xrun[1] = true;
-					result = snd_pcm_prepare(handle[1]);
-					if (result < 0)
-					{
-						errorStream_ << "RtApiAlsa::callbackEvent: error preparing device after overrun, "
-									 << snd_strerror(result) << ".";
-						errorText_ = errorStream_.str();
-					}
-				}
-				else
-				{
-					errorStream_ << "RtApiAlsa::callbackEvent: error, current state is " << snd_pcm_state_name(state)
-								 << ", " << snd_strerror(result) << ".";
-					errorText_ = errorStream_.str();
-				}
-			}
-			else
-			{
-				errorStream_ << "RtApiAlsa::callbackEvent: audio read error, " << snd_strerror(result) << ".";
-				errorText_ = errorStream_.str();
-			}
-			error(Exception::WARNING);
-			goto tryOutput;
-		}
-
-		// Do byte swapping if necessary.
-		if (stream_.doByteSwap[1])
-		{
-			byteSwapBuffer(buffer, stream_.bufferSize * channels, format);
-		}
-
-		// Do buffer conversion if necessary.
-		if (stream_.doConvertBuffer[1])
-		{
-			convertBuffer(stream_.userBuffer.second.data(), stream_.deviceBuffer.data(), stream_.convertInfo[1]);
-		}
-
-		// Check stream latency
-		result = snd_pcm_delay(handle[1], &frames);
-		if (result == 0 && frames > 0)
-		{ stream_.latency[1] = frames; }
-	}
-
-tryOutput:
-
-	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
-	{
-
-		// Setup parameters and do buffer conversion if necessary.
-		if (stream_.doConvertBuffer[0])
-		{
-			buffer = stream_.deviceBuffer.data();
-			convertBuffer(buffer, stream_.userBuffer.first.data(), stream_.convertInfo[0]);
-			channels = stream_.nDeviceChannels[0];
-			format = stream_.deviceFormat[0];
-		}
-		else
-		{
-			buffer = stream_.userBuffer.first.data();
-			channels = stream_.nUserChannels[0];
-			format = stream_.userFormat;
-		}
-
-		// Do byte swapping if necessary.
-		if (stream_.doByteSwap[0])
-		{
-			byteSwapBuffer(buffer, stream_.bufferSize * channels, format);
-		}
-
-		// Write samples to device in interleaved/non-interleaved format.
-		if (stream_.deviceInterleaved[0])
-		{
-			result = snd_pcm_writei(handle[0], buffer, stream_.bufferSize);
-		}
-		else
-		{
-			void* bufs[channels];
-			size_t offset = stream_.bufferSize * formatBytes(format);
-			for (int i = 0; i < channels; i++)
-			{
-				bufs[i] = (void*)(buffer + (i * offset));
-			}
-			result = snd_pcm_writen(handle[0], bufs, stream_.bufferSize);
-		}
-
-		if (result < (int)stream_.bufferSize)
-		{
-			// Either an error or underrun occured.
-			if (result == -EPIPE)
-			{
-				snd_pcm_state_t state = snd_pcm_state(handle[0]);
-				if (state == SND_PCM_STATE_XRUN)
-				{
-					apiInfo->xrun[0] = true;
-					result = snd_pcm_prepare(handle[0]);
-					if (result < 0)
-					{
-						errorStream_ << "RtApiAlsa::callbackEvent: error preparing device after underrun, "
-									 << snd_strerror(result) << ".";
-						errorText_ = errorStream_.str();
-					}
-				}
-				else
-				{
-					errorStream_ << "RtApiAlsa::callbackEvent: error, current state is " << snd_pcm_state_name(state)
-								 << ", " << snd_strerror(result) << ".";
-					errorText_ = errorStream_.str();
-				}
-			}
-			else
-			{
-				errorStream_ << "RtApiAlsa::callbackEvent: audio write error, " << snd_strerror(result) << ".";
-				errorText_ = errorStream_.str();
-			}
-			error(Exception::WARNING);
-			goto unlock;
-		}
-
-		// Check stream latency
-		result = snd_pcm_delay(handle[0], &frames);
-		if (result == 0 && frames > 0)
-		{ stream_.latency[0] = frames; }
-	}
-
-unlock:
+void LinuxAlsa::unlockMutex()
+{
 	pthread_mutex_unlock(&stream_.mutex);
 
 	AudioArchitecture::tickStreamTime();
-	if (doStopStream == 1)
-	{ this->stopStream(); }
+}
+
+template <class Device>
+void LinuxAlsa::tryInput(Device _handle)
+{
+	int channels = 0;
+	int result = 0;
+
+	AudioFormat format;
+	std::vector <char> buffer;
+
+	// Setup parameters.
+	if (stream_.doConvertBuffer[1])
+	{
+		buffer = stream_.deviceBuffer;
+		channels = stream_.nDeviceChannels[1];
+		format = stream_.deviceFormat[1];
+	}
+	else
+	{
+		buffer = stream_.userBuffer.second;
+		channels = stream_.nUserChannels[1];
+		format = stream_.userFormat;
+	}
+
+	// Read samples from device in interleaved/non-interleaved format.
+	if (stream_.deviceInterleaved[1])
+	{
+		result = snd_pcm_readi(_handle, buffer.data(), stream_.bufferSize);
+	}
+
+	verifyUnderRunOrError(_handle, 1, result);
+
+	// Do byte swapping if necessary.
+	if (stream_.doByteSwap[1])
+	{
+		byteSwapBuffer(buffer.data(), stream_.bufferSize * channels, format);
+	}
+
+	// Do buffer conversion if necessary.
+	if (stream_.doConvertBuffer[1])
+	{
+		convertBuffer(stream_.userBuffer.second.data(), stream_.deviceBuffer.data(), stream_.convertInfo[1]);
+	}
+
+	// Check stream latency
+	checkStreamLatencyOf(_handle, 1);
+}
+
+template <class Handle>
+void LinuxAlsa::tryOutput(Handle _handle)
+{
+	int channels = 0;
+	int result = 0;
+
+	AudioFormat format;
+	std::vector <char> buffer;
+
+	// Setup parameters and do buffer conversion if necessary.
+	if (stream_.doConvertBuffer[0])
+	{
+		buffer = stream_.deviceBuffer;
+		convertBuffer(buffer.data(), stream_.userBuffer.first.data(), stream_.convertInfo[0]);
+		channels = stream_.nDeviceChannels[0];
+		format = stream_.deviceFormat[0];
+	}
+	else
+	{
+		buffer = stream_.userBuffer.first;
+		channels = stream_.nUserChannels[0];
+		format = stream_.userFormat;
+	}
+
+	// Do byte swapping if necessary.
+	if (stream_.doByteSwap[0])
+	{
+		byteSwapBuffer(buffer.data(), stream_.bufferSize * channels, format);
+	}
+
+	// Write samples to device in interleaved/non-interleaved format.
+	if (stream_.deviceInterleaved[0])
+	{
+		result = snd_pcm_writei(_handle, buffer.data(), stream_.bufferSize);
+	}
+
+	verifyUnderRunOrError(_handle, 0, result);
+
+	// Check stream latency
+	checkStreamLatencyOf(_handle, 0);
+}
+
+template <class Handle>
+void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, int result)
+{
+	if (result < (int)stream_.bufferSize)
+	{
+		// Either an error or under-run occurred.
+		if (result == -EPIPE)
+		{
+			snd_pcm_state_t state = snd_pcm_state(_handle);
+			if (state == SND_PCM_STATE_XRUN)
+			{
+				if (index == 0)
+				{
+					alsaHandle.setXRunPlayback(true);
+				}
+				else
+				{
+					alsaHandle.setXRunRecord(true);
+				}
+
+				if (int e = snd_pcm_prepare(_handle) < 0)
+				{
+					Levin::Error() << "Linux Alsa: error preparing device after overrun, "
+								   << snd_strerror(e) << "." << Levin::endl;
+				}
+			}
+			else
+			{
+				Levin::Error() << "Linux Alsa: error, current state is " << snd_pcm_state_name(state)
+							   << ", " << snd_strerror(result) << "." << Levin::endl;
+			}
+		}
+		else
+		{
+			Levin::Error() << "Linux Alsa: audio write/read error, " << snd_strerror(result) << "." << Levin::endl;
+		}
+	}
+}
+
+template <class Handle>
+void LinuxAlsa::checkStreamLatencyOf(Handle _handle, int index)
+{
+	long frames = 0;
+	int result = snd_pcm_delay(_handle, &frames);
+
+	if (result == 0 && frames > 0)
+	{
+		stream_.latency[index] = frames;
+	}
 }
