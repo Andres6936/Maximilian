@@ -55,6 +55,8 @@ namespace Maximilian
 
 		// Methods
 
+		void waitThreadForSignal();
+
 		void waitThreadForCondition(pthread_mutex_t& _mutex);
 
 		// Getters

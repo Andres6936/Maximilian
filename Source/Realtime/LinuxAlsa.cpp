@@ -795,14 +795,12 @@ void LinuxAlsa::closeStream()
 		return;
 	}
 
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-
 	stream_.callbackInfo.isRunning = false;
 	pthread_mutex_lock(&stream_.mutex);
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
 		alsaHandle.setRunnable(true);
-		pthread_cond_signal(&apiInfo->runnable_cv);
+		alsaHandle.waitThreadForSignal();
 	}
 	pthread_mutex_unlock(&stream_.mutex);
 	pthread_join(stream_.callbackInfo.thread, NULL);
@@ -879,10 +877,8 @@ void LinuxAlsa::prepareStateOfDevice(Device _device)
 
 void LinuxAlsa::unlockMutexOfAPIHandle()
 {
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-
 	alsaHandle.setRunnable(true);
-	pthread_cond_signal(&apiInfo->runnable_cv);
+	alsaHandle.waitThreadForSignal();
 	pthread_mutex_unlock(&stream_.mutex);
 }
 
@@ -971,8 +967,6 @@ void LinuxAlsa::dropHandle(Handle _handle)
 
 void LinuxAlsa::callbackEvent()
 {
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
 		pthread_mutex_lock(&stream_.mutex);

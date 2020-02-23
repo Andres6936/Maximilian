@@ -203,3 +203,8 @@ void AlsaHandle::setXRunRecord(bool _run)
 {
 	xrun[1] = _run;
 }
+
+void AlsaHandle::waitThreadForSignal()
+{
+	pthread_cond_signal(&runnable_cv);
+}
