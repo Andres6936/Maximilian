@@ -648,19 +648,14 @@ foundDevice:
 		stream_.doConvertBuffer[index] = true;
 	}
 
-	// Allocate the ApiHandle if necessary and then save.
-	AlsaHandle apiInfo;
-
-	if (pthread_cond_init(&apiInfo.runnable_cv, NULL))
+	if (index == 0)
 	{
-		errorText_ = "RtApiAlsa::probeDeviceOpen: error initializing pthread condition variable.";
-		goto error;
+		alsaHandle.setTheHandleForPlayback(phandle);
 	}
-
-	apiInfo.handles[0] = 0;
-	apiInfo.handles[1] = 0;
-
-	apiInfo.handles[index] = phandle;
+	else
+	{
+		alsaHandle.setTheHandleForRecord(phandle);
+	}
 
 	// Allocate necessary internal buffers.
 	unsigned long bufferBytes;
@@ -720,10 +715,9 @@ foundDevice:
 		// We had already set up an output stream.
 		stream_.mode = StreamMode::DUPLEX;
 		// Link the streams if possible.
-		apiInfo.synchronized = false;
-		if (snd_pcm_link(apiInfo.handles[0], apiInfo.handles[1]) == 0)
+		if (snd_pcm_link(alsaHandle.getHandleForPlayback(), alsaHandle.getHandleForRecord()) == 0)
 		{
-			apiInfo.synchronized = true;
+			alsaHandle.setSynchronized(true);
 		}
 		else
 		{
@@ -770,7 +764,7 @@ foundDevice:
 		pthread_attr_setschedpolicy( &attr, SCHED_OTHER );
 #endif
 
-		stream_.apiHandle = apiInfo;
+		stream_.apiHandle = alsaHandle;
 
 		stream_.callbackInfo.isRunning = true;
 		result = pthread_create(&stream_.callbackInfo.thread, &attr, alsaCallbackHandler, &stream_.callbackInfo);
@@ -786,14 +780,6 @@ foundDevice:
 	return SUCCESS;
 
 error:
-
-	pthread_cond_destroy(&apiInfo.runnable_cv);
-
-	if (apiInfo.handles[0])
-	{ snd_pcm_close(apiInfo.handles[0]); }
-
-	if (apiInfo.handles[1])
-	{ snd_pcm_close(apiInfo.handles[1]); }
 
 	stream_.deviceBuffer.clear();
 
@@ -815,7 +801,7 @@ void LinuxAlsa::closeStream()
 	pthread_mutex_lock(&stream_.mutex);
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
-		apiInfo->runnable = true;
+		alsaHandle.setRunnable(true);
 		pthread_cond_signal(&apiInfo->runnable_cv);
 	}
 	pthread_mutex_unlock(&stream_.mutex);
@@ -826,29 +812,12 @@ void LinuxAlsa::closeStream()
 		stream_.state = StreamState::STREAM_STOPPED;
 		if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 		{
-			snd_pcm_drop(apiInfo->handles[0]);
+			snd_pcm_drop(alsaHandle.handles[0]);
 		}
 		if (stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX)
 		{
-			snd_pcm_drop(apiInfo->handles[1]);
+			snd_pcm_drop(alsaHandle.handles[1]);
 		}
-	}
-
-	if (apiInfo)
-	{
-		pthread_cond_destroy(&apiInfo->runnable_cv);
-
-		if (apiInfo->handles[0])
-		{
-			snd_pcm_close(apiInfo->handles[0]);
-		}
-
-		if (apiInfo->handles[1])
-		{
-			snd_pcm_close(apiInfo->handles[1]);
-		}
-
-		snd_config_update_free_global();
 	}
 
 	stream_.userBuffer.first.clear();
@@ -875,18 +844,14 @@ void LinuxAlsa::startStream()
 
 	pthread_mutex_lock(&stream_.mutex);
 
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-
-	auto handle = (snd_pcm_t**)apiInfo->handles;
-
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		prepareStateOfDevice(handle[0]);
+		prepareStateOfDevice(alsaHandle.handles[0]);
 	}
 
-	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
+	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !alsaHandle.isSynchronized())
 	{
-		prepareStateOfDevice(handle[1]);
+		prepareStateOfDevice(alsaHandle.handles[1]);
 	}
 
 	stream_.state = StreamState::STREAM_RUNNING;
@@ -916,7 +881,7 @@ void LinuxAlsa::unlockMutexOfAPIHandle()
 {
 	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
 
-	apiInfo->runnable = true;
+	alsaHandle.setRunnable(true);
 	pthread_cond_signal(&apiInfo->runnable_cv);
 	pthread_mutex_unlock(&stream_.mutex);
 }
@@ -934,20 +899,17 @@ void LinuxAlsa::stopStream()
 	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_lock(&stream_.mutex);
 
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-	auto** handle = (snd_pcm_t**)apiInfo->handles;
-
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
 		int result = 0;
 
-		if (apiInfo->synchronized)
+		if (alsaHandle.isSynchronized())
 		{
-			result = snd_pcm_drop(handle[0]);
+			result = snd_pcm_drop(alsaHandle.handles[0]);
 		}
 		else
 		{
-			result = snd_pcm_drain(handle[0]);
+			result = snd_pcm_drain(alsaHandle.handles[0]);
 		}
 
 		if (result < 0)
@@ -960,9 +922,9 @@ void LinuxAlsa::stopStream()
 		}
 	}
 
-	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
+	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !alsaHandle.isSynchronized())
 	{
-		dropHandle(handle[1]);
+		dropHandle(alsaHandle.handles[1]);
 	}
 
 	pthread_mutex_unlock(&stream_.mutex);
@@ -981,18 +943,14 @@ void LinuxAlsa::abortStream()
 	stream_.state = StreamState::STREAM_STOPPED;
 	pthread_mutex_lock(&stream_.mutex);
 
-	auto* apiInfo = std::any_cast <AlsaHandle>(&stream_.apiHandle);
-
-	auto** handle = (snd_pcm_t**)apiInfo->handles;
-
 	if (stream_.mode == StreamMode::OUTPUT || stream_.mode == StreamMode::DUPLEX)
 	{
-		dropHandle(handle[0]);
+		dropHandle(alsaHandle.handles[0]);
 	}
 
-	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !apiInfo->synchronized)
+	if ((stream_.mode == StreamMode::INPUT || stream_.mode == StreamMode::DUPLEX) && !alsaHandle.isSynchronized())
 	{
-		dropHandle(handle[1]);
+		dropHandle(alsaHandle.handles[1]);
 	}
 
 	pthread_mutex_unlock(&stream_.mutex);
@@ -1018,9 +976,10 @@ void LinuxAlsa::callbackEvent()
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
 		pthread_mutex_lock(&stream_.mutex);
-		while (!apiInfo->runnable)
+
+		while (!alsaHandle.isRunnable())
 		{
-			pthread_cond_wait(&apiInfo->runnable_cv, &stream_.mutex);
+			alsaHandle.waitThreadForCondition(stream_.mutex);
 		}
 
 		if (stream_.state != StreamState::STREAM_RUNNING)
@@ -1040,15 +999,15 @@ void LinuxAlsa::callbackEvent()
 
 	AudioStreamStatus status = AudioStreamStatus::None;
 
-	if (stream_.mode != StreamMode::INPUT && apiInfo->xrun[0] == true)
+	if (stream_.mode != StreamMode::INPUT && alsaHandle.isXRunPlayback() == true)
 	{
 		status = AudioStreamStatus::Underflow;
-		apiInfo->xrun[0] = false;
+		alsaHandle.setXRunPlayback(false);
 	}
-	if (stream_.mode != StreamMode::OUTPUT && apiInfo->xrun[1] == true)
+	if (stream_.mode != StreamMode::OUTPUT && alsaHandle.isXRunRecord() == true)
 	{
 		status = AudioStreamStatus::Overflow;
-		apiInfo->xrun[1] = false;
+		alsaHandle.setXRunRecord(false);
 	}
 
 	if (status != AudioStreamStatus::None)

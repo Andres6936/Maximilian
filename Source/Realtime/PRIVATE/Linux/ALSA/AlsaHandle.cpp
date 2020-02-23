@@ -1,3 +1,4 @@
+#include <Exception.h>
 #include "AlsaHandle.hpp"
 
 #include "Levin/Log.h"
@@ -7,6 +8,23 @@ using namespace Maximilian;
 AlsaHandle::AlsaHandle() noexcept
 {
 	determineTheNumberOfDevices();
+
+	if (pthread_cond_init(&runnable_cv, nullptr))
+	{
+		Levin::Severe() << "Construct of Linux Alsa: ";
+		Levin::Severe() << "Error initializing pthread condition variable." << Levin::endl;
+	}
+}
+
+AlsaHandle::~AlsaHandle()
+{
+	pthread_cond_destroy(&runnable_cv);
+
+	if (handles[0]) snd_pcm_close(handles[0]);
+	if (handles[1]) snd_pcm_close(handles[1]);
+
+	// Clear the cache for handle, avoid memory leak.
+	snd_config_update_free_global();
 }
 
 bool AlsaHandle::isAvailableForCapture(snd_ctl_t& handle, snd_pcm_info_t& info)
@@ -121,3 +139,67 @@ UInt8 AlsaHandle::getNumberOfDevices() const
 	return numberOfDevices;
 }
 
+void AlsaHandle::setTheHandleForPlayback(snd_pcm_t* _handle)
+{
+	handles[0] = _handle;
+}
+
+void AlsaHandle::setTheHandleForRecord(snd_pcm_t* _handle)
+{
+	handles[1] = _handle;
+}
+
+snd_pcm_t* AlsaHandle::getHandleForPlayback() const
+{
+	return handles[0];
+}
+
+snd_pcm_t* AlsaHandle::getHandleForRecord() const
+{
+	return handles[1];
+}
+
+void AlsaHandle::setSynchronized(bool _synchronized)
+{
+	synchronized = _synchronized;
+}
+
+void AlsaHandle::setRunnable(bool _runnable)
+{
+	runnable = _runnable;
+}
+
+bool AlsaHandle::isSynchronized() const
+{
+	return synchronized;
+}
+
+bool AlsaHandle::isRunnable() const
+{
+	return runnable;
+}
+
+void AlsaHandle::waitThreadForCondition(pthread_mutex_t& _mutex)
+{
+	pthread_cond_wait(&runnable_cv, &_mutex);
+}
+
+bool AlsaHandle::isXRunPlayback() const
+{
+	return xrun[0];
+}
+
+bool AlsaHandle::isXRunRecord() const
+{
+	return xrun[1];
+}
+
+void AlsaHandle::setXRunPlayback(bool _run)
+{
+	xrun[0] = _run;
+}
+
+void AlsaHandle::setXRunRecord(bool _run)
+{
+	xrun[1] = _run;
+}
