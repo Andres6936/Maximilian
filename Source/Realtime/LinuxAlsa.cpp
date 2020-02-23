@@ -46,17 +46,13 @@ unsigned int LinuxAlsa::getDeviceCount()
 
 		sprintf(name.data(), "hw:%d", card);
 
-		int result = snd_ctl_open(&handle, name.data(), 0);
-
-		if (result < 0)
+		if (int e = snd_ctl_open(&handle, name.data(), 0) < 0)
 		{
-			Levin::Warn() << "Linux Alsa: getDeviceCount, control open, card = " << card
-						  << ", " << snd_strerror(result) << "." << Levin::endl;
+			Levin::Warn() << "Linux Alsa: getDeviceCount(): ";
+			Levin::Warn() << "Control open, card = " << card << ", ";
+			Levin::Warn() << snd_strerror(e) << "." << Levin::endl;
 
 			snd_ctl_close(handle);
-			// Free the cache for avoid memory leak
-			snd_config_update_free_global();
-			snd_card_next(&card);
 
 			// Return zero device in this point
 			return numberOfDevices;
@@ -66,12 +62,11 @@ unsigned int LinuxAlsa::getDeviceCount()
 
 		while (true)
 		{
-			result = snd_ctl_pcm_next_device(handle, &subDevice);
-
-			if (result < 0)
+			if (int e = snd_ctl_pcm_next_device(handle, &subDevice) < 0)
 			{
-				Levin::Warn() << "Linux Alsa: getDeviceCount, control next device, card = " << card
-							  << ", " << snd_strerror(result) << "." << Levin::endl;
+				Levin::Warn() << "Linux Alsa: getDeviceCount(): ";
+				Levin::Warn() << "Control next device, card = " << card;
+				Levin::Warn() << ", " << snd_strerror(e) << "." << Levin::endl;
 				break;
 			}
 
