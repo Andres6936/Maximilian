@@ -84,16 +84,18 @@ namespace Maximilian
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
 
-		  @post The variable audioArchitecture has been initalized
+		  @post The variable audioArchitecture has been initialized.
 
-		  @throw Exception if not audio architecture supported
+		  @throw Exception if not audio architecture supported on the system.
 		*/
 		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
 
-		static std::vector <SupportedArchitectures> getArchitecturesCompiled();
+		/**
+		 * @return The list of architectures supported, if not architecture
+		 *  support on the system an list empty will be returned.
+		 */
+		static std::vector<SupportedArchitectures> getArchitecturesCompiled();
 
-
-		//! The destructor.
 		/*!
 		  If a stream is running or open, it will be stopped and closed
 		  automatically.
