@@ -59,6 +59,13 @@ namespace Maximilian
 
 	protected:
 
+		/**
+		 * The audio architecture, it can be JACK, ALSA, OSS (Linux
+		 * systems) and ASIO, DS (Windows systems).
+		 *
+		 * @attention This variable should be initialized in
+		 *  the constructor
+		 */
 		AudioArchitecture* audioArchitecture = nullptr;
 
 	private:
@@ -70,12 +77,14 @@ namespace Maximilian
 	public:
 
 		/*!
-		  The constructor performs minor initialization tasks.  No exceptions
-		  can be thrown.
+		  The constructor initialize the audio architecture. If not audio
+		  architecture supported an exception will be thrown.
 
 		  If no API argument is specified and multiple API support has been
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
+
+		  @throw Exception if not audio architecture supported
 		*/
 		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
 

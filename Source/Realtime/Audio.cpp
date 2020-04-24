@@ -136,12 +136,12 @@ void Audio::assertThatAudioArchitectureHaveMinimumAnDevice()
 {
 	if (audioArchitecture == nullptr)
 	{
-		Levin::Error() << "No compiled API support found... Critical error." << Levin::endl;
+		Levin::Severe() << "No compiled API support found... Critical error." << Levin::endl;
 
 		throw Exception("AudioArchitectureNoCompiledException");
 	}
 
-	if (audioArchitecture->getDeviceCount() < 0)
+	if (audioArchitecture->getDeviceCount() <= 0)
 	{
 		throw Exception("NoAudioDevicesFoundException");
 	}
@@ -150,15 +150,15 @@ void Audio::assertThatAudioArchitectureHaveMinimumAnDevice()
 Audio::Audio(SupportedArchitectures _architecture)
 {
 	// Initialize Levin for use of Log
-	Levin::LOGGER = std::make_unique <Levin::ColoredLogger>(std::wcout);
+	Levin::LOGGER = std::make_unique<Levin::ColoredLogger>(std::wcout);
 
-	if (_architecture != SupportedArchitectures::Unspecified)
+	if (_architecture not_eq SupportedArchitectures::Unspecified)
 	{
 		// Attempt to open the specified API.
 		tryInitializeInstanceOfArchitecture(_architecture);
 
 		// If the instance ha been correctly initialized
-		if (audioArchitecture != nullptr)
+		if (audioArchitecture not_eq nullptr)
 		{
 			assertThatAudioArchitectureHaveMinimumAnDevice();
 			return;
