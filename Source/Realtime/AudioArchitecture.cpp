@@ -129,7 +129,7 @@ void AudioArchitecture::error(Exception::Type type)
 	}
 }
 
-void AudioArchitecture::verifyStream()
+void AudioArchitecture::verifyStream() const
 {
 	if (stream_.state == StreamState::STREAM_CLOSED)
 	{

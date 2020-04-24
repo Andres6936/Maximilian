@@ -213,7 +213,7 @@ namespace Maximilian
 		  Protected common method that throws an Exception (type =
 		  INVALID_USE) if a stream is not open.
 		*/
-		void verifyStream();
+		void verifyStream() const;
 
 		//! Protected common error method to allow global control over error handling.
 		void error(Exception::Type type);
