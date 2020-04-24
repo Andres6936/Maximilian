@@ -46,18 +46,14 @@
 #include <sstream>
 
 #include "Exception.h"
-#include "DeviceInfo.hpp"
-#include "StreamOptions.hpp"
-#include "StreamParameters.hpp"
 #include "Definition/AudioFormat.hpp"
+#include "Realtime/AudioArchitecture.hpp"
 #include "Definition/AudioStreamFlags.hpp"
 #include "Definition/AudioStreamStatus.hpp"
 #include "Enum/SupportedArchitectures.hpp"
 
 namespace Maximilian
 {
-	class AudioArchitecture;
-
 	class Audio
 	{
 
