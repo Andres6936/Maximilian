@@ -84,6 +84,8 @@ namespace Maximilian
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
 
+		  @post The variable audioArchitecture has been initalized
+
 		  @throw Exception if not audio architecture supported
 		*/
 		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
