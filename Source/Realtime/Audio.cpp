@@ -189,14 +189,21 @@ Audio::Audio(SupportedArchitectures _architecture)
 	assertThatAudioArchitectureHaveMinimumAnDevice();
 }
 
-Audio::~Audio() throw()
+Audio::~Audio() noexcept
 {
 	delete audioArchitecture;
 }
 
 void Audio::openStream(void _functionUser(std::vector <double>&))
 {
-	return audioArchitecture->openStream(_functionUser);
+	try
+	{
+		audioArchitecture->openStream(_functionUser);
+	}
+	catch (Exception& e)
+	{
+		e.printMessage();
+	}
 }
 
 #if defined(__MACOSX_CORE__)
@@ -5901,12 +5908,12 @@ extern "C" void *ossCallbackHandler( void *ptr )
 #endif
 
 
-SupportedArchitectures Audio::getCurrentApi() throw()
+SupportedArchitectures Audio::getCurrentApi() noexcept
 {
 	return audioArchitecture->getCurrentArchitecture();
 }
 
-unsigned int Audio::getDeviceCount() throw()
+unsigned int Audio::getDeviceCount() noexcept
 {
 	return audioArchitecture->getDeviceCount();
 }
@@ -5916,29 +5923,43 @@ DeviceInfo Audio::getDeviceInfo(unsigned int device)
 	return audioArchitecture->getDeviceInfo(device);
 }
 
-unsigned int Audio::getDefaultInputDevice() throw()
+unsigned int Audio::getDefaultInputDevice() noexcept
 {
 	return AudioArchitecture::getDefaultInputDevice();
 }
 
-unsigned int Audio::getDefaultOutputDevice() throw()
+unsigned int Audio::getDefaultOutputDevice() noexcept
 {
 	return AudioArchitecture::getDefaultOutputDevice();
 }
 
-void Audio::closeStream() throw()
+void Audio::closeStream() noexcept
 {
 	return audioArchitecture->closeStream();
 }
 
 void Audio::startStream()
 {
-	return audioArchitecture->startStream();
+	try
+	{
+		audioArchitecture->startStream();
+	}
+	catch (Exception& e)
+	{
+		e.printMessage();
+	}
 }
 
 void Audio::stopStream()
 {
-	return audioArchitecture->stopStream();
+	try
+	{
+		audioArchitecture->stopStream();
+	}
+	catch (Exception& e)
+	{
+		e.printMessage();
+	}
 }
 
 void Audio::abortStream()
@@ -5946,12 +5967,12 @@ void Audio::abortStream()
 	return audioArchitecture->abortStream();
 }
 
-bool Audio::isStreamOpen() const throw()
+bool Audio::isStreamOpen() const noexcept
 {
 	return audioArchitecture->isStreamOpen();
 }
 
-bool Audio::isStreamRunning() const throw()
+bool Audio::isStreamRunning() const noexcept
 {
 	return audioArchitecture->isStreamRunning();
 }
@@ -5971,7 +5992,7 @@ double Audio::getStreamTime()
 	return audioArchitecture->getStreamTime();
 }
 
-void Audio::showWarnings(bool value) throw()
+void Audio::showWarnings(bool value) noexcept
 {
 	audioArchitecture->showWarnings(value);
 }

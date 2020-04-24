@@ -70,33 +70,16 @@ int main()
 
 	Audio dac;
 
-	try
-	{
-		dac.openStream(play);
-		dac.startStream();
-	}
-	catch (Exception& e)
-	{
-		e.printMessage();
-		exit(0);
-	}
+	dac.openStream(play);
+	dac.startStream();
 
 	char input;
 	std::cout << "\nMaximilian is playing ... press <enter> to quit.\n";
 	std::cin.get(input);
 
-	try
-	{
-		// Stop the stream
-		dac.stopStream();
-	}
-	catch (Exception& e)
-	{
-		e.printMessage();
-	}
+	// Stop the stream
+	dac.stopStream();
 
 	if (dac.isStreamOpen())
 	{ dac.closeStream(); }
-
-	return 0;
 }

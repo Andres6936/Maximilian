@@ -16,7 +16,7 @@ Maximilian::AudioArchitecture::~AudioArchitecture()
 	pthread_mutex_destroy(&stream_.mutex);
 }
 
-void AudioArchitecture::assertThatStreamIsNotOpen()
+void AudioArchitecture::assertThatStreamIsNotOpen() const
 {
 	if (stream_.state != StreamState::STREAM_CLOSED)
 	{

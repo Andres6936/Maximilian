@@ -66,15 +66,15 @@ namespace Maximilian
 		 */
 		AudioFormat format = AudioFormat::Float64;
 
-		void assertThatStreamIsNotOpen();
+		void assertThatStreamIsNotOpen() const;
 
-		template <typename T, typename O, typename I>
+		template<typename T, typename O, typename I>
 		void formatBufferAccordToTypesOfDate(T _type, O* outBuffer, I* inBuffer, ConvertInfo& info);
 
-		template <typename T, typename O, typename I>
+		template<typename T, typename O, typename I>
 		void formatBufferWithBitwise(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
 
-		template <typename O, typename I>
+		template<typename O, typename I>
 		void formatBufferWithoutScale(O* outBuffer, I* inBuffer, ConvertInfo& info);
 
 		template <typename T, typename O, typename I>

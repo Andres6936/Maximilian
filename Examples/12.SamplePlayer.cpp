@@ -33,33 +33,16 @@ int main()
 
 	Audio audio;
 
-	try
-	{
-		audio.openStream(play);
-		audio.startStream();
-	}
-	catch (Exception& e)
-	{
-		e.printMessage();
-		exit(0);
-	}
+	audio.openStream(play);
+	audio.startStream();
 
 	char input;
 	std::cout << "\nMaximilian is playing ... press <enter> to quit.\n";
 	std::cin.get(input);
 
-	try
-	{
-		// Stop the stream
-		audio.stopStream();
-	}
-	catch (Exception& e)
-	{
-		e.printMessage();
-	}
+	// Stop the stream
+	audio.stopStream();
 
 	if (audio.isStreamOpen())
 	{ audio.closeStream(); }
-
-	return 0;
 }
