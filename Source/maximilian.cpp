@@ -573,7 +573,7 @@ void Envelope::trigger(bool noteOn)
 double Envelope::ramp(double startVal, double endVal, double duration)
 {
 
-	if (trig != 0)
+	if (trig not_eq 0)
 	{
 		phase = startVal;
 		isPlaying = true;
@@ -612,7 +612,7 @@ double Envelope::ramp(double startVal, double endVal, double duration)
 double Envelope::ramps(std::vector <double> rampsArray)
 {
 
-	if (trig != 0)
+	if (trig not_eq 0)
 	{
 		valindex = 0;
 		endVal = rampsArray[valindex + 1];
@@ -705,7 +705,7 @@ double Envelope::ramps(std::vector <double> rampsArray)
 double Envelope::ar(double attack, double release)
 {
 
-	if (trig != 0)
+	if (trig not_eq 0)
 	{
 		//phase=0;
 		releaseMode = false;
@@ -736,7 +736,7 @@ double Envelope::ar(double attack, double release)
 double Envelope::adsr(double attack, double decay, double sustain, double release)
 {
 
-	if (trig != 0 && !attackMode)
+	if (trig not_eq 0 && !attackMode)
 	{
 //        phase=0.;
 		releaseMode = false;
@@ -1699,7 +1699,7 @@ void Clip::setLength(unsigned long numSamples)
 {
 	cout << "Length: " << numSamples << endl;
 	short* newData = (short*)malloc(sizeof(short) * numSamples);
-	if (NULL != temp)
+	if (NULL not_eq temp)
 	{
 		unsigned long copyLength = min((unsigned long)length, numSamples);
 		memcpy(newData, temp, sizeof(short) * copyLength);
@@ -1806,7 +1806,7 @@ void Clip::autoTrim(float alpha, float threshold, bool trimStart, bool trimEnd)
 double Dyn::gate(double input, double threshold, long holdtime, double attack, double release)
 {
 
-	if (fabs(input) > threshold && attackphase != 1)
+	if (fabs(input) > threshold && attackphase not_eq 1)
 	{
 		holdcount = 0;
 		releasephase = 0;
@@ -1852,7 +1852,7 @@ double Dyn::gate(double input, double threshold, long holdtime, double attack, d
 double Dyn::compressor(double input, double ratio, double threshold, double attack, double release)
 {
 
-	if (fabs(input) > threshold && attackphase != 1)
+	if (fabs(input) > threshold && attackphase not_eq 1)
 	{
 		holdcount = 0;
 		releasephase = 0;
@@ -1892,7 +1892,7 @@ double Dyn::compressor(double input, double ratio, double threshold, double atta
 double Dyn::compress(double input)
 {
 
-	if (fabs(input) > threshold && attackphase != 1)
+	if (fabs(input) > threshold && attackphase not_eq 1)
 	{
 		holdcount = 0;
 		releasephase = 0;
@@ -1936,7 +1936,7 @@ double Dyn::compress(double input)
 double Env::ar(double input, double attack, double release, long holdtime, int trigger)
 {
 
-	if (trigger == 1 && attackphase != 1 && holdphase != 1)
+	if (trigger == 1 && attackphase not_eq 1 && holdphase not_eq 1)
 	{
 		holdcount = 0;
 		releasephase = 0;
@@ -1967,7 +1967,7 @@ double Env::ar(double input, double attack, double release, long holdtime, int t
 		output = input;
 	}
 
-	if (holdcount == holdtime && trigger != 1)
+	if (holdcount == holdtime && trigger not_eq 1)
 	{
 		holdphase = 0;
 		releasephase = 1;
@@ -1989,7 +1989,7 @@ Maximilian::Env::adsr(double input, double attack, double decay, double sustain,
 		int trigger)
 {
 
-	if (trigger == 1 && attackphase != 1 && holdphase != 1 && decayphase != 1)
+	if (trigger == 1 && attackphase not_eq 1 && holdphase not_eq 1 && decayphase not_eq 1)
 	{
 		holdcount = 0;
 		decayphase = 0;
@@ -2034,7 +2034,7 @@ Maximilian::Env::adsr(double input, double attack, double decay, double sustain,
 		output = input * amplitude;
 	}
 
-	if (holdcount >= holdtime && trigger != 1)
+	if (holdcount >= holdtime && trigger not_eq 1)
 	{
 		holdphase = 0;
 		releasephase = 1;
@@ -2052,7 +2052,7 @@ Maximilian::Env::adsr(double input, double attack, double decay, double sustain,
 double Env::adsr(double input, int trigger)
 {
 
-	if (trigger == 1 && attackphase != 1 && holdphase != 1 && decayphase != 1)
+	if (trigger == 1 && attackphase not_eq 1 && holdphase not_eq 1 && decayphase not_eq 1)
 	{
 		holdcount = 0;
 		decayphase = 0;
@@ -2097,7 +2097,7 @@ double Env::adsr(double input, int trigger)
 		output = input * amplitude;
 	}
 
-	if (holdcount >= holdtime && trigger != 1)
+	if (holdcount >= holdtime && trigger not_eq 1)
 	{
 		holdphase = 0;
 		releasephase = 1;
@@ -2570,7 +2570,7 @@ void maxiClock::ticker()
 	tick = false;
 	currentCount = floor(timer.phasor(bps));//this sets up a metronome that ticks n times a second
 
-	if (lastCount != currentCount)
+	if (lastCount not_eq currentCount)
 	{//if we have a new timer int this sample,
 
 		tick = true;
@@ -3015,11 +3015,11 @@ void maxiRecorder::startRecording()
 	}
 
 #if defined(OS_IS_UNIX)
-	if (pthread_create(&daemon, NULL, &maxiRecorder::update_pthread_helper, this) != 0)
+	if (pthread_create(&daemon, NULL, &maxiRecorder::update_pthread_helper, this) not_eq 0)
 	{
 		std::cout << "pthread created incorrectly" << std::endl;
 	}
-	if (pthread_detach(daemon) != 0)
+	if (pthread_detach(daemon) not_eq 0)
 	{
 		std::cout << "pthread detached incorrectly" << std::endl;
 	}

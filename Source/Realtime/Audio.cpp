@@ -254,7 +254,7 @@ RtApiCore:: RtApiCore()
                                           kAudioObjectPropertyScopeGlobal,
                                           kAudioObjectPropertyElementMaster };
   OSStatus result = AudioObjectSetPropertyData( kAudioObjectSystemObject, &property, 0, NULL, sizeof(CFRunLoopRef), &theRunLoop);
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorText_ = "RtApiCore::RtApiCore: error setting run loop property!";
     error( RtError::WARNING );
   }
@@ -266,7 +266,7 @@ RtApiCore :: ~RtApiCore()
   // The subclass destructor gets called before the base class
   // destructor, so close an existing stream before deallocating
   // apiDeviceId memory.
-  if ( stream_.state != STREAM_CLOSED ) closeStream();
+  if ( stream_.state not_eq STREAM_CLOSED ) closeStream();
 }
 
 unsigned int RtApiCore :: getDeviceCount( void )
@@ -275,7 +275,7 @@ unsigned int RtApiCore :: getDeviceCount( void )
   UInt32 dataSize;
   AudioObjectPropertyAddress propertyAddress = { kAudioHardwarePropertyDevices, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMaster };
   OSStatus result = AudioObjectGetPropertyDataSize( kAudioObjectSystemObject, &propertyAddress, 0, NULL, &dataSize );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorText_ = "RtApiCore::getDeviceCount: OS-X error getting device info!";
     error( RtError::WARNING );
     return 0;
@@ -293,7 +293,7 @@ unsigned int RtApiCore :: getDefaultInputDevice( void )
   UInt32 dataSize = sizeof( AudioDeviceID );
   AudioObjectPropertyAddress property = { kAudioHardwarePropertyDefaultInputDevice, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMaster };
   OSStatus result = AudioObjectGetPropertyData( kAudioObjectSystemObject, &property, 0, NULL, &dataSize, &id );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorText_ = "RtApiCore::getDefaultInputDevice: OS-X system error getting device.";
     error( RtError::WARNING );
     return 0;
@@ -303,7 +303,7 @@ unsigned int RtApiCore :: getDefaultInputDevice( void )
   AudioDeviceID deviceList[ nDevices ];
   property.mSelector = kAudioHardwarePropertyDevices;
   result = AudioObjectGetPropertyData( kAudioObjectSystemObject, &property, 0, NULL, &dataSize, (void *) &deviceList );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorText_ = "RtApiCore::getDefaultInputDevice: OS-X system error getting device IDs.";
     error( RtError::WARNING );
     return 0;
@@ -326,7 +326,7 @@ unsigned int RtApiCore :: getDefaultOutputDevice( void )
   UInt32 dataSize = sizeof( AudioDeviceID );
   AudioObjectPropertyAddress property = { kAudioHardwarePropertyDefaultOutputDevice, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMaster };
   OSStatus result = AudioObjectGetPropertyData( kAudioObjectSystemObject, &property, 0, NULL, &dataSize, &id );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorText_ = "RtApiCore::getDefaultOutputDevice: OS-X system error getting device.";
     error( RtError::WARNING );
     return 0;
@@ -336,7 +336,7 @@ unsigned int RtApiCore :: getDefaultOutputDevice( void )
   AudioDeviceID deviceList[ nDevices ];
   property.mSelector = kAudioHardwarePropertyDevices;
   result = AudioObjectGetPropertyData( kAudioObjectSystemObject, &property, 0, NULL, &dataSize, (void *) &deviceList );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorText_ = "RtApiCore::getDefaultOutputDevice: OS-X system error getting device IDs.";
     error( RtError::WARNING );
     return 0;
@@ -374,7 +374,7 @@ RtDeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
                                           kAudioObjectPropertyElementMaster };
   OSStatus result = AudioObjectGetPropertyData( kAudioObjectSystemObject, &property,
                                                 0, NULL, &dataSize, (void *) &deviceList );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorText_ = "RtApiCore::getDeviceInfo: OS-X system error getting device IDs.";
     error( RtError::WARNING );
     return info;
@@ -388,7 +388,7 @@ RtDeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
   dataSize = sizeof( CFStringRef );
   property.mSelector = kAudioObjectPropertyManufacturer;
   result = AudioObjectGetPropertyData( id, &property, 0, NULL, &dataSize, &cfname );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorStream_ << "RtApiCore::probeDeviceInfo: system error (" << getErrorCode( result ) << ") getting device manufacturer.";
     errorText_ = errorStream_.str();
     error( RtError::WARNING );
@@ -406,7 +406,7 @@ RtDeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
 
   property.mSelector = kAudioObjectPropertyName;
   result = AudioObjectGetPropertyData( id, &property, 0, NULL, &dataSize, &cfname );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorStream_ << "RtApiCore::probeDeviceInfo: system error (" << getErrorCode( result ) << ") getting device name.";
     errorText_ = errorStream_.str();
     error( RtError::WARNING );
@@ -428,7 +428,7 @@ RtDeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
   //  property.mElement = kAudioObjectPropertyElementWildcard;
   dataSize = 0;
   result = AudioObjectGetPropertyDataSize( id, &property, 0, NULL, &dataSize );
-  if ( result != noErr || dataSize == 0 ) {
+  if ( result not_eq noErr || dataSize == 0 ) {
     errorStream_ << "RtApiCore::getDeviceInfo: system error (" << getErrorCode( result ) << ") getting output stream configuration info for device (" << device << ").";
     errorText_ = errorStream_.str();
     error( RtError::WARNING );
@@ -444,7 +444,7 @@ RtDeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
   }
 
   result = AudioObjectGetPropertyData( id, &property, 0, NULL, &dataSize, bufferList );
-  if ( result != noErr || dataSize == 0 ) {
+  if ( result not_eq noErr || dataSize == 0 ) {
     free( bufferList );
     errorStream_ << "RtApiCore::getDeviceInfo: system error (" << getErrorCode( result ) << ") getting output stream configuration for device (" << device << ").";
     errorText_ = errorStream_.str();
@@ -461,7 +461,7 @@ RtDeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
   // Get the input stream "configuration".
   property.mScope = kAudioDevicePropertyScopeInput;
   result = AudioObjectGetPropertyDataSize( id, &property, 0, NULL, &dataSize );
-  if ( result != noErr || dataSize == 0 ) {
+  if ( result not_eq noErr || dataSize == 0 ) {
     errorStream_ << "RtApiCore::getDeviceInfo: system error (" << getErrorCode( result ) << ") getting input stream configuration info for device (" << device << ").";
     errorText_ = errorStream_.str();
     error( RtError::WARNING );
@@ -477,7 +477,7 @@ RtDeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
   }
 
   result = AudioObjectGetPropertyData( id, &property, 0, NULL, &dataSize, bufferList );
-  if (result != noErr || dataSize == 0) {
+  if (result not_eq noErr || dataSize == 0) {
     free( bufferList );
     errorStream_ << "RtApiCore::getDeviceInfo: system error (" << getErrorCode( result ) << ") getting input stream configuration for device (" << device << ").";
     errorText_ = errorStream_.str();
@@ -503,7 +503,7 @@ RtDeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
   property.mSelector = kAudioDevicePropertyAvailableNominalSampleRates;
   if ( isInput == false ) property.mScope = kAudioDevicePropertyScopeOutput;
   result = AudioObjectGetPropertyDataSize( id, &property, 0, NULL, &dataSize );
-  if ( result != kAudioHardwareNoError || dataSize == 0 ) {
+  if ( result not_eq kAudioHardwareNoError || dataSize == 0 ) {
     errorStream_ << "RtApiCore::getDeviceInfo: system error (" << getErrorCode( result ) << ") getting sample rate info.";
     errorText_ = errorStream_.str();
     error( RtError::WARNING );
@@ -513,7 +513,7 @@ RtDeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
   UInt32 nRanges = dataSize / sizeof( AudioValueRange );
   AudioValueRange rangeList[ nRanges ];
   result = AudioObjectGetPropertyData( id, &property, 0, NULL, &dataSize, &rangeList );
-  if ( result != kAudioHardwareNoError ) {
+  if ( result not_eq kAudioHardwareNoError ) {
     errorStream_ << "RtApiCore::getDeviceInfo: system error (" << getErrorCode( result ) << ") getting sample rates.";
     errorText_ = errorStream_.str();
     error( RtError::WARNING );
@@ -629,7 +629,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
                                           kAudioObjectPropertyElementMaster };
   OSStatus result = AudioObjectGetPropertyData( kAudioObjectSystemObject, &property,
                                                 0, NULL, &dataSize, (void *) &deviceList );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorText_ = "RtApiCore::probeDeviceOpen: OS-X system error getting device IDs.";
     return FAILURE;
   }
@@ -650,7 +650,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   dataSize = 0;
   property.mSelector = kAudioDevicePropertyStreamConfiguration;
   result = AudioObjectGetPropertyDataSize( id, &property, 0, NULL, &dataSize );
-  if ( result != noErr || dataSize == 0 ) {
+  if ( result not_eq noErr || dataSize == 0 ) {
     errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") getting stream configuration info for device (" << device << ").";
     errorText_ = errorStream_.str();
     return FAILURE;
@@ -664,7 +664,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   }
 
   result = AudioObjectGetPropertyData( id, &property, 0, NULL, &dataSize, bufferList );
-  if (result != noErr || dataSize == 0) {
+  if (result not_eq noErr || dataSize == 0) {
     errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") getting stream configuration for device (" << device << ").";
     errorText_ = errorStream_.str();
     return FAILURE;
@@ -742,7 +742,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   property.mSelector = kAudioDevicePropertyBufferFrameSizeRange;
   result = AudioObjectGetPropertyData( id, &property, 0, NULL, &dataSize, &bufferRange );
 
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") getting buffer size range for device (" << device << ").";
     errorText_ = errorStream_.str();
     return FAILURE;
@@ -759,7 +759,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   property.mSelector = kAudioDevicePropertyBufferFrameSize;
   result = AudioObjectSetPropertyData( id, &property, 0, NULL, dataSize, &theSize );
 
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") setting the buffer size for device (" << device << ").";
     errorText_ = errorStream_.str();
     return FAILURE;
@@ -768,7 +768,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   // If attempting to setup a duplex stream, the bufferSize parameter
   // MUST be the same in both directions!
   *bufferSize = theSize;
-  if ( stream_.mode == OUTPUT && mode == INPUT && *bufferSize != stream_.bufferSize ) {
+  if ( stream_.mode == OUTPUT && mode == INPUT && *bufferSize not_eq stream_.bufferSize ) {
     errorStream_ << "RtApiCore::probeDeviceOpen: system error setting buffer size for duplex stream on device (" << device << ").";
     errorText_ = errorStream_.str();
     return FAILURE;
@@ -783,16 +783,16 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
     dataSize = sizeof( hog_pid );
     property.mSelector = kAudioDevicePropertyHogMode;
     result = AudioObjectGetPropertyData( id, &property, 0, NULL, &dataSize, &hog_pid );
-    if ( result != noErr ) {
+    if ( result not_eq noErr ) {
       errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") getting 'hog' state!";
       errorText_ = errorStream_.str();
       return FAILURE;
     }
 
-    if ( hog_pid != getpid() ) {
+    if ( hog_pid not_eq getpid() ) {
       hog_pid = getpid();
       result = AudioObjectSetPropertyData( id, &property, 0, NULL, dataSize, &hog_pid );
-      if ( result != noErr ) {
+      if ( result not_eq noErr ) {
         errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") setting 'hog' state!";
         errorText_ = errorStream_.str();
         return FAILURE;
@@ -806,7 +806,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   property.mSelector = kAudioDevicePropertyNominalSampleRate;
   result = AudioObjectGetPropertyData( id, &property, 0, NULL, &dataSize, &nominalRate );
 
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") getting current sample rate.";
     errorText_ = errorStream_.str();
     return FAILURE;
@@ -819,7 +819,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
     Float64 reportedRate = 0.0;
     AudioObjectPropertyAddress tmp = { kAudioDevicePropertyNominalSampleRate, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMaster };
     result = AudioObjectAddPropertyListener( id, &tmp, rateListener, (void *) &reportedRate );
-    if ( result != noErr ) {
+    if ( result not_eq noErr ) {
       errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") setting sample rate property listener for device (" << device << ").";
       errorText_ = errorStream_.str();
       return FAILURE;
@@ -828,7 +828,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
     nominalRate = (Float64) sampleRate;
     result = AudioObjectSetPropertyData( id, &property, 0, NULL, dataSize, &nominalRate );
 
-    if ( result != noErr ) {
+    if ( result not_eq noErr ) {
       errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") setting sample rate for device (" << device << ").";
       errorText_ = errorStream_.str();
       return FAILURE;
@@ -836,7 +836,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
 
     // Now wait until the reported nominal rate is what we just set.
     UInt32 microCounter = 0;
-    while ( reportedRate != nominalRate ) {
+    while ( reportedRate not_eq nominalRate ) {
       microCounter += 5000;
       if ( microCounter > 5000000 ) break;
       usleep( 5000 );
@@ -858,7 +858,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   dataSize = sizeof( AudioStreamBasicDescription );
   property.mSelector = kAudioStreamPropertyVirtualFormat;
   result = AudioObjectGetPropertyData( id, &property, 0, NULL, &dataSize, &description );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") getting stream format for device (" << device << ").";
     errorText_ = errorStream_.str();
     return FAILURE;
@@ -873,14 +873,14 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
     updateFormat = true;
   }
 
-  if ( description.mFormatID != kAudioFormatLinearPCM ) {
+  if ( description.mFormatID not_eq kAudioFormatLinearPCM ) {
     description.mFormatID = kAudioFormatLinearPCM;
     updateFormat = true;
   }
 
   if ( updateFormat ) {
     result = AudioObjectSetPropertyData( id, &property, 0, NULL, dataSize, &description );
-    if ( result != noErr ) {
+    if ( result not_eq noErr ) {
       errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") setting sample rate or data format for device (" << device << ").";
       errorText_ = errorStream_.str();
       return FAILURE;
@@ -890,7 +890,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   // Now check the physical format.
   property.mSelector = kAudioStreamPropertyPhysicalFormat;
   result = AudioObjectGetPropertyData( id, &property, 0, NULL,  &dataSize, &description );
-  if ( result != noErr ) {
+  if ( result not_eq noErr ) {
     errorStream_ << "RtApiCore::probeDeviceOpen: system error (" << getErrorCode( result ) << ") getting stream physical format for device (" << device << ").";
     errorText_ = errorStream_.str();
     return FAILURE;
@@ -902,7 +902,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   //std::cout << "   bytesPerFrame = " << description.mBytesPerFrame << std::endl;
   //std::cout << "   sample rate = " << description.mSampleRate << std::endl;
 
-  if ( description.mFormatID != kAudioFormatLinearPCM || description.mBitsPerChannel < 16 ) {
+  if ( description.mFormatID not_eq kAudioFormatLinearPCM || description.mBitsPerChannel < 16 ) {
     description.mFormatID = kAudioFormatLinearPCM;
     //description.mSampleRate = (Float64) sampleRate;
     AudioStreamBasicDescription	testDescription = description;
@@ -989,13 +989,13 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
 
   // Set flags for buffer conversion.
   stream_.doConvertBuffer[mode] = false;
-  if ( stream_.userFormat != stream_.deviceFormat[mode] )
+  if ( stream_.userFormat not_eq stream_.deviceFormat[mode] )
     stream_.doConvertBuffer[mode] = true;
   if ( stream_.nUserChannels[mode] < stream_.nDeviceChannels[mode] )
     stream_.doConvertBuffer[mode] = true;
   if ( streamCount == 1 ) {
     if ( stream_.nUserChannels[mode] > 1 &&
-         stream_.userInterleaved != stream_.deviceInterleaved[mode] )
+         stream_.userInterleaved not_eq stream_.deviceInterleaved[mode] )
       stream_.doConvertBuffer[mode] = true;
   }
   else if ( monoMode && stream_.userInterleaved )
@@ -1081,7 +1081,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
     // deprecated in favor of AudioDeviceCreateIOProcID()
     result = AudioDeviceAddIOProc( id, callbackHandler, (void *) &stream_.callbackInfo );
 #endif
-    if ( result != noErr ) {
+    if ( result not_eq noErr ) {
       errorStream_ << "RtApiCore::probeDeviceOpen: system error setting callback for device (" << device << ").";
       errorText_ = errorStream_.str();
       goto error;
@@ -1140,7 +1140,7 @@ void RtApiCore :: closeStream( void )
 #endif
   }
 
-  if ( stream_.mode == INPUT || ( stream_.mode == DUPLEX && stream_.device[0] != stream_.device[1] ) ) {
+  if ( stream_.mode == INPUT || ( stream_.mode == DUPLEX && stream_.device[0] not_eq stream_.device[1] ) ) {
     if ( stream_.state == STREAM_RUNNING )
       AudioDeviceStop( handle->id[1], callbackHandler );
 #if defined( MAC_OS_X_VERSION_10_5 ) && ( MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5 )
@@ -1188,7 +1188,7 @@ void RtApiCore :: startStream( void )
   if ( stream_.mode == OUTPUT || stream_.mode == DUPLEX ) {
 
     result = AudioDeviceStart( handle->id[0], callbackHandler );
-    if ( result != noErr ) {
+    if ( result not_eq noErr ) {
       errorStream_ << "RtApiCore::startStream: system error (" << getErrorCode( result ) << ") starting callback procedure on device (" << stream_.device[0] << ").";
       errorText_ = errorStream_.str();
       goto unlock;
@@ -1196,10 +1196,10 @@ void RtApiCore :: startStream( void )
   }
 
   if ( stream_.mode == INPUT ||
-       ( stream_.mode == DUPLEX && stream_.device[0] != stream_.device[1] ) ) {
+       ( stream_.mode == DUPLEX && stream_.device[0] not_eq stream_.device[1] ) ) {
 
     result = AudioDeviceStart( handle->id[1], callbackHandler );
-    if ( result != noErr ) {
+    if ( result not_eq noErr ) {
       errorStream_ << "RtApiCore::startStream: system error starting input callback procedure on device (" << stream_.device[1] << ").";
       errorText_ = errorStream_.str();
       goto unlock;
@@ -1245,19 +1245,19 @@ void RtApiCore :: stopStream( void )
     MUTEX_UNLOCK( &stream_.mutex );
     result = AudioDeviceStop( handle->id[0], callbackHandler );
     MUTEX_LOCK( &stream_.mutex );
-    if ( result != noErr ) {
+    if ( result not_eq noErr ) {
       errorStream_ << "RtApiCore::stopStream: system error (" << getErrorCode( result ) << ") stopping callback procedure on device (" << stream_.device[0] << ").";
       errorText_ = errorStream_.str();
       goto unlock;
     }
   }
 
-  if ( stream_.mode == INPUT || ( stream_.mode == DUPLEX && stream_.device[0] != stream_.device[1] ) ) {
+  if ( stream_.mode == INPUT || ( stream_.mode == DUPLEX && stream_.device[0] not_eq stream_.device[1] ) ) {
 
     MUTEX_UNLOCK( &stream_.mutex );
     result = AudioDeviceStop( handle->id[1], callbackHandler );
     MUTEX_LOCK( &stream_.mutex );
-    if ( result != noErr ) {
+    if ( result not_eq noErr ) {
       errorStream_ << "RtApiCore::stopStream: system error (" << getErrorCode( result ) << ") stopping input callback procedure on device (" << stream_.device[1] << ").";
       errorText_ = errorStream_.str();
       goto unlock;
@@ -1324,15 +1324,15 @@ bool RtApiCore :: callbackEvent( AudioDeviceID deviceId,
   // Invoke user callback to get fresh output data UNLESS we are
   // draining stream or duplex mode AND the input/output devices are
   // different AND this function is called for the input device.
-  if ( handle->drainCounter == 0 && ( stream_.mode != DUPLEX || deviceId == outputDevice ) ) {
+  if ( handle->drainCounter == 0 && ( stream_.mode not_eq DUPLEX || deviceId == outputDevice ) ) {
     RtAudioCallback callback = (RtAudioCallback) info->callback;
     double streamTime = getStreamTime();
     RtAudioStreamStatus status = 0;
-    if ( stream_.mode != INPUT && handle->xrun[0] == true ) {
+    if ( stream_.mode not_eq INPUT && handle->xrun[0] == true ) {
       status |= RTAUDIO_OUTPUT_UNDERFLOW;
       handle->xrun[0] = false;
     }
-    if ( stream_.mode != OUTPUT && handle->xrun[1] == true ) {
+    if ( stream_.mode not_eq OUTPUT && handle->xrun[1] == true ) {
       status |= RTAUDIO_INPUT_OVERFLOW;
       handle->xrun[1] = false;
     }
@@ -1658,7 +1658,7 @@ RtApiJack :: RtApiJack()
 
 RtApiJack :: ~RtApiJack()
 {
-  if ( stream_.state != STREAM_CLOSED ) closeStream();
+  if ( stream_.state not_eq STREAM_CLOSED ) closeStream();
 }
 
 unsigned int RtApiJack :: getDeviceCount( void )
@@ -1679,9 +1679,9 @@ unsigned int RtApiJack :: getDeviceCount( void )
     do {
       port = (char *) ports[ nChannels ];
       iColon = port.find(":");
-      if ( iColon != std::string::npos ) {
+      if ( iColon not_eq std::string::npos ) {
         port = port.substr( 0, iColon + 1 );
-        if ( port != previousPort ) {
+        if ( port not_eq previousPort ) {
           nDevices++;
           previousPort = port;
         }
@@ -1718,9 +1718,9 @@ RtDeviceInfo RtApiJack :: getDeviceInfo( unsigned int device )
     do {
       port = (char *) ports[ nPorts ];
       iColon = port.find(":");
-      if ( iColon != std::string::npos ) {
+      if ( iColon not_eq std::string::npos ) {
         port = port.substr( 0, iColon );
-        if ( port != previousPort ) {
+        if ( port not_eq previousPort ) {
           if ( nDevices == device ) info.name = port;
           nDevices++;
           previousPort = port;
@@ -1841,7 +1841,7 @@ bool RtApiJack :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
 
   // Look for jack server and try to become a client (only do once per stream).
   jack_client_t *client = 0;
-  if ( mode == OUTPUT || ( mode == INPUT && stream_.mode != OUTPUT ) ) {
+  if ( mode == OUTPUT || ( mode == INPUT && stream_.mode not_eq OUTPUT ) ) {
     jack_options_t jackoptions = (jack_options_t) ( JackNoStartServer ); //JackNullOption;
     jack_status_t *status = NULL;
     if ( options && !options->streamName.empty() )
@@ -1869,9 +1869,9 @@ bool RtApiJack :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
     do {
       port = (char *) ports[ nPorts ];
       iColon = port.find(":");
-      if ( iColon != std::string::npos ) {
+      if ( iColon not_eq std::string::npos ) {
         port = port.substr( 0, iColon );
-        if ( port != previousPort ) {
+        if ( port not_eq previousPort ) {
           if ( nDevices == device ) deviceName = port;
           nDevices++;
           previousPort = port;
@@ -1906,7 +1906,7 @@ bool RtApiJack :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
 
   // Check the jack server sample rate.
   unsigned int jackRate = jack_get_sample_rate( client );
-  if ( sampleRate != jackRate ) {
+  if ( sampleRate not_eq jackRate ) {
     jack_client_close( client );
     errorStream_ << "RtApiJack::probeDeviceOpen: the requested sample rate (" << sampleRate << ") is different than the JACK server rate (" << jackRate << ").";
     errorText_ = errorStream_.str();
@@ -1943,9 +1943,9 @@ bool RtApiJack :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
 
   // Set flags for buffer conversion.
   stream_.doConvertBuffer[mode] = false;
-  if ( stream_.userFormat != stream_.deviceFormat[mode] )
+  if ( stream_.userFormat not_eq stream_.deviceFormat[mode] )
     stream_.doConvertBuffer[mode] = true;
-  if ( stream_.userInterleaved != stream_.deviceInterleaved[mode] &&
+  if ( stream_.userInterleaved not_eq stream_.deviceInterleaved[mode] &&
        stream_.nUserChannels[mode] > 1 )
     stream_.doConvertBuffer[mode] = true;
 
@@ -2262,7 +2262,7 @@ bool RtApiJack :: callbackEvent( unsigned long nframes )
     error( RtError::WARNING );
     return FAILURE;
   }
-  if ( stream_.bufferSize != nframes ) {
+  if ( stream_.bufferSize not_eq nframes ) {
     errorText_ = "RtApiCore::callbackEvent(): the JACK buffer size has changed ... cannot process!";
     error( RtError::WARNING );
     return FAILURE;
@@ -2293,11 +2293,11 @@ bool RtApiJack :: callbackEvent( unsigned long nframes )
     RtAudioCallback callback = (RtAudioCallback) info->callback;
     double streamTime = getStreamTime();
     RtAudioStreamStatus status = 0;
-    if ( stream_.mode != INPUT && handle->xrun[0] == true ) {
+    if ( stream_.mode not_eq INPUT && handle->xrun[0] == true ) {
       status |= RTAUDIO_OUTPUT_UNDERFLOW;
       handle->xrun[0] = false;
     }
-    if ( stream_.mode != OUTPUT && handle->xrun[1] == true ) {
+    if ( stream_.mode not_eq OUTPUT && handle->xrun[1] == true ) {
       status |= RTAUDIO_INPUT_OVERFLOW;
       handle->xrun[1] = false;
     }
@@ -2440,7 +2440,7 @@ RtApiAsio :: RtApiAsio()
 
 RtApiAsio :: ~RtApiAsio()
 {
-  if ( stream_.state != STREAM_CLOSED ) closeStream();
+  if ( stream_.state not_eq STREAM_CLOSED ) closeStream();
   if ( coInitialized_ ) CoUninitialize();
 }
 
@@ -2467,7 +2467,7 @@ RtDeviceInfo RtApiAsio :: getDeviceInfo( unsigned int device )
   }
 
   // If a stream is already open, we cannot probe other devices.  Thus, use the saved results.
-  if ( stream_.state != STREAM_CLOSED ) {
+  if ( stream_.state not_eq STREAM_CLOSED ) {
     if ( device >= devices_.size() ) {
       errorText_ = "RtApiAsio::getDeviceInfo: device ID was not present before stream was opened.";
       error( RtError::WARNING );
@@ -2478,7 +2478,7 @@ RtDeviceInfo RtApiAsio :: getDeviceInfo( unsigned int device )
 
   char driverName[32];
   ASIOError result = drivers.asioGetDriverName( (int) device, driverName, 32 );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     errorStream_ << "RtApiAsio::getDeviceInfo: unable to get driver name (" << getAsioErrorString( result ) << ").";
     errorText_ = errorStream_.str();
     error( RtError::WARNING );
@@ -2495,7 +2495,7 @@ RtDeviceInfo RtApiAsio :: getDeviceInfo( unsigned int device )
   }
 
   result = ASIOInit( &driverInfo );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     errorStream_ << "RtApiAsio::getDeviceInfo: error (" << getAsioErrorString( result ) << ") initializing driver (" << driverName << ").";
     errorText_ = errorStream_.str();
     error( RtError::WARNING );
@@ -2505,7 +2505,7 @@ RtDeviceInfo RtApiAsio :: getDeviceInfo( unsigned int device )
   // Determine the device channel information.
   long inputChannels, outputChannels;
   result = ASIOGetChannels( &inputChannels, &outputChannels );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     drivers.removeCurrentDriver();
     errorStream_ << "RtApiAsio::getDeviceInfo: error (" << getAsioErrorString( result ) << ") getting channel count (" << driverName << ").";
     errorText_ = errorStream_.str();
@@ -2532,7 +2532,7 @@ RtDeviceInfo RtApiAsio :: getDeviceInfo( unsigned int device )
   channelInfo.isInput = true;
   if ( info.inputChannels <= 0 ) channelInfo.isInput = false;
   result = ASIOGetChannelInfo( &channelInfo );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     drivers.removeCurrentDriver();
     errorStream_ << "RtApiAsio::getDeviceInfo: error (" << getAsioErrorString( result ) << ") getting driver channel info (" << driverName << ").";
     errorText_ = errorStream_.str();
@@ -2582,21 +2582,21 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
                                    RtAudio::StreamOptions *options )
 {
   // For ASIO, a duplex stream MUST use the same driver.
-  if ( mode == INPUT && stream_.mode == OUTPUT && stream_.device[0] != device ) {
+  if ( mode == INPUT && stream_.mode == OUTPUT && stream_.device[0] not_eq device ) {
     errorText_ = "RtApiAsio::probeDeviceOpen: an ASIO duplex stream must use the same device for input and output!";
     return FAILURE;
   }
 
   char driverName[32];
   ASIOError result = drivers.asioGetDriverName( (int) device, driverName, 32 );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     errorStream_ << "RtApiAsio::probeDeviceOpen: unable to get driver name (" << getAsioErrorString( result ) << ").";
     errorText_ = errorStream_.str();
     return FAILURE;
   }
 
   // Only load the driver once for duplex stream.
-  if ( mode != INPUT || stream_.mode != OUTPUT ) {
+  if ( mode not_eq INPUT || stream_.mode not_eq OUTPUT ) {
     // The getDeviceInfo() function will not work when a stream is open
     // because ASIO does not allow multiple devices to run at the same
     // time.  Thus, we'll probe the system before opening a stream and
@@ -2610,7 +2610,7 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
     }
 
     result = ASIOInit( &driverInfo );
-    if ( result != ASE_OK ) {
+    if ( result not_eq ASE_OK ) {
       errorStream_ << "RtApiAsio::probeDeviceOpen: error (" << getAsioErrorString( result ) << ") initializing driver (" << driverName << ").";
       errorText_ = errorStream_.str();
       return FAILURE;
@@ -2620,7 +2620,7 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   // Check the device channel count.
   long inputChannels, outputChannels;
   result = ASIOGetChannels( &inputChannels, &outputChannels );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     drivers.removeCurrentDriver();
     errorStream_ << "RtApiAsio::probeDeviceOpen: error (" << getAsioErrorString( result ) << ") getting channel count (" << driverName << ").";
     errorText_ = errorStream_.str();
@@ -2640,7 +2640,7 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
 
   // Verify the sample rate is supported.
   result = ASIOCanSampleRate( (ASIOSampleRate) sampleRate );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     drivers.removeCurrentDriver();
     errorStream_ << "RtApiAsio::probeDeviceOpen: driver (" << driverName << ") does not support requested sample rate (" << sampleRate << ").";
     errorText_ = errorStream_.str();
@@ -2650,7 +2650,7 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   // Get the current sample rate
   ASIOSampleRate currentRate;
   result = ASIOGetSampleRate( &currentRate );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     drivers.removeCurrentDriver();
     errorStream_ << "RtApiAsio::probeDeviceOpen: driver (" << driverName << ") error getting sample rate.";
     errorText_ = errorStream_.str();
@@ -2658,9 +2658,9 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   }
 
   // Set the sample rate only if necessary
-  if ( currentRate != sampleRate ) {
+  if ( currentRate not_eq sampleRate ) {
     result = ASIOSetSampleRate( (ASIOSampleRate) sampleRate );
-    if ( result != ASE_OK ) {
+    if ( result not_eq ASE_OK ) {
       drivers.removeCurrentDriver();
       errorStream_ << "RtApiAsio::probeDeviceOpen: driver (" << driverName << ") error setting sample rate (" << sampleRate << ").";
       errorText_ = errorStream_.str();
@@ -2674,7 +2674,7 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   if ( mode == OUTPUT ) channelInfo.isInput = false;
   else channelInfo.isInput = true;
   result = ASIOGetChannelInfo( &channelInfo );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     drivers.removeCurrentDriver();
     errorStream_ << "RtApiAsio::probeDeviceOpen: driver (" << driverName << ") error (" << getAsioErrorString( result ) << ") getting data format.";
     errorText_ = errorStream_.str();
@@ -2714,7 +2714,7 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   // should be ok.
   long minSize, maxSize, preferSize, granularity;
   result = ASIOGetBufferSize( &minSize, &maxSize, &preferSize, &granularity );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     drivers.removeCurrentDriver();
     errorStream_ << "RtApiAsio::probeDeviceOpen: driver (" << driverName << ") error (" << getAsioErrorString( result ) << ") getting buffer size.";
     errorText_ = errorStream_.str();
@@ -2748,12 +2748,12 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
     if ( *bufferSize < (unsigned int) minSize ) *bufferSize = (unsigned int) minSize;
     else if ( *bufferSize > (unsigned int) maxSize ) *bufferSize = (unsigned int) maxSize;
   }
-  else if ( granularity != 0 ) {
+  else if ( granularity not_eq 0 ) {
     // Set to an even multiple of granularity, rounding up.
     *bufferSize = (*bufferSize + granularity-1) / granularity * granularity;
   }
 
-  if ( mode == INPUT && stream_.mode == OUTPUT && stream_.bufferSize != *bufferSize ) {
+  if ( mode == INPUT && stream_.mode == OUTPUT && stream_.bufferSize not_eq *bufferSize ) {
     drivers.removeCurrentDriver();
     errorText_ = "RtApiAsio::probeDeviceOpen: input/output buffersize discrepancy!";
     return FAILURE;
@@ -2828,7 +2828,7 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
   asioCallbacks.asioMessage = &asioMessages;
   asioCallbacks.bufferSwitchTimeInfo = NULL;
   result = ASIOCreateBuffers( handle->bufferInfos, nChannels, stream_.bufferSize, &asioCallbacks );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     errorStream_ << "RtApiAsio::probeDeviceOpen: driver (" << driverName << ") error (" << getAsioErrorString( result ) << ") creating buffers.";
     errorText_ = errorStream_.str();
     goto error;
@@ -2837,9 +2837,9 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
 
   // Set flags for buffer conversion.
   stream_.doConvertBuffer[mode] = false;
-  if ( stream_.userFormat != stream_.deviceFormat[mode] )
+  if ( stream_.userFormat not_eq stream_.deviceFormat[mode] )
     stream_.doConvertBuffer[mode] = true;
-  if ( stream_.userInterleaved != stream_.deviceInterleaved[mode] &&
+  if ( stream_.userInterleaved not_eq stream_.deviceInterleaved[mode] &&
        stream_.nUserChannels[mode] > 1 )
     stream_.doConvertBuffer[mode] = true;
 
@@ -2887,7 +2887,7 @@ bool RtApiAsio :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
 
   // Determine device latencies
   result = ASIOGetLatencies( &inputLatency, &outputLatency );
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     errorStream_ << "RtApiAsio::probeDeviceOpen: driver (" << driverName << ") error (" << getAsioErrorString( result ) << ") getting latency.";
     errorText_ = errorStream_.str();
     error( RtError::WARNING); // warn but don't fail
@@ -2987,7 +2987,7 @@ void RtApiAsio :: startStream()
 
   AsioHandle *handle = (AsioHandle *) stream_.apiHandle;
   ASIOError result = ASIOStart();
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     errorStream_ << "RtApiAsio::startStream: error (" << getAsioErrorString( result ) << ") starting device.";
     errorText_ = errorStream_.str();
     goto unlock;
@@ -3040,7 +3040,7 @@ void RtApiAsio :: stopStream()
   stream_.state = STREAM_STOPPED;
 
   ASIOError result = ASIOStop();
-  if ( result != ASE_OK ) {
+  if ( result not_eq ASE_OK ) {
     errorStream_ << "RtApiAsio::stopStream: error (" << getAsioErrorString( result ) << ") stopping device.";
     errorText_ = errorStream_.str();
   }
@@ -3122,11 +3122,11 @@ bool RtApiAsio :: callbackEvent( long bufferIndex )
     RtAudioCallback callback = (RtAudioCallback) info->callback;
     double streamTime = getStreamTime();
     RtAudioStreamStatus status = 0;
-    if ( stream_.mode != INPUT && asioXRun == true ) {
+    if ( stream_.mode not_eq INPUT && asioXRun == true ) {
       status |= RTAUDIO_OUTPUT_UNDERFLOW;
       asioXRun = false;
     }
-    if ( stream_.mode != OUTPUT && asioXRun == true ) {
+    if ( stream_.mode not_eq OUTPUT && asioXRun == true ) {
       status |= RTAUDIO_INPUT_OVERFLOW;
       asioXRun = false;
     }
@@ -3154,7 +3154,7 @@ bool RtApiAsio :: callbackEvent( long bufferIndex )
     if ( handle->drainCounter > 1 ) { // write zeros to the output stream
 
       for ( i=0, j=0; i<nChannels; i++ ) {
-        if ( handle->bufferInfos[i].isInput != ASIOTrue )
+        if ( handle->bufferInfos[i].isInput not_eq ASIOTrue )
           memset( handle->bufferInfos[i].buffers[bufferIndex], 0, bufferBytes );
       }
 
@@ -3168,7 +3168,7 @@ bool RtApiAsio :: callbackEvent( long bufferIndex )
                         stream_.deviceFormat[0] );
 
       for ( i=0, j=0; i<nChannels; i++ ) {
-        if ( handle->bufferInfos[i].isInput != ASIOTrue )
+        if ( handle->bufferInfos[i].isInput not_eq ASIOTrue )
           memcpy( handle->bufferInfos[i].buffers[bufferIndex],
                   &stream_.deviceBuffer[j++*bufferBytes], bufferBytes );
       }
@@ -3182,7 +3182,7 @@ bool RtApiAsio :: callbackEvent( long bufferIndex )
                         stream_.userFormat );
 
       for ( i=0, j=0; i<nChannels; i++ ) {
-        if ( handle->bufferInfos[i].isInput != ASIOTrue )
+        if ( handle->bufferInfos[i].isInput not_eq ASIOTrue )
           memcpy( handle->bufferInfos[i].buffers[bufferIndex],
                   &stream_.userBuffer[0][bufferBytes*j++], bufferBytes );
       }
@@ -3449,7 +3449,7 @@ RtApiDs :: RtApiDs()
 RtApiDs :: ~RtApiDs()
 {
   if ( coInitialized_ ) CoUninitialize(); // balanced call.
-  if ( stream_.state != STREAM_CLOSED ) closeStream();
+  if ( stream_.state not_eq STREAM_CLOSED ) closeStream();
 }
 
 // The DirectSound default output is always the first device.
@@ -4053,11 +4053,11 @@ bool RtApiDs :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigned 
 
   // Set flag for buffer conversion
   stream_.doConvertBuffer[mode] = false;
-  if (stream_.nUserChannels[mode] != stream_.nDeviceChannels[mode])
+  if (stream_.nUserChannels[mode] not_eq stream_.nDeviceChannels[mode])
     stream_.doConvertBuffer[mode] = true;
-  if (stream_.userFormat != stream_.deviceFormat[mode])
+  if (stream_.userFormat not_eq stream_.deviceFormat[mode])
     stream_.doConvertBuffer[mode] = true;
-  if ( stream_.userInterleaved != stream_.deviceInterleaved[mode] &&
+  if ( stream_.userInterleaved not_eq stream_.deviceInterleaved[mode] &&
        stream_.nUserChannels[mode] > 1 )
     stream_.doConvertBuffer[mode] = true;
 
@@ -4460,11 +4460,11 @@ void RtApiDs :: callbackEvent()
     RtAudioCallback callback = (RtAudioCallback) info->callback;
     double streamTime = getStreamTime();
     RtAudioStreamStatus status = 0;
-    if ( stream_.mode != INPUT && handle->xrun[0] == true ) {
+    if ( stream_.mode not_eq INPUT && handle->xrun[0] == true ) {
       status |= RTAUDIO_OUTPUT_UNDERFLOW;
       handle->xrun[0] = false;
     }
-    if ( stream_.mode != OUTPUT && handle->xrun[1] == true ) {
+    if ( stream_.mode not_eq OUTPUT && handle->xrun[1] == true ) {
       status |= RTAUDIO_INPUT_OVERFLOW;
       handle->xrun[1] = false;
     }
@@ -4540,7 +4540,7 @@ void RtApiDs :: callbackEvent()
           errorText_ = errorStream_.str();
           error( RtError::SYSTEM_ERROR );
         }
-        if ( safeWritePointer != startSafeWritePointer && safeReadPointer != startSafeReadPointer ) break;
+        if ( safeWritePointer not_eq startSafeWritePointer && safeReadPointer not_eq startSafeReadPointer ) break;
         Sleep( 1 );
       }
 
@@ -4653,7 +4653,7 @@ void RtApiDs :: callbackEvent()
 
     // Copy our buffer into the DS buffer
     CopyMemory( buffer1, buffer, bufferSize1 );
-    if ( buffer2 != NULL ) CopyMemory( buffer2, buffer+bufferSize1, bufferSize2 );
+    if ( buffer2 not_eq NULL ) CopyMemory( buffer2, buffer+bufferSize1, bufferSize2 );
 
     // Update our buffer offset and unlock sound buffer
     dsBuffer->Unlock( buffer1, bufferSize1, buffer2, bufferSize2 );
@@ -4773,11 +4773,11 @@ void RtApiDs :: callbackEvent()
     if ( duplexPrerollBytes <= 0 ) {
       // Copy our buffer into the DS buffer
       CopyMemory( buffer, buffer1, bufferSize1 );
-      if ( buffer2 != NULL ) CopyMemory( buffer+bufferSize1, buffer2, bufferSize2 );
+      if ( buffer2 not_eq NULL ) CopyMemory( buffer+bufferSize1, buffer2, bufferSize2 );
     }
     else {
       memset( buffer, 0, bufferSize1 );
-      if ( buffer2 != NULL ) memset( buffer + bufferSize1, 0, bufferSize2 );
+      if ( buffer2 not_eq NULL ) memset( buffer + bufferSize1, 0, bufferSize2 );
       duplexPrerollBytes -= bufferSize1 + bufferSize2;
     }
 
@@ -4854,7 +4854,7 @@ static BOOL CALLBACK deviceQueryCallback( LPGUID lpguid,
     LPDIRECTSOUNDCAPTURE object;
 
     hr = DirectSoundCaptureCreate(  lpguid, &object,   NULL );
-    if ( hr != DS_OK ) return TRUE;
+    if ( hr not_eq DS_OK ) return TRUE;
 
     caps.dwSize = sizeof(caps);
     hr = object->GetCaps( &caps );
@@ -4868,7 +4868,7 @@ static BOOL CALLBACK deviceQueryCallback( LPGUID lpguid,
     DSCAPS caps;
     LPDIRECTSOUND object;
     hr = DirectSoundCreate(  lpguid, &object,   NULL );
-    if ( hr != DS_OK ) return TRUE;
+    if ( hr not_eq DS_OK ) return TRUE;
 
     caps.dwSize = sizeof(caps);
     hr = object->GetCaps( &caps );
@@ -5004,7 +5004,7 @@ RtApiOss :: RtApiOss()
 
 RtApiOss :: ~RtApiOss()
 {
-  if ( stream_.state != STREAM_CLOSED ) closeStream();
+  if ( stream_.state not_eq STREAM_CLOSED ) closeStream();
 }
 
 unsigned int RtApiOss :: getDeviceCount( void )
@@ -5206,7 +5206,7 @@ bool RtApiOss :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigned
         return FAILURE;
       }
       // Check that the number previously set channels is the same.
-      if ( stream_.nUserChannels[0] != channels ) {
+      if ( stream_.nUserChannels[0] not_eq channels ) {
         errorStream_ << "RtApiOss::probeDeviceOpen: input/output channels must be equal for OSS duplex device (" << ainfo.name << ").";
         errorText_ = errorStream_.str();
         return FAILURE;
@@ -5364,7 +5364,7 @@ bool RtApiOss :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigned
   // Set the data format.
   int temp = deviceFormat;
   result = ioctl( fd, SNDCTL_DSP_SETFMT, &deviceFormat );
-  if ( result == -1 || deviceFormat != temp ) {
+  if ( result == -1 || deviceFormat not_eq temp ) {
     close( fd );
     errorStream_ << "RtApiOss::probeDeviceOpen: error setting data format on device (" << ainfo.name << ").";
     errorText_ = errorStream_.str();
@@ -5431,11 +5431,11 @@ bool RtApiOss :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigned
 
   // Set flags for buffer conversion
   stream_.doConvertBuffer[mode] = false;
-  if ( stream_.userFormat != stream_.deviceFormat[mode] )
+  if ( stream_.userFormat not_eq stream_.deviceFormat[mode] )
     stream_.doConvertBuffer[mode] = true;
   if ( stream_.nUserChannels[mode] < stream_.nDeviceChannels[mode] )
     stream_.doConvertBuffer[mode] = true;
-  if ( stream_.userInterleaved != stream_.deviceInterleaved[mode] &&
+  if ( stream_.userInterleaved not_eq stream_.deviceInterleaved[mode] &&
        stream_.nUserChannels[mode] > 1 )
     stream_.doConvertBuffer[mode] = true;
 
@@ -5695,7 +5695,7 @@ void RtApiOss :: stopStream()
     handle->triggered = false;
   }
 
-  if ( stream_.mode == INPUT || ( stream_.mode == DUPLEX && handle->id[0] != handle->id[1] ) ) {
+  if ( stream_.mode == INPUT || ( stream_.mode == DUPLEX && handle->id[0] not_eq handle->id[1] ) ) {
     result = ioctl( handle->id[1], SNDCTL_DSP_HALT, 0 );
     if ( result == -1 ) {
       errorStream_ << "RtApiOss::stopStream: system error stopping input callback procedure on device (" << stream_.device[0] << ").";
@@ -5708,7 +5708,7 @@ void RtApiOss :: stopStream()
   stream_.state = STREAM_STOPPED;
   MUTEX_UNLOCK( &stream_.mutex );
 
-  if ( result != -1 ) return;
+  if ( result not_eq -1 ) return;
   error( RtError::SYSTEM_ERROR );
 }
 
@@ -5741,7 +5741,7 @@ void RtApiOss :: abortStream()
     handle->triggered = false;
   }
 
-  if ( stream_.mode == INPUT || ( stream_.mode == DUPLEX && handle->id[0] != handle->id[1] ) ) {
+  if ( stream_.mode == INPUT || ( stream_.mode == DUPLEX && handle->id[0] not_eq handle->id[1] ) ) {
     result = ioctl( handle->id[1], SNDCTL_DSP_HALT, 0 );
     if ( result == -1 ) {
       errorStream_ << "RtApiOss::abortStream: system error stopping input callback procedure on device (" << stream_.device[0] << ").";
@@ -5754,7 +5754,7 @@ void RtApiOss :: abortStream()
   stream_.state = STREAM_STOPPED;
   MUTEX_UNLOCK( &stream_.mutex );
 
-  if ( result != -1 ) return;
+  if ( result not_eq -1 ) return;
   error( RtError::SYSTEM_ERROR );
 }
 
@@ -5764,7 +5764,7 @@ void RtApiOss :: callbackEvent()
   if ( stream_.state == STREAM_STOPPED ) {
     MUTEX_LOCK( &stream_.mutex );
     pthread_cond_wait( &handle->runnable, &stream_.mutex );
-    if ( stream_.state != STREAM_RUNNING ) {
+    if ( stream_.state not_eq STREAM_RUNNING ) {
       MUTEX_UNLOCK( &stream_.mutex );
       return;
     }
@@ -5782,11 +5782,11 @@ void RtApiOss :: callbackEvent()
   RtAudioCallback callback = (RtAudioCallback) stream_.callbackInfo.callback;
   double streamTime = getStreamTime();
   RtAudioStreamStatus status = 0;
-  if ( stream_.mode != INPUT && handle->xrun[0] == true ) {
+  if ( stream_.mode not_eq INPUT && handle->xrun[0] == true ) {
     status |= RTAUDIO_OUTPUT_UNDERFLOW;
     handle->xrun[0] = false;
   }
-  if ( stream_.mode != OUTPUT && handle->xrun[1] == true ) {
+  if ( stream_.mode not_eq OUTPUT && handle->xrun[1] == true ) {
     status |= RTAUDIO_INPUT_OVERFLOW;
     handle->xrun[1] = false;
   }

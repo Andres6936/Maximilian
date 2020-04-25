@@ -134,7 +134,7 @@ namespace Maximilian
 
 		bool isStreamOpen() const
 		{
-			return stream_.state != StreamState::STREAM_CLOSED;
+			return stream_.state not_eq StreamState::STREAM_CLOSED;
 		};
 
 		bool isStreamRunning() const

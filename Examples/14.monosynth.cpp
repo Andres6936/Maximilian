@@ -36,7 +36,7 @@ void play(double* output)
 	currentCount = (int)timer.phasor(0.5);//this sets up a metronome that ticks every 2 seconds
 
 
-	if (lastCount != currentCount)
+	if (lastCount not_eq currentCount)
 	{//if we have a new timer int this sample, play the sound
 		ADSR.trigger = 1;
 

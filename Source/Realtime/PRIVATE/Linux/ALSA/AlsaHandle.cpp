@@ -126,7 +126,7 @@ void AlsaHandle::determineTheNumberOfDevices()
 		Levin::Error() << "Can't determine the number of devices." << Levin::endl;
 	}
 
-	if (handle != nullptr)
+	if (handle not_eq nullptr)
 	{
 		snd_ctl_close(handle);
 		// Free the cache for avoid memory leak

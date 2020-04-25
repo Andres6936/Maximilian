@@ -18,7 +18,7 @@ Maximilian::AudioArchitecture::~AudioArchitecture()
 
 void AudioArchitecture::assertThatStreamIsNotOpen() const
 {
-	if (stream_.state != StreamState::STREAM_CLOSED)
+	if (stream_.state not_eq StreamState::STREAM_CLOSED)
 	{
 		Levin::Error() << "Assert: OpenStream, a stream is already open!" << Levin::endl;
 		throw Exception("StreamAlreadyOpenException");
@@ -41,7 +41,7 @@ void AudioArchitecture::openStream(void _functionUser(std::vector <double>&))
 	if (result == false)
 	{ error(Exception::SYSTEM_ERROR); }
 
-	if (getOptionsFlags() != AudioStreamFlags::None)
+	if (getOptionsFlags() not_eq AudioStreamFlags::None)
 	{ options.setNumberOfBuffers(stream_.nBuffers); }
 	stream_.state = StreamState::STREAM_STOPPED;
 }
@@ -123,7 +123,7 @@ void AudioArchitecture::error(Exception::Type type)
 	{
 		Levin::Warn() << errorText_ << Levin::endl;
 	}
-	else if (type != Exception::WARNING)
+	else if (type not_eq Exception::WARNING)
 	{
 		throw Exception(errorText_);
 	}
@@ -192,7 +192,7 @@ void AudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChanne
 	}
 
 	// Set up the interleave/deinterleave offsets.
-	if (stream_.deviceInterleaved[index] != stream_.userInterleaved)
+	if (stream_.deviceInterleaved[index] not_eq stream_.userInterleaved)
 	{
 		if ((mode == StreamMode::OUTPUT && stream_.deviceInterleaved[index]) ||
 			(mode == StreamMode::INPUT && stream_.userInterleaved))

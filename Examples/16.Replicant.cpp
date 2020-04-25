@@ -40,7 +40,7 @@ void play(std::vector <double>& output)
 
 	currentCount = (int)timer.phasor(9);//this sets up a metronome that ticks every so often
 
-	if (lastCount != currentCount)
+	if (lastCount not_eq currentCount)
 	{//if we have a new timer int this sample, play the sound
 		trigger = 1;//play the arpeggiator line
 		trigger2 = leadLineTrigger[playHead % 256];//play the lead line
@@ -73,7 +73,7 @@ void play(std::vector <double>& output)
 
 	delayout = (leadout + (delay.dl(leadout, 14000, 0.8) * 0.5)) / 2;//add some delay
 
-	if (trigger != 0)
+	if (trigger not_eq 0)
 	{ trigger = 0; }//set the trigger to off if you want it to trigger immediately next time.
 
 

@@ -26,7 +26,7 @@ extern "C" void* alsaCallbackHandler(void* ptr)
 
 LinuxAlsa::~LinuxAlsa()
 {
-	if (stream_.state != StreamState::STREAM_CLOSED)
+	if (stream_.state not_eq StreamState::STREAM_CLOSED)
 	{ closeStream(); }
 }
 
@@ -332,7 +332,7 @@ foundDevice:
 	// The getDeviceInfo() function will not work for a device that is
 	// already open.  Thus, we'll probe the system before opening a
 	// stream and save the results for use by getDeviceInfo().
-	if (mode == StreamMode::OUTPUT || (mode == StreamMode::INPUT && stream_.mode != StreamMode::OUTPUT))
+	if (mode == StreamMode::OUTPUT || (mode == StreamMode::INPUT && stream_.mode not_eq StreamMode::OUTPUT))
 	{ // only do once
 		this->saveDeviceInfo();
 	}
@@ -465,7 +465,7 @@ foundDevice:
 
 	// Determine whether byte-swaping is necessary.
 	stream_.doByteSwap[index] = false;
-	if (deviceFormat != SND_PCM_FORMAT_S8)
+	if (deviceFormat not_eq SND_PCM_FORMAT_S8)
 	{
 		result = snd_pcm_format_cpu_endian(deviceFormat);
 		if (result == 0)
@@ -573,7 +573,7 @@ foundDevice:
 
 	// If attempting to setup a duplex stream, the bufferSize parameter
 	// MUST be the same in both directions!
-	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT && getBufferFrames() != stream_.bufferSize)
+	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT && getBufferFrames() not_eq stream_.bufferSize)
 	{
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: system error setting buffer size for duplex stream on device ("
 					 << name << ").";
@@ -634,7 +634,7 @@ foundDevice:
 
 	// Set flags for buffer conversion
 	stream_.doConvertBuffer[index] = false;
-	if (stream_.userFormat != stream_.deviceFormat[index])
+	if (stream_.userFormat not_eq stream_.deviceFormat[index])
 	{
 		stream_.doConvertBuffer[index] = true;
 	}
@@ -642,7 +642,7 @@ foundDevice:
 	{
 		stream_.doConvertBuffer[index] = true;
 	}
-	if (stream_.userInterleaved != stream_.deviceInterleaved[index] &&
+	if (stream_.userInterleaved not_eq stream_.deviceInterleaved[index] &&
 		stream_.nUserChannels[index] > 1)
 	{
 		stream_.doConvertBuffer[index] = true;
@@ -859,7 +859,7 @@ void LinuxAlsa::prepareStateOfDevice(Device _device)
 {
 	snd_pcm_state_t state = snd_pcm_state(_device);
 
-	if (state != SND_PCM_STATE_PREPARED)
+	if (state not_eq SND_PCM_STATE_PREPARED)
 	{
 		if (int e = snd_pcm_prepare(_device) < 0)
 		{
@@ -974,7 +974,7 @@ void LinuxAlsa::callbackEvent()
 			alsaHandle.waitThreadForCondition(stream_.mutex);
 		}
 
-		if (stream_.state != StreamState::STREAM_RUNNING)
+		if (stream_.state not_eq StreamState::STREAM_RUNNING)
 		{
 			pthread_mutex_unlock(&stream_.mutex);
 			return;
@@ -991,18 +991,18 @@ void LinuxAlsa::callbackEvent()
 
 	AudioStreamStatus status = AudioStreamStatus::None;
 
-	if (stream_.mode != StreamMode::INPUT && alsaHandle.isXRunPlayback() == true)
+	if (stream_.mode not_eq StreamMode::INPUT && alsaHandle.isXRunPlayback() == true)
 	{
 		status = AudioStreamStatus::Underflow;
 		alsaHandle.setXRunPlayback(false);
 	}
-	if (stream_.mode != StreamMode::OUTPUT && alsaHandle.isXRunRecord() == true)
+	if (stream_.mode not_eq StreamMode::OUTPUT && alsaHandle.isXRunRecord() == true)
 	{
 		status = AudioStreamStatus::Overflow;
 		alsaHandle.setXRunRecord(false);
 	}
 
-	if (status != AudioStreamStatus::None)
+	if (status not_eq AudioStreamStatus::None)
 	{
 		Levin::Error() << "An Underflow or Overflow has been produced." << Levin::endl;
 
