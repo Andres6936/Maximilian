@@ -85,7 +85,7 @@ namespace Maximilian
 		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
 
 		//! Returns the audio API specifier for the current instance of RtAudio.
-		SupportedArchitectures getCurrentApi() throw();
+		SupportedArchitectures getCurrentApi() noexcept;
 
 		//! A public function that queries for the number of audio devices available.
 		/*!
@@ -93,7 +93,7 @@ namespace Maximilian
 		  is called, thus supporting devices connected \e after instantiation. If
 		  a system error occurs during processing, a warning will be issued.
 		*/
-		unsigned int getDeviceCount() throw();
+		unsigned int getDeviceCount() noexcept;
 
 		//! Return an RtDeviceInfo structure for a specified device number.
 		/*!
@@ -116,7 +116,7 @@ namespace Maximilian
 		  client's responsibility to verify that a device is available
 		  before attempting to open a stream.
 		*/
-		static unsigned int getDefaultOutputDevice() throw();
+		static unsigned int getDefaultOutputDevice() noexcept;
 
 		//! A function that returns the index of the default input device.
 		/*!
@@ -126,7 +126,7 @@ namespace Maximilian
 		  client's responsibility to verify that a device is available
 		  before attempting to open a stream.
 		*/
-		static unsigned int getDefaultInputDevice() throw();
+		static unsigned int getDefaultInputDevice() noexcept;
 
 		//! A public function for opening a stream with the specified parameters.
 		/*!
@@ -173,7 +173,7 @@ namespace Maximilian
 		  If a stream is not open, this function issues a warning and
 		  returns (no exception is thrown).
 		*/
-		void closeStream() throw();
+		void closeStream() noexcept;
 
 		//! A function that starts a stream.
 		/*!
@@ -203,10 +203,10 @@ namespace Maximilian
 		void abortStream();
 
 		//! Returns true if a stream is open and false if not.
-		bool isStreamOpen() const throw();
+		bool isStreamOpen() const noexcept;
 
 		//! Returns true if the stream is running and false if it is stopped or not open.
-		bool isStreamRunning() const throw();
+		bool isStreamRunning() const noexcept;
 
 		//! Returns the number of elapsed seconds since the stream was started.
 		/*!
@@ -234,7 +234,7 @@ namespace Maximilian
 		unsigned int getStreamSampleRate();
 
 		//! Specify whether warning messages should be printed to stderr.
-		void showWarnings(bool value = true) throw();
+		void showWarnings(bool value = true) noexcept;
 	};
 }
 
