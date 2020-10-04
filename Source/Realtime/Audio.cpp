@@ -43,8 +43,9 @@
 #include "Realtime/Audio.hpp"
 #include "Realtime/LinuxAlsa.hpp"
 
-#include <iostream>
 #include <memory>
+#include <iostream>
+#include <exception>
 
 #include <Levin/Log.h>
 #include <Levin/Logger.h>
@@ -138,12 +139,12 @@ void Audio::assertThatAudioArchitectureHaveMinimumAnDevice()
 	{
 		Levin::Error() << "No compiled API support found... Critical error." << Levin::endl;
 
-		throw Exception("AudioArchitectureNoCompiledException");
+		throw std::logic_error("AudioArchitectureNoCompiledException");
 	}
 
 	if (audioArchitecture->getDeviceCount() < 0)
 	{
-		throw Exception("NoAudioDevicesFoundException");
+		throw std::logic_error("NoAudioDevicesFoundException");
 	}
 }
 

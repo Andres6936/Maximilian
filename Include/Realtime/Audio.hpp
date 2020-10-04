@@ -46,7 +46,6 @@
 #include <memory>
 #include <sstream>
 
-#include "Exception.h"
 #include "DeviceInfo.hpp"
 #include "StreamOptions.hpp"
 #include "StreamParameters.hpp"
