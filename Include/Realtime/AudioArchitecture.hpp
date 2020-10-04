@@ -1,10 +1,16 @@
 #ifndef MAXIMILIAN_AUDIOARCHITECTURE_HPP
 #define MAXIMILIAN_AUDIOARCHITECTURE_HPP
 
-#include "Audio.hpp"
+#include <sstream>
+#include <functional>
+
+#include <Exception.h>
 #include "AudioStream.hpp"
 #include "ConvertInfo.hpp"
 #include "Enum/SupportedArchitectures.hpp"
+#include "StreamParameters.hpp"
+#include "StreamOptions.hpp"
+#include "DeviceInfo.hpp"
 
 namespace Maximilian
 {

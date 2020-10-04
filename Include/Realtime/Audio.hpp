@@ -54,11 +54,10 @@
 #include "Definition/AudioStreamFlags.hpp"
 #include "Definition/AudioStreamStatus.hpp"
 #include "Enum/SupportedArchitectures.hpp"
+#include "AudioArchitecture.hpp"
 
 namespace Maximilian
 {
-	class AudioArchitecture;
-
 	class Audio
 	{
 

@@ -91,7 +91,7 @@ void Audio::tryInitializeInstanceOfArchitecture(SupportedArchitectures _architec
 	// in any called, and that no have an device valid.
 
 	// Deleted an nullptr no have effect or consequences.
-	delete audioArchitecture;
+	audioArchitecture.reset(nullptr);
 
 
 #if defined(__UNIX_JACK__)
@@ -101,7 +101,7 @@ void Audio::tryInitializeInstanceOfArchitecture(SupportedArchitectures _architec
 #if defined(__LINUX_ALSA__)
 	if (_architecture == SupportedArchitectures::Linux_Alsa)
 	{
-		audioArchitecture = new LinuxAlsa();
+		audioArchitecture = std::make_unique<LinuxAlsa>();
 		// Exit methods
 		return;
 	}
