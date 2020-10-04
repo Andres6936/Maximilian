@@ -1,5 +1,5 @@
-#ifndef MAXIMILIAN_AUDIOARCHITECTURE_HPP
-#define MAXIMILIAN_AUDIOARCHITECTURE_HPP
+#ifndef MAXIMILIAN_IAUDIOARCHITECTURE_HPP
+#define MAXIMILIAN_IAUDIOARCHITECTURE_HPP
 
 #include <sstream>
 #include <functional>
@@ -16,14 +16,14 @@ namespace Maximilian
 {
 
 	/**
-	 * AudioArchitecture is a "controller" used to select an available audio i/o
+	 * IAudioArchitecture is a "controller" used to select an available audio i/o
 	 * interface.  It presents a common API for the user to call but
 	 * all functionality is implemented by the class RtApi and its
 	 * subclasses.  RtAudio creates an instance of an RtApi subclass
 	 * based on the user's API choice.  If no choice is made, RtAudio
 	 * attempts to make a "logical" API selection.
 	 */
-	class AudioArchitecture
+	class IAudioArchitecture
 	{
 
 	private:
@@ -91,9 +91,9 @@ namespace Maximilian
 
 	public:
 
-		AudioArchitecture();
+		IAudioArchitecture();
 
-		virtual ~AudioArchitecture();
+		virtual ~IAudioArchitecture();
 
 		// Static Methods
 
@@ -239,4 +239,4 @@ namespace Maximilian
 }
 
 
-#endif //MAXIMILIAN_AUDIOARCHITECTURE_HPP
+#endif //MAXIMILIAN_IAUDIOARCHITECTURE_HPP

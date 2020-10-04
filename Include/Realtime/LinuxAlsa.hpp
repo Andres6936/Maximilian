@@ -2,13 +2,13 @@
 #define MAXIMILIAN_LINUXALSA_HPP
 
 #include "Audio.hpp"
-#include "AudioArchitecture.hpp"
+#include "IAudioArchitecture.hpp"
 
 #include <vector>
 
 namespace Maximilian
 {
-	class LinuxAlsa : public AudioArchitecture
+	class LinuxAlsa : public IAudioArchitecture
 	{
 
 	public:

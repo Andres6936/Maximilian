@@ -1067,7 +1067,7 @@ void LinuxAlsa::unlockMutex()
 {
 	pthread_mutex_unlock(&stream_.mutex);
 
-	AudioArchitecture::tickStreamTime();
+	IAudioArchitecture::tickStreamTime();
 }
 
 template <class Device>

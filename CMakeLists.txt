@@ -26,7 +26,7 @@ ADD_LIBRARY(Maximilian
         Source/main.cpp
         Source/maximilian.cpp
         Source/Realtime/Audio.cpp
-        Source/Realtime/AudioArchitecture.cpp
+        Source/Realtime/IAudioArchitecture.cpp
         Source/Realtime/LinuxAlsa.cpp
         Source/Realtime/AudioStream.cpp
         Source/Realtime/ConvertInfo.cpp

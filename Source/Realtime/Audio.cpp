@@ -5914,12 +5914,12 @@ DeviceInfo Audio::getDeviceInfo(unsigned int device)
 
 unsigned int Audio::getDefaultInputDevice() noexcept
 {
-	return AudioArchitecture::getDefaultInputDevice();
+	return IAudioArchitecture::getDefaultInputDevice();
 }
 
 unsigned int Audio::getDefaultOutputDevice() noexcept
 {
-	return AudioArchitecture::getDefaultOutputDevice();
+	return IAudioArchitecture::getDefaultOutputDevice();
 }
 
 void Audio::closeStream() noexcept

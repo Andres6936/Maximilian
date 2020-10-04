@@ -49,7 +49,7 @@
 #include "DeviceInfo.hpp"
 #include "StreamOptions.hpp"
 #include "StreamParameters.hpp"
-#include "AudioArchitecture.hpp"
+#include "IAudioArchitecture.hpp"
 #include "Definition/AudioFormat.hpp"
 #include "Definition/AudioStreamFlags.hpp"
 #include "Definition/AudioStreamStatus.hpp"
@@ -62,7 +62,7 @@ namespace Maximilian
 
 	protected:
 
-		std::unique_ptr<AudioArchitecture> audioArchitecture { nullptr };
+		std::unique_ptr<IAudioArchitecture> audioArchitecture { nullptr };
 
 	private:
 
