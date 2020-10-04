@@ -5,12 +5,12 @@
 #include <functional>
 
 #include <Exception.h>
+#include "DeviceInfo.hpp"
 #include "AudioStream.hpp"
 #include "ConvertInfo.hpp"
-#include "Enum/SupportedArchitectures.hpp"
-#include "StreamParameters.hpp"
 #include "StreamOptions.hpp"
-#include "DeviceInfo.hpp"
+#include "StreamParameters.hpp"
+#include "Enum/SupportedArchitectures.hpp"
 
 namespace Maximilian
 {

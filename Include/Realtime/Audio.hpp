@@ -50,11 +50,11 @@
 #include "DeviceInfo.hpp"
 #include "StreamOptions.hpp"
 #include "StreamParameters.hpp"
+#include "AudioArchitecture.hpp"
 #include "Definition/AudioFormat.hpp"
 #include "Definition/AudioStreamFlags.hpp"
 #include "Definition/AudioStreamStatus.hpp"
 #include "Enum/SupportedArchitectures.hpp"
-#include "AudioArchitecture.hpp"
 
 namespace Maximilian
 {
