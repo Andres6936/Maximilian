@@ -70,6 +70,8 @@ namespace Maximilian
 
 		void tryInitializeInstanceOfArchitecture(SupportedArchitectures _architecture);
 
+		static std::vector <SupportedArchitectures> getArchitecturesCompiled() noexcept;
+
 	public:
 
 		/*!
@@ -81,8 +83,6 @@ namespace Maximilian
 		  systems) and ASIO, DS (Windows systems).
 		*/
 		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
-
-		static std::vector <SupportedArchitectures> getArchitecturesCompiled();
 
 		//! Returns the audio API specifier for the current instance of RtAudio.
 		SupportedArchitectures getCurrentApi() throw();

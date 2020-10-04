@@ -52,7 +52,7 @@
 
 using namespace Maximilian;
 
-std::vector <SupportedArchitectures> Audio::getArchitecturesCompiled()
+std::vector <SupportedArchitectures> Audio::getArchitecturesCompiled() noexcept
 {
 	std::vector <SupportedArchitectures> architectures;
 
