@@ -189,11 +189,6 @@ Audio::Audio(SupportedArchitectures _architecture)
 	assertThatAudioArchitectureHaveMinimumAnDevice();
 }
 
-Audio::~Audio() throw()
-{
-	delete audioArchitecture;
-}
-
 void Audio::openStream(void _functionUser(std::vector <double>&))
 {
 	return audioArchitecture->openStream(_functionUser);

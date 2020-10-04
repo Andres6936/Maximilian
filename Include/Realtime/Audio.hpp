@@ -43,6 +43,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <sstream>
 
 #include "Exception.h"
@@ -63,7 +64,7 @@ namespace Maximilian
 
 	protected:
 
-		AudioArchitecture* audioArchitecture = nullptr;
+		std::unique_ptr<AudioArchitecture> audioArchitecture { nullptr };
 
 	private:
 
@@ -84,14 +85,6 @@ namespace Maximilian
 		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
 
 		static std::vector <SupportedArchitectures> getArchitecturesCompiled();
-
-
-		//! The destructor.
-		/*!
-		  If a stream is running or open, it will be stopped and closed
-		  automatically.
-		*/
-		~Audio() throw();
 
 		//! Returns the audio API specifier for the current instance of RtAudio.
 		SupportedArchitectures getCurrentApi() throw();
