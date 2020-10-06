@@ -8,22 +8,6 @@
 
 using namespace Maximilian;
 
-extern "C" void* alsaCallbackHandler(void* ptr)
-{
-	CallbackInfo* info = (CallbackInfo*)ptr;
-	LinuxAlsa* object = (LinuxAlsa*)info->object;
-	bool* isRunning = &info->isRunning;
-
-	while (*isRunning == true)
-	{
-		pthread_testcancel();
-		object->callbackEvent();
-	}
-
-	pthread_exit(nullptr);
-}
-
-
 LinuxAlsa::~LinuxAlsa()
 {
 	if (stream_.state != StreamState::STREAM_CLOSED)
