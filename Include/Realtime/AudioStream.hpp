@@ -2,7 +2,6 @@
 #define MAXIMILIAN_AUDIOSTREAM_HPP
 
 #include "ConvertInfo.hpp"
-#include "CallbackInfo.hpp"
 #include "Definition/AudioFormat.hpp"
 
 #include <array>

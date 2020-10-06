@@ -30,7 +30,6 @@ ADD_LIBRARY(Maximilian
         Source/Realtime/LinuxAlsa.cpp
         Source/Realtime/AudioStream.cpp
         Source/Realtime/ConvertInfo.cpp
-        Source/Realtime/CallbackInfo.cpp
         Source/Realtime/DeviceInfo.cpp
         Source/Realtime/StreamParameters.cpp
         Source/Realtime/StreamOptions.cpp
