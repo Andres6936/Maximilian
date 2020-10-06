@@ -713,11 +713,10 @@ foundDevice:
 	{
 		stream_.mode = mode;
 
-		// Setup callback thread.
-		stream_.callbackInfo.isRunning = true;
+		isStreamRunning = true;
 
 		threads.push_back(std::thread{[&]{
-			while(stream_.callbackInfo.isRunning)
+			while(isStreamRunning)
 			{
 				callbackEvent();
 			}
@@ -736,7 +735,8 @@ void LinuxAlsa::closeStream()
 		return;
 	}
 
-	stream_.callbackInfo.isRunning = false;
+	isStreamRunning = false;
+
 	pthread_mutex_lock(&stream_.mutex);
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{

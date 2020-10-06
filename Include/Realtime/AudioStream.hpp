@@ -106,7 +106,7 @@ namespace Maximilian
 		StreamState state = StreamState::STREAM_CLOSED;         // STOPPED, RUNNING, or CLOSED
 
 		AudioFormat userFormat = AudioFormat::Float64;
-		CallbackInfo callbackInfo;
+
 		ConvertInfo convertInfo[2] = { };
 
 		AudioStream() = default;

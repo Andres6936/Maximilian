@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <thread>
+#include <atomic>
 
 namespace Maximilian
 {
@@ -15,6 +16,8 @@ namespace Maximilian
 	private:
 
 		std::vector<std::thread> threads;
+
+		std::atomic_bool isStreamRunning = false;
 
 	public:
 
