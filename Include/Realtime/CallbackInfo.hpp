@@ -18,7 +18,6 @@ namespace Maximilian
 
 	public:
 
-		void* object = nullptr;    // Used as a "this" pointer.
 		bool isRunning = false;
 
 		// Default constructor.

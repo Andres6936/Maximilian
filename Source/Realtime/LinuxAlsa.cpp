@@ -714,7 +714,6 @@ foundDevice:
 		stream_.mode = mode;
 
 		// Setup callback thread.
-		stream_.callbackInfo.object = (void*)this;
 		stream_.callbackInfo.isRunning = true;
 
 		threads.push_back(std::thread{[&]{
