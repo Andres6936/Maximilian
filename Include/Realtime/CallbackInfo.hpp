@@ -19,7 +19,6 @@ namespace Maximilian
 	public:
 
 		void* object = nullptr;    // Used as a "this" pointer.
-		pthread_t thread;
 		bool isRunning = false;
 
 		// Default constructor.

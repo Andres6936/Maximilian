@@ -5,11 +5,16 @@
 #include "IAudioArchitecture.hpp"
 
 #include <vector>
+#include <thread>
 
 namespace Maximilian
 {
 	class LinuxAlsa : public IAudioArchitecture
 	{
+
+	private:
+
+		std::vector<std::thread> threads;
 
 	public:
 
