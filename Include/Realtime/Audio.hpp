@@ -66,9 +66,9 @@ namespace Maximilian
 
 	private:
 
-		void assertThatAudioArchitectureHaveMinimumAnDevice();
+		void assertThatAudioArchitectureHaveMinimumAnDevice() noexcept;
 
-		void tryInitializeInstanceOfArchitecture(SupportedArchitectures _architecture);
+		void tryInitializeInstanceOfArchitecture(SupportedArchitectures _architecture) noexcept;
 
 		static std::vector <SupportedArchitectures> getArchitecturesCompiled() noexcept;
 
@@ -82,7 +82,7 @@ namespace Maximilian
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
 		*/
-		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
+		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified) noexcept;
 
 		//! Returns the audio API specifier for the current instance of RtAudio.
 		SupportedArchitectures getCurrentApi() const noexcept;

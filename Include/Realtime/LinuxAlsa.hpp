@@ -21,7 +21,7 @@ namespace Maximilian
 
 	public:
 
-		LinuxAlsa() = default;
+		LinuxAlsa() noexcept = default;
 
 		~LinuxAlsa() override;
 

@@ -24,6 +24,7 @@ ADD_DEFINITIONS(-D__LINUX_ALSA__)
 
 ADD_LIBRARY(Maximilian
         Source/main.cpp
+        Source/Architectures/Dummy.cpp
         Source/maximilian.cpp
         Source/Realtime/Audio.cpp
         Source/Realtime/IAudioArchitecture.cpp

@@ -40,6 +40,7 @@
 
 // RtAudio: Version 4.0.9
 
+#include "Architectures/Dummy.hpp"
 #include "Realtime/Audio.hpp"
 #include "Realtime/LinuxAlsa.hpp"
 
@@ -83,7 +84,7 @@ std::vector <SupportedArchitectures> Audio::getArchitecturesCompiled() noexcept
 	return architectures;
 }
 
-void Audio::tryInitializeInstanceOfArchitecture(SupportedArchitectures _architecture)
+void Audio::tryInitializeInstanceOfArchitecture(SupportedArchitectures _architecture) noexcept
 {
 	// This methods is design for be called several times of way consecutive
 	// to found an instance that content an device.
@@ -133,22 +134,23 @@ void Audio::tryInitializeInstanceOfArchitecture(SupportedArchitectures _architec
 	Levin::Warn() << "No compiled support for specified API argument." << Levin::endl;
 }
 
-void Audio::assertThatAudioArchitectureHaveMinimumAnDevice()
+void Audio::assertThatAudioArchitectureHaveMinimumAnDevice() noexcept
 {
 	if (audioArchitecture == nullptr)
 	{
-		Levin::Error() << "No compiled API support found... Critical error." << Levin::endl;
+		Levin::Error() << "No compiled API support found... Use of Dummy Audio (Not functional)."
+		<< Levin::endl;
 
-		throw std::logic_error("AudioArchitectureNoCompiledException");
+		audioArchitecture = std::make_unique<Architectures::Dummy>();
 	}
 
 	if (audioArchitecture->getDeviceCount() < 0)
 	{
-		throw std::logic_error("NoAudioDevicesFoundException");
+		Levin::Error() << "No Audio Devices Found" << Levin::endl;
 	}
 }
 
-Audio::Audio(SupportedArchitectures _architecture)
+Audio::Audio(SupportedArchitectures _architecture) noexcept
 {
 	// Initialize Levin for use of Log
 	Levin::LOGGER = std::make_unique <Levin::ColoredLogger>(std::wcout);
