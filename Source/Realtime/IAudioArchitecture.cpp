@@ -1,24 +1,24 @@
-#include "Realtime/AudioArchitecture.hpp"
+#include "Realtime/IAudioArchitecture.hpp"
 
 #include <Levin/Log.h>
 #include <cstring>
 
 using namespace Maximilian;
 
-Maximilian::AudioArchitecture::AudioArchitecture()
+Maximilian::IAudioArchitecture::IAudioArchitecture() noexcept
 {
 	pthread_mutex_init(&stream_.mutex, nullptr);
 	outputParameters.setDeviceId(getDefaultOutputDevice());
 }
 
-Maximilian::AudioArchitecture::~AudioArchitecture()
+Maximilian::IAudioArchitecture::~IAudioArchitecture()
 {
 	pthread_mutex_destroy(&stream_.mutex);
 }
 
-void AudioArchitecture::assertThatStreamIsNotOpen() const
+void IAudioArchitecture::assertThatStreamIsNotOpen()
 {
-	if (stream_.state not_eq StreamState::STREAM_CLOSED)
+	if (stream_.state != StreamState::STREAM_CLOSED)
 	{
 		Levin::Error() << "Assert: OpenStream, a stream is already open!" << Levin::endl;
 		throw Exception("StreamAlreadyOpenException");
@@ -26,7 +26,7 @@ void AudioArchitecture::assertThatStreamIsNotOpen() const
 }
 
 
-void AudioArchitecture::openStream(void _functionUser(std::vector <double>&))
+void IAudioArchitecture::openStream(void _functionUser(std::vector <double>&))
 {
 	assertThatStreamIsNotOpen();
 
@@ -41,30 +41,30 @@ void AudioArchitecture::openStream(void _functionUser(std::vector <double>&))
 	if (result == false)
 	{ error(Exception::SYSTEM_ERROR); }
 
-	if (getOptionsFlags() not_eq AudioStreamFlags::None)
+	if (getOptionsFlags() != AudioStreamFlags::None)
 	{ options.setNumberOfBuffers(stream_.nBuffers); }
 	stream_.state = StreamState::STREAM_STOPPED;
 }
 
-unsigned int AudioArchitecture::getDefaultInputDevice()
+unsigned int IAudioArchitecture::getDefaultInputDevice()
 {
 	// Should be implemented in subclasses if possible.
 	return 0;
 }
 
-unsigned int AudioArchitecture::getDefaultOutputDevice()
+unsigned int IAudioArchitecture::getDefaultOutputDevice()
 {
 	// Should be implemented in subclasses if possible.
 	return 0;
 }
 
-void AudioArchitecture::closeStream()
+void IAudioArchitecture::closeStream()
 {
 	// MUST be implemented in subclasses!
 	throw Exception("NotImplementedException");
 }
 
-bool AudioArchitecture::probeDeviceOpen(
+bool IAudioArchitecture::probeDeviceOpen(
 		unsigned int device,
 		StreamMode mode,
 		unsigned int channels,
@@ -74,7 +74,7 @@ bool AudioArchitecture::probeDeviceOpen(
 	throw Exception("NotImplementedException");
 }
 
-void AudioArchitecture::tickStreamTime()
+void IAudioArchitecture::tickStreamTime()
 {
 	// Subclasses that do not provide their own implementation of
 	// getStreamTime should call this function once per buffer I/O to
@@ -83,7 +83,7 @@ void AudioArchitecture::tickStreamTime()
 	stream_.streamTime += (stream_.bufferSize * 1.0 / stream_.sampleRate);
 }
 
-long AudioArchitecture::getStreamLatency()
+long IAudioArchitecture::getStreamLatency()
 {
 	verifyStream();
 
@@ -100,14 +100,14 @@ long AudioArchitecture::getStreamLatency()
 	return totalLatency;
 }
 
-double AudioArchitecture::getStreamTime()
+double IAudioArchitecture::getStreamTime()
 {
 	verifyStream();
 	return stream_.streamTime;
 
 }
 
-unsigned int AudioArchitecture::getStreamSampleRate()
+unsigned int IAudioArchitecture::getStreamSampleRate()
 {
 	verifyStream();
 	return stream_.sampleRate;
@@ -116,20 +116,20 @@ unsigned int AudioArchitecture::getStreamSampleRate()
 
 // This method can be modified to control the behavior of error
 // message printing.
-void AudioArchitecture::error(Exception::Type type)
+void IAudioArchitecture::error(Exception::Type type)
 {
 	errorStream_.str(""); // clear the ostringstream
 	if (type == Exception::WARNING && showWarnings_ == true)
 	{
 		Levin::Warn() << errorText_ << Levin::endl;
 	}
-	else if (type not_eq Exception::WARNING)
+	else if (type != Exception::WARNING)
 	{
 		throw Exception(errorText_);
 	}
 }
 
-void AudioArchitecture::verifyStream() const
+void IAudioArchitecture::verifyStream()
 {
 	if (stream_.state == StreamState::STREAM_CLOSED)
 	{
@@ -139,7 +139,7 @@ void AudioArchitecture::verifyStream() const
 	}
 }
 
-unsigned int AudioArchitecture::formatBytes(AudioFormat _audioFormat)
+unsigned int IAudioArchitecture::formatBytes(AudioFormat _audioFormat)
 {
 	switch (_audioFormat)
 	{
@@ -163,7 +163,7 @@ unsigned int AudioArchitecture::formatBytes(AudioFormat _audioFormat)
 	return 0;
 }
 
-void AudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChannel)
+void IAudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChannel)
 {
 	int index = (int)mode;
 
@@ -192,7 +192,7 @@ void AudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChanne
 	}
 
 	// Set up the interleave/deinterleave offsets.
-	if (stream_.deviceInterleaved[index] not_eq stream_.userInterleaved)
+	if (stream_.deviceInterleaved[index] != stream_.userInterleaved)
 	{
 		if ((mode == StreamMode::OUTPUT && stream_.deviceInterleaved[index]) ||
 			(mode == StreamMode::INPUT && stream_.userInterleaved))
@@ -277,7 +277,7 @@ void AudioArchitecture::setConvertInfo(StreamMode mode, unsigned int firstChanne
 }
 
 template <typename O, typename I>
-void AudioArchitecture::formatBufferWithoutScale(O* outBuffer, I* inBuffer, ConvertInfo& info)
+void IAudioArchitecture::formatBufferWithoutScale(O* outBuffer, I* inBuffer, ConvertInfo& info)
 {
 	for (unsigned int i = 0; i < stream_.bufferSize; i++)
 	{
@@ -293,7 +293,7 @@ void AudioArchitecture::formatBufferWithoutScale(O* outBuffer, I* inBuffer, Conv
 }
 
 template <typename T, typename O, typename I>
-void AudioArchitecture::formatBufferAccordToTypesOfDate(T _type, O* outBuffer, I* inBuffer, ConvertInfo& info)
+void IAudioArchitecture::formatBufferAccordToTypesOfDate(T _type, O* outBuffer, I* inBuffer, ConvertInfo& info)
 {
 	auto* out = (T*)outBuffer;
 
@@ -341,7 +341,7 @@ void AudioArchitecture::formatBufferAccordToTypesOfDate(T _type, O* outBuffer, I
 }
 
 template <typename T, typename O, typename I>
-void AudioArchitecture::formatBufferWithBitwise(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
+void IAudioArchitecture::formatBufferWithBitwise(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
 {
 	for (unsigned int i = 0; i < stream_.bufferSize; i++)
 	{
@@ -357,7 +357,7 @@ void AudioArchitecture::formatBufferWithBitwise(T _scale, O* outBuffer, I* inBuf
 }
 
 template <typename T, typename O, typename I>
-void AudioArchitecture::formatBufferToScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
+void IAudioArchitecture::formatBufferToScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
 {
 	for (unsigned int i = 0; i < stream_.bufferSize; i++)
 	{
@@ -374,7 +374,7 @@ void AudioArchitecture::formatBufferToScale(T _scale, O* outBuffer, I* inBuffer,
 }
 
 template <typename T, typename O, typename I>
-void AudioArchitecture::formatBufferOf24BitsToScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
+void IAudioArchitecture::formatBufferOf24BitsToScale(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info)
 {
 	for (unsigned int i = 0; i < stream_.bufferSize; i++)
 	{
@@ -390,7 +390,7 @@ void AudioArchitecture::formatBufferOf24BitsToScale(T _scale, O* outBuffer, I* i
 	}
 }
 
-void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertInfo& info)
+void IAudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertInfo& info)
 {
 	// This function does format conversion, input/output channel compensation, and
 	// data interleaving/deinterleaving.  24-bit integers are assumed to occupy
@@ -680,7 +680,7 @@ void AudioArchitecture::convertBuffer(char* outBuffer, char* inBuffer, ConvertIn
 	}
 }
 
-void AudioArchitecture::byteSwapBuffer(char* buffer, unsigned int samples, AudioFormat format)
+void IAudioArchitecture::byteSwapBuffer(char* buffer, unsigned int samples, AudioFormat format)
 {
 	char val;
 	char* ptr;
@@ -755,39 +755,39 @@ void AudioArchitecture::byteSwapBuffer(char* buffer, unsigned int samples, Audio
 
 // Getters
 
-unsigned int AudioArchitecture::getSampleRate() const
+unsigned int IAudioArchitecture::getSampleRate() const
 {
 	return sampleRate;
 }
 
-unsigned int AudioArchitecture::getBufferFrames() const
+unsigned int IAudioArchitecture::getBufferFrames() const
 {
 	return bufferFrames;
 }
 
 // Setters
 
-void AudioArchitecture::setBufferFrames(unsigned int _bufferFrames)
+void IAudioArchitecture::setBufferFrames(unsigned int _bufferFrames)
 {
 	bufferFrames = _bufferFrames;
 }
 
-AudioStreamFlags AudioArchitecture::getOptionsFlags() const
+AudioStreamFlags IAudioArchitecture::getOptionsFlags() const
 {
 	return options.getFlags();
 }
 
-int AudioArchitecture::getOptionsPriority() const
+int IAudioArchitecture::getOptionsPriority() const
 {
 	return options.getPriority();
 }
 
-unsigned int AudioArchitecture::getNumberOfBuffersOptions() const
+unsigned int IAudioArchitecture::getNumberOfBuffersOptions() const
 {
 	return options.getNumberOfBuffers();
 }
 
-AudioFormat AudioArchitecture::getAudioFormat() const
+AudioFormat IAudioArchitecture::getAudioFormat() const
 {
 	return format;
 }

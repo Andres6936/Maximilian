@@ -43,11 +43,14 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <sstream>
 
-#include "Exception.h"
+#include "DeviceInfo.hpp"
+#include "StreamOptions.hpp"
+#include "StreamParameters.hpp"
+#include "IAudioArchitecture.hpp"
 #include "Definition/AudioFormat.hpp"
-#include "Realtime/AudioArchitecture.hpp"
 #include "Definition/AudioStreamFlags.hpp"
 #include "Definition/AudioStreamStatus.hpp"
 #include "Enum/SupportedArchitectures.hpp"
@@ -59,51 +62,30 @@ namespace Maximilian
 
 	protected:
 
-		/**
-		 * The audio architecture, it can be JACK, ALSA, OSS (Linux
-		 * systems) and ASIO, DS (Windows systems).
-		 *
-		 * @attention This variable should be initialized in
-		 *  the constructor
-		 */
-		AudioArchitecture* audioArchitecture = nullptr;
+		std::unique_ptr<IAudioArchitecture> audioArchitecture { nullptr };
 
 	private:
 
-		void assertThatAudioArchitectureHaveMinimumAnDevice();
+		void assertThatAudioArchitectureHaveMinimumAnDevice() noexcept;
 
-		void tryInitializeInstanceOfArchitecture(SupportedArchitectures _architecture);
+		void tryInitializeInstanceOfArchitecture(SupportedArchitectures _architecture) noexcept;
+
+		static std::vector <SupportedArchitectures> getArchitecturesCompiled() noexcept;
 
 	public:
 
 		/*!
-		  The constructor initialize the audio architecture. If not audio
-		  architecture supported an exception will be thrown.
+		  The constructor performs minor initialization tasks.  No exceptions
+		  can be thrown.
 
 		  If no API argument is specified and multiple API support has been
 		  compiled, the default order of use is JACK, ALSA, OSS (Linux
 		  systems) and ASIO, DS (Windows systems).
-
-		  @post The variable audioArchitecture has been initialized.
-
-		  @throw Exception if not audio architecture supported on the system.
 		*/
-		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
-
-		/**
-		 * @return The list of architectures supported, if not architecture
-		 *  support on the system an list empty will be returned.
-		 */
-		static std::vector<SupportedArchitectures> getArchitecturesCompiled();
-
-		/*!
-		  If a stream is running or open, it will be stopped and closed
-		  automatically.
-		*/
-		~Audio() noexcept;
+		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified) noexcept;
 
 		//! Returns the audio API specifier for the current instance of RtAudio.
-		SupportedArchitectures getCurrentApi() noexcept;
+		SupportedArchitectures getCurrentApi() const noexcept;
 
 		//! A public function that queries for the number of audio devices available.
 		/*!
@@ -111,7 +93,7 @@ namespace Maximilian
 		  is called, thus supporting devices connected \e after instantiation. If
 		  a system error occurs during processing, a warning will be issued.
 		*/
-		unsigned int getDeviceCount() noexcept;
+		unsigned int getDeviceCount() const noexcept;
 
 		//! Return an RtDeviceInfo structure for a specified device number.
 		/*!

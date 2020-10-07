@@ -8,29 +8,13 @@
 
 using namespace Maximilian;
 
-extern "C" void* alsaCallbackHandler(void* ptr)
-{
-	CallbackInfo* info = (CallbackInfo*)ptr;
-	LinuxAlsa* object = (LinuxAlsa*)info->object;
-	bool* isRunning = &info->isRunning;
-
-	while (*isRunning == true)
-	{
-		pthread_testcancel();
-		object->callbackEvent();
-	}
-
-	pthread_exit(nullptr);
-}
-
-
 LinuxAlsa::~LinuxAlsa()
 {
 	if (stream_.state not_eq StreamState::STREAM_CLOSED)
 	{ closeStream(); }
 }
 
-unsigned int LinuxAlsa::getDeviceCount()
+unsigned int LinuxAlsa::getDeviceCount() const noexcept
 {
 	return alsaHandle.getNumberOfDevices();
 }
@@ -729,59 +713,17 @@ foundDevice:
 	{
 		stream_.mode = mode;
 
-		// Setup callback thread.
-		stream_.callbackInfo.object = (void*)this;
+		isStreamRunning = true;
 
-		// Set the thread attributes for joinable and realtime scheduling
-		// priority (optional).  The higher priority will only take affect
-		// if the program is run as root or suid. Note, under Linux
-		// processes with CAP_SYS_NICE privilege, a user can change
-		// scheduling policy and priority (thus need not be root). See
-		// POSIX "capabilities".
-		pthread_attr_t attr;
-		pthread_attr_init(&attr);
-		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-#ifdef SCHED_RR // Undefined with some OSes (eg: NetBSD 1.6.x with GNU Pthread)
-		if (getOptionsFlags() == AudioStreamFlags::Schedule_Realtime)
-		{
-			struct sched_param param;
-			int priority = getOptionsPriority();
-			int min = sched_get_priority_min(SCHED_RR);
-			int max = sched_get_priority_max(SCHED_RR);
-			if (priority < min)
-			{ priority = min; }
-			else if (priority > max)
-			{ priority = max; }
-			param.sched_priority = priority;
-			pthread_attr_setschedparam(&attr, &param);
-			pthread_attr_setschedpolicy(&attr, SCHED_RR);
-		}
-		else
-		{
-			pthread_attr_setschedpolicy(&attr, SCHED_OTHER);
-		}
-#else
-		pthread_attr_setschedpolicy( &attr, SCHED_OTHER );
-#endif
-
-		stream_.callbackInfo.isRunning = true;
-		result = pthread_create(&stream_.callbackInfo.thread, &attr, alsaCallbackHandler, &stream_.callbackInfo);
-		pthread_attr_destroy(&attr);
-		if (result)
-		{
-			stream_.callbackInfo.isRunning = false;
-			errorText_ = "RtApiAlsa::error creating callback thread!";
-			goto error;
-		}
+		threads.push_back(std::thread{[&]{
+			while(isStreamRunning)
+			{
+				callbackEvent();
+			}
+		}});
 	}
 
 	return SUCCESS;
-
-error:
-
-	stream_.deviceBuffer.clear();
-
-	return FAILURE;
 }
 
 void LinuxAlsa::closeStream()
@@ -793,7 +735,8 @@ void LinuxAlsa::closeStream()
 		return;
 	}
 
-	stream_.callbackInfo.isRunning = false;
+	isStreamRunning = false;
+
 	pthread_mutex_lock(&stream_.mutex);
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
@@ -801,7 +744,11 @@ void LinuxAlsa::closeStream()
 		alsaHandle.waitThreadForSignal();
 	}
 	pthread_mutex_unlock(&stream_.mutex);
-	pthread_join(stream_.callbackInfo.thread, NULL);
+
+	for(auto& thread : threads)
+	{
+		thread.join();
+	}
 
 	if (stream_.state == StreamState::STREAM_RUNNING)
 	{
@@ -1067,7 +1014,7 @@ void LinuxAlsa::unlockMutex()
 {
 	pthread_mutex_unlock(&stream_.mutex);
 
-	AudioArchitecture::tickStreamTime();
+	IAudioArchitecture::tickStreamTime();
 }
 
 template <class Device>

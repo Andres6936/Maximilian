@@ -61,7 +61,7 @@ namespace Maximilian
 
 		// Getters
 
-		[[nodiscard]] UInt8 getNumberOfDevices() const;
+		[[nodiscard]] UInt8 getNumberOfDevices() const noexcept;
 
 		[[nodiscard]] bool isRunnable() const;
 

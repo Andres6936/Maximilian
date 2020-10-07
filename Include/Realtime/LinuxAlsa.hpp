@@ -2,27 +2,35 @@
 #define MAXIMILIAN_LINUXALSA_HPP
 
 #include "Audio.hpp"
-#include "AudioArchitecture.hpp"
+#include "IAudioArchitecture.hpp"
 
 #include <vector>
+#include <thread>
+#include <atomic>
 
 namespace Maximilian
 {
-	class LinuxAlsa : public AudioArchitecture
+	class LinuxAlsa : public IAudioArchitecture
 	{
+
+	private:
+
+		std::vector<std::thread> threads;
+
+		std::atomic_bool isStreamRunning = false;
 
 	public:
 
-		LinuxAlsa() = default;
+		LinuxAlsa() noexcept = default;
 
 		~LinuxAlsa() override;
 
-		SupportedArchitectures getCurrentArchitecture() override
+		SupportedArchitectures getCurrentArchitecture() const noexcept override
 		{
 			return SupportedArchitectures::Linux_Alsa;
 		};
 
-		unsigned int getDeviceCount() override;
+		unsigned int getDeviceCount() const noexcept override;
 
 		DeviceInfo getDeviceInfo(int device) override;
 

@@ -134,7 +134,7 @@ void AlsaHandle::determineTheNumberOfDevices()
 	}
 }
 
-UInt8 AlsaHandle::getNumberOfDevices() const
+UInt8 AlsaHandle::getNumberOfDevices() const noexcept
 {
 	return numberOfDevices;
 }

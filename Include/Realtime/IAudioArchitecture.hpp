@@ -1,29 +1,29 @@
-#ifndef MAXIMILIAN_AUDIOARCHITECTURE_HPP
-#define MAXIMILIAN_AUDIOARCHITECTURE_HPP
+#ifndef MAXIMILIAN_IAUDIOARCHITECTURE_HPP
+#define MAXIMILIAN_IAUDIOARCHITECTURE_HPP
 
-#include <functional>
 #include <sstream>
+#include <functional>
 
-#include "Exception.h"
-#include "Realtime/DeviceInfo.hpp"
-#include "Realtime/AudioStream.hpp"
-#include "Realtime/ConvertInfo.hpp"
-#include "Realtime/StreamOptions.hpp"
-#include "Realtime/StreamParameters.hpp"
+#include <Exception.h>
+#include "DeviceInfo.hpp"
+#include "AudioStream.hpp"
+#include "ConvertInfo.hpp"
+#include "StreamOptions.hpp"
+#include "StreamParameters.hpp"
 #include "Enum/SupportedArchitectures.hpp"
 
 namespace Maximilian
 {
 
 	/**
-	 * AudioArchitecture is a "controller" used to select an available audio i/o
+	 * IAudioArchitecture is a "controller" used to select an available audio i/o
 	 * interface.  It presents a common API for the user to call but
 	 * all functionality is implemented by the class RtApi and its
 	 * subclasses.  RtAudio creates an instance of an RtApi subclass
 	 * based on the user's API choice.  If no choice is made, RtAudio
 	 * attempts to make a "logical" API selection.
 	 */
-	class AudioArchitecture
+	class IAudioArchitecture
 	{
 
 	private:
@@ -72,15 +72,15 @@ namespace Maximilian
 		 */
 		AudioFormat format = AudioFormat::Float64;
 
-		void assertThatStreamIsNotOpen() const;
+		void assertThatStreamIsNotOpen();
 
-		template<typename T, typename O, typename I>
+		template <typename T, typename O, typename I>
 		void formatBufferAccordToTypesOfDate(T _type, O* outBuffer, I* inBuffer, ConvertInfo& info);
 
-		template<typename T, typename O, typename I>
+		template <typename T, typename O, typename I>
 		void formatBufferWithBitwise(T _scale, O* outBuffer, I* inBuffer, ConvertInfo& info);
 
-		template<typename O, typename I>
+		template <typename O, typename I>
 		void formatBufferWithoutScale(O* outBuffer, I* inBuffer, ConvertInfo& info);
 
 		template <typename T, typename O, typename I>
@@ -91,9 +91,9 @@ namespace Maximilian
 
 	public:
 
-		AudioArchitecture();
+		IAudioArchitecture() noexcept;
 
-		virtual ~AudioArchitecture();
+		virtual ~IAudioArchitecture();
 
 		// Static Methods
 
@@ -110,9 +110,9 @@ namespace Maximilian
 
 		// Virtual Methods
 
-		virtual unsigned int getDeviceCount() = 0;
+		virtual unsigned int getDeviceCount() const noexcept = 0;
 
-		virtual SupportedArchitectures getCurrentArchitecture() = 0;
+		virtual SupportedArchitectures getCurrentArchitecture() const noexcept = 0;
 
 		virtual DeviceInfo getDeviceInfo(int device) = 0;
 
@@ -134,7 +134,7 @@ namespace Maximilian
 
 		bool isStreamOpen() const
 		{
-			return stream_.state not_eq StreamState::STREAM_CLOSED;
+			return stream_.state != StreamState::STREAM_CLOSED;
 		};
 
 		bool isStreamRunning() const
@@ -219,7 +219,7 @@ namespace Maximilian
 		  Protected common method that throws an Exception (type =
 		  INVALID_USE) if a stream is not open.
 		*/
-		void verifyStream() const;
+		void verifyStream();
 
 		//! Protected common error method to allow global control over error handling.
 		void error(Exception::Type type);
@@ -239,4 +239,4 @@ namespace Maximilian
 }
 
 
-#endif //MAXIMILIAN_AUDIOARCHITECTURE_HPP
+#endif //MAXIMILIAN_IAUDIOARCHITECTURE_HPP
