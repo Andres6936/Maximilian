@@ -5902,7 +5902,7 @@ SupportedArchitectures Audio::getCurrentApi() const noexcept
 	return audioArchitecture->getCurrentArchitecture();
 }
 
-unsigned int Audio::getDeviceCount() noexcept
+unsigned int Audio::getDeviceCount() const noexcept
 {
 	return audioArchitecture->getDeviceCount();
 }

@@ -110,7 +110,7 @@ namespace Maximilian
 
 		// Virtual Methods
 
-		virtual unsigned int getDeviceCount() = 0;
+		virtual unsigned int getDeviceCount() const noexcept = 0;
 
 		virtual SupportedArchitectures getCurrentArchitecture() const noexcept = 0;
 

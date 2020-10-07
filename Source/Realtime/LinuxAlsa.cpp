@@ -14,7 +14,7 @@ LinuxAlsa::~LinuxAlsa()
 	{ closeStream(); }
 }
 
-unsigned int LinuxAlsa::getDeviceCount()
+unsigned int LinuxAlsa::getDeviceCount() const noexcept
 {
 	return alsaHandle.getNumberOfDevices();
 }

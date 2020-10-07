@@ -30,7 +30,7 @@ namespace Maximilian
 			return SupportedArchitectures::Linux_Alsa;
 		};
 
-		unsigned int getDeviceCount() override;
+		unsigned int getDeviceCount() const noexcept override;
 
 		DeviceInfo getDeviceInfo(int device) override;
 

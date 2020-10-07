@@ -93,7 +93,7 @@ namespace Maximilian
 		  is called, thus supporting devices connected \e after instantiation. If
 		  a system error occurs during processing, a warning will be issued.
 		*/
-		unsigned int getDeviceCount() noexcept;
+		unsigned int getDeviceCount() const noexcept;
 
 		//! Return an RtDeviceInfo structure for a specified device number.
 		/*!
