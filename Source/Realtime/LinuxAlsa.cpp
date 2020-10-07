@@ -859,7 +859,6 @@ void LinuxAlsa::stopStream() noexcept
 						   << snd_strerror(result) << "." << Levin::endl;
 
 			pthread_mutex_unlock(&stream_.mutex);
-			throw Exception("ErrorDropHandleException");
 		}
 	}
 
