@@ -94,9 +94,5 @@ int main()
 	std::cout << "\nMaximilian is playing ... press <enter> to quit.\n";
 	std::cin.get(input);
 
-	// Stop the stream
-	audio.stopStream();
-
-	if (audio.isStreamOpen())
-	{ audio.closeStream(); }
+	audio.closeStream();
 }
