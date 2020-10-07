@@ -5,7 +5,7 @@
 
 using namespace Maximilian;
 
-Maximilian::IAudioArchitecture::IAudioArchitecture()
+Maximilian::IAudioArchitecture::IAudioArchitecture() noexcept
 {
 	pthread_mutex_init(&stream_.mutex, nullptr);
 	outputParameters.setDeviceId(getDefaultOutputDevice());

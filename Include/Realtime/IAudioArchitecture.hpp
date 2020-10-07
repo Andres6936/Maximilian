@@ -91,7 +91,7 @@ namespace Maximilian
 
 	public:
 
-		IAudioArchitecture();
+		IAudioArchitecture() noexcept;
 
 		virtual ~IAudioArchitecture();
 
