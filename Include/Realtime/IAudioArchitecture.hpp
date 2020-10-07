@@ -1,6 +1,7 @@
 #ifndef MAXIMILIAN_IAUDIOARCHITECTURE_HPP
 #define MAXIMILIAN_IAUDIOARCHITECTURE_HPP
 
+#include <cstdint>
 #include <sstream>
 #include <functional>
 
@@ -206,11 +207,8 @@ namespace Maximilian
 		  "warning" message is reported and FAILURE is returned. A
 		  successful probe is indicated by a return value of SUCCESS.
 		*/
-		virtual bool probeDeviceOpen(
-				unsigned int device,
-				StreamMode mode,
-				unsigned int channels,
-				unsigned int firstChannel);
+		virtual bool probeDeviceOpen( std::uint32_t device, StreamMode mode,
+				std::uint32_t channels, std::uint32_t firstChannel) noexcept = 0;
 
 		//! A protected function used to increment the stream time.
 		void tickStreamTime();

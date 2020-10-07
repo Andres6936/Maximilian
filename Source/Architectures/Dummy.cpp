@@ -4,6 +4,12 @@
 
 using namespace Maximilian;
 
+bool Architectures::Dummy::probeDeviceOpen(std::uint32_t device, StreamMode mode, std::uint32_t channels,
+		std::uint32_t firstChannel) noexcept
+{
+	return false;
+}
+
 unsigned int Architectures::Dummy::getDeviceCount() const noexcept
 {
 	return -1;

@@ -13,9 +13,12 @@ namespace Maximilian::Architectures
 
 	public:
 
-		unsigned int getDeviceCount() const noexcept override;
+		bool probeDeviceOpen(std::uint32_t device, StreamMode mode, std::uint32_t channels,
+				std::uint32_t firstChannel) noexcept override;
 
 		SupportedArchitectures getCurrentArchitecture() const noexcept override;
+
+		unsigned int getDeviceCount() const noexcept override;
 
 		DeviceInfo getDeviceInfo(int device) override;
 

@@ -59,16 +59,6 @@ unsigned int IAudioArchitecture::getDefaultOutputDevice()
 	return 0;
 }
 
-bool IAudioArchitecture::probeDeviceOpen(
-		unsigned int device,
-		StreamMode mode,
-		unsigned int channels,
-		unsigned int firstChannel)
-{
-	// MUST be implemented in subclasses!
-	throw Exception("NotImplementedException");
-}
-
 void IAudioArchitecture::tickStreamTime()
 {
 	// Subclasses that do not provide their own implementation of
