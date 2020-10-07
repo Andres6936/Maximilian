@@ -25,7 +25,7 @@ namespace Maximilian
 
 		~LinuxAlsa() override;
 
-		SupportedArchitectures getCurrentArchitecture() override
+		SupportedArchitectures getCurrentArchitecture() const noexcept override
 		{
 			return SupportedArchitectures::Linux_Alsa;
 		};

@@ -112,7 +112,7 @@ namespace Maximilian
 
 		virtual unsigned int getDeviceCount() = 0;
 
-		virtual SupportedArchitectures getCurrentArchitecture() = 0;
+		virtual SupportedArchitectures getCurrentArchitecture() const noexcept = 0;
 
 		virtual DeviceInfo getDeviceInfo(int device) = 0;
 

@@ -5897,7 +5897,7 @@ extern "C" void *ossCallbackHandler( void *ptr )
 #endif
 
 
-SupportedArchitectures Audio::getCurrentApi() noexcept
+SupportedArchitectures Audio::getCurrentApi() const noexcept
 {
 	return audioArchitecture->getCurrentArchitecture();
 }

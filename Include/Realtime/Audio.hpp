@@ -85,7 +85,7 @@ namespace Maximilian
 		explicit Audio(SupportedArchitectures _architecture = SupportedArchitectures::Unspecified);
 
 		//! Returns the audio API specifier for the current instance of RtAudio.
-		SupportedArchitectures getCurrentApi() noexcept;
+		SupportedArchitectures getCurrentApi() const noexcept;
 
 		//! A public function that queries for the number of audio devices available.
 		/*!
