@@ -118,13 +118,13 @@ namespace Maximilian
 
 		void openStream(void _functionUser(std::vector <double>&));
 
-		virtual void closeStream();
+		virtual void closeStream() noexcept;
 
-		virtual void startStream() = 0;
+		virtual void startStream() noexcept = 0;
 
-		virtual void stopStream() = 0;
+		virtual void stopStream() noexcept = 0;
 
-		virtual void abortStream() = 0;
+		virtual void abortStream() noexcept = 0;
 
 		long getStreamLatency();
 

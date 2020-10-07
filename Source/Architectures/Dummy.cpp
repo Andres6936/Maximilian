@@ -19,17 +19,17 @@ DeviceInfo Architectures::Dummy::getDeviceInfo(int device)
 	return DeviceInfo();
 }
 
-void Architectures::Dummy::startStream()
+void Architectures::Dummy::startStream() noexcept
 {
 
 }
 
-void Architectures::Dummy::stopStream()
+void Architectures::Dummy::stopStream() noexcept
 {
 
 }
 
-void Architectures::Dummy::abortStream()
+void Architectures::Dummy::abortStream() noexcept
 {
 
 }

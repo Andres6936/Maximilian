@@ -34,13 +34,13 @@ namespace Maximilian
 
 		DeviceInfo getDeviceInfo(int device) override;
 
-		void closeStream() override;
+		void closeStream() noexcept override;
 
-		void startStream() override;
+		void startStream() noexcept override;
 
-		void stopStream() override;
+		void stopStream() noexcept override;
 
-		void abortStream() override;
+		void abortStream() noexcept override;
 
 		// This function is intended for internal use only.  It must be
 		// public because it is called by the internal callback handler,

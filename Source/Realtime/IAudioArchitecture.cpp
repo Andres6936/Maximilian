@@ -58,7 +58,7 @@ unsigned int IAudioArchitecture::getDefaultOutputDevice()
 	return 0;
 }
 
-void IAudioArchitecture::closeStream()
+void IAudioArchitecture::closeStream() noexcept
 {
 	// MUST be implemented in subclasses!
 	throw Exception("NotImplementedException");

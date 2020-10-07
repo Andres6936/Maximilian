@@ -19,11 +19,11 @@ namespace Maximilian::Architectures
 
 		DeviceInfo getDeviceInfo(int device) override;
 
-		void startStream() override;
+		void startStream() noexcept override;
 
-		void stopStream() override;
+		void stopStream() noexcept override;
 
-		void abortStream() override;
+		void abortStream() noexcept override;
 
 	};
 

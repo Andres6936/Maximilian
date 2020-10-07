@@ -726,7 +726,7 @@ foundDevice:
 	return SUCCESS;
 }
 
-void LinuxAlsa::closeStream()
+void LinuxAlsa::closeStream() noexcept
 {
 	if (stream_.state == StreamState::STREAM_CLOSED)
 	{
@@ -772,7 +772,7 @@ void LinuxAlsa::closeStream()
 	stream_.state = StreamState::STREAM_CLOSED;
 }
 
-void LinuxAlsa::startStream()
+void LinuxAlsa::startStream() noexcept
 {
 	// This method calls snd_pcm_prepare if the device isn't already in that state.
 
@@ -827,7 +827,7 @@ void LinuxAlsa::unlockMutexOfAPIHandle()
 	pthread_mutex_unlock(&stream_.mutex);
 }
 
-void LinuxAlsa::stopStream()
+void LinuxAlsa::stopStream() noexcept
 {
 	verifyStream();
 	if (stream_.state == StreamState::STREAM_STOPPED)
@@ -871,7 +871,7 @@ void LinuxAlsa::stopStream()
 	pthread_mutex_unlock(&stream_.mutex);
 }
 
-void LinuxAlsa::abortStream()
+void LinuxAlsa::abortStream() noexcept
 {
 	verifyStream();
 
