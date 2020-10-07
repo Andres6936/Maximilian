@@ -182,7 +182,7 @@ namespace Maximilian
 		  stream is not open.  A warning is issued if the stream is already
 		  running.
 		*/
-		void startStream();
+		void startStream() noexcept;
 
 		//! Stop a stream, allowing any samples remaining in the output queue to be played.
 		/*!
@@ -191,7 +191,7 @@ namespace Maximilian
 		  stream is not open.  A warning is issued if the stream is already
 		  stopped.
 		*/
-		void stopStream();
+		void stopStream() noexcept;
 
 		//! Stop a stream, discarding any samples remaining in the input/output queue.
 		/*!
@@ -200,7 +200,7 @@ namespace Maximilian
 		  stream is not open.  A warning is issued if the stream is already
 		  stopped.
 		*/
-		void abortStream();
+		void abortStream() noexcept;
 
 		//! Returns true if a stream is open and false if not.
 		bool isStreamOpen() const noexcept;

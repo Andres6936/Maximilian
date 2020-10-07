@@ -5929,17 +5929,17 @@ void Audio::closeStream() noexcept
 	return audioArchitecture->closeStream();
 }
 
-void Audio::startStream()
+void Audio::startStream() noexcept
 {
 	return audioArchitecture->startStream();
 }
 
-void Audio::stopStream()
+void Audio::stopStream() noexcept
 {
 	return audioArchitecture->stopStream();
 }
 
-void Audio::abortStream()
+void Audio::abortStream() noexcept
 {
 	return audioArchitecture->abortStream();
 }
