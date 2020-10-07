@@ -166,7 +166,7 @@ namespace Maximilian
 				 lowest allowable value is used.  The actual value used is
 				 returned via the structure argument.  The parameter is API dependent.
 		*/
-		void openStream(void _functionUser(std::vector <double>&));
+		void openStream(void _functionUser(std::vector <double>&)) noexcept;
 
 		//! A function that closes a stream and frees any associated stream memory.
 		/*!

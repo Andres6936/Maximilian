@@ -16,17 +16,18 @@ Maximilian::IAudioArchitecture::~IAudioArchitecture()
 	pthread_mutex_destroy(&stream_.mutex);
 }
 
-void IAudioArchitecture::assertThatStreamIsNotOpen()
+void IAudioArchitecture::assertThatStreamIsNotOpen() noexcept
 {
 	if (stream_.state != StreamState::STREAM_CLOSED)
 	{
 		Levin::Error() << "Assert: OpenStream, a stream is already open!" << Levin::endl;
-		throw Exception("StreamAlreadyOpenException");
+
+		closeStream();
 	}
 }
 
 
-void IAudioArchitecture::openStream(void _functionUser(std::vector <double>&))
+void IAudioArchitecture::openStream(void _functionUser(std::vector <double>&)) noexcept
 {
 	assertThatStreamIsNotOpen();
 

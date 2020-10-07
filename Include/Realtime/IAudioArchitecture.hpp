@@ -72,7 +72,7 @@ namespace Maximilian
 		 */
 		AudioFormat format = AudioFormat::Float64;
 
-		void assertThatStreamIsNotOpen();
+		void assertThatStreamIsNotOpen() noexcept;
 
 		template <typename T, typename O, typename I>
 		void formatBufferAccordToTypesOfDate(T _type, O* outBuffer, I* inBuffer, ConvertInfo& info);
@@ -116,7 +116,7 @@ namespace Maximilian
 
 		virtual DeviceInfo getDeviceInfo(int device) = 0;
 
-		void openStream(void _functionUser(std::vector <double>&));
+		void openStream(void _functionUser(std::vector <double>&)) noexcept;
 
 		virtual void closeStream() noexcept = 0;
 

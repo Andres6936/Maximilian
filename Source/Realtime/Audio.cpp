@@ -192,7 +192,7 @@ Audio::Audio(SupportedArchitectures _architecture) noexcept
 	assertThatAudioArchitectureHaveMinimumAnDevice();
 }
 
-void Audio::openStream(void _functionUser(std::vector <double>&))
+void Audio::openStream(void _functionUser(std::vector <double>&)) noexcept
 {
 	return audioArchitecture->openStream(_functionUser);
 }
