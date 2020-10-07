@@ -118,7 +118,7 @@ namespace Maximilian
 
 		void openStream(void _functionUser(std::vector <double>&));
 
-		virtual void closeStream() noexcept;
+		virtual void closeStream() noexcept = 0;
 
 		virtual void startStream() noexcept = 0;
 

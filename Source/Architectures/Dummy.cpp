@@ -19,6 +19,11 @@ DeviceInfo Architectures::Dummy::getDeviceInfo(int device)
 	return DeviceInfo();
 }
 
+void Architectures::Dummy::closeStream() noexcept
+{
+
+}
+
 void Architectures::Dummy::startStream() noexcept
 {
 

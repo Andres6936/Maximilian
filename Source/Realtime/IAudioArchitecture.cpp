@@ -58,12 +58,6 @@ unsigned int IAudioArchitecture::getDefaultOutputDevice()
 	return 0;
 }
 
-void IAudioArchitecture::closeStream() noexcept
-{
-	// MUST be implemented in subclasses!
-	throw Exception("NotImplementedException");
-}
-
 bool IAudioArchitecture::probeDeviceOpen(
 		unsigned int device,
 		StreamMode mode,
