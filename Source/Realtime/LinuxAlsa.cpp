@@ -514,13 +514,15 @@ foundDevice:
 	// minimum device channel number > than the value requested by the user.
 	stream_.nUserChannels[index] = channels;
 	unsigned int value;
-	result = snd_pcm_hw_params_get_channels_max(hw_params, &value);
+
+	const std::int32_t _result = snd_pcm_hw_params_get_channels_max(hw_params, &value);
+
 	unsigned int deviceChannels = value;
-	if (result < 0 || deviceChannels < channels + firstChannel)
+	if (_result < 0 || deviceChannels < channels + firstChannel)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: requested channel parameters not supported by device (" << name
-					 << "), " << snd_strerror(result) << ".";
+					 << "), " << snd_strerror(_result) << ".";
 		errorText_ = errorStream_.str();
 		return FAILURE;
 	}
