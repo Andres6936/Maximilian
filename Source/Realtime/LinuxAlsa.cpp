@@ -385,14 +385,31 @@ foundDevice:
   snd_pcm_hw_params_dump( hw_params, out );
 #endif
 
+	auto assertThatHardwareParametersHasBeenConfigured = [&](const std::int32_t _result){
+		if (_result < 0)
+		{
+			snd_pcm_close(phandle);
+			Levin::Error() << "RtApiAlsa::probeDeviceOpen: error setting pcm device (" << name
+						   << ") access, " << snd_strerror(_result) << ".";
+
+			return false;
+		}
+
+		return true;
+	};
+
 	// Set access ... check user preference.
 	if (getOptionsFlags() == AudioStreamFlags::Non_Interleaved)
 	{
 		stream_.userInterleaved = false;
-		result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_NONINTERLEAVED);
-		if (result < 0)
+
+		if (std::int32_t result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_NONINTERLEAVED); result < 0)
 		{
 			result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
+
+			// Exit of function and clear the structures
+			if (assertThatHardwareParametersHasBeenConfigured(result) == false) return false;
+
 			stream_.deviceInterleaved[index] = true;
 		}
 		else
@@ -403,25 +420,20 @@ foundDevice:
 	else
 	{
 		stream_.userInterleaved = true;
-		result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
-		if (result < 0)
+
+		if (std::int32_t result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED); result < 0)
 		{
 			result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_NONINTERLEAVED);
+
+			// Exit of function and clear the structures
+			if (assertThatHardwareParametersHasBeenConfigured(result) == false) return false;
+
 			stream_.deviceInterleaved[index] = false;
 		}
 		else
 		{
 			stream_.deviceInterleaved[index] = true;
 		}
-	}
-
-	if (result < 0)
-	{
-		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting pcm device (" << name << ") access, "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		return FAILURE;
 	}
 
 	// Determine how to set the device format.
