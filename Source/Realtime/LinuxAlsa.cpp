@@ -258,7 +258,6 @@ bool LinuxAlsa::probeDeviceOpen( std::uint32_t device, StreamMode mode,
 
 	std::int32_t totalOfDevices = 0;
 
-	int result;
 	char name[64];
 	snd_ctl_t* chandle;
 
@@ -270,28 +269,34 @@ bool LinuxAlsa::probeDeviceOpen( std::uint32_t device, StreamMode mode,
 	{
 		// Count cards and devices
 		std::int32_t card = -1;
+
+		// Tries to determine the next card from given card number.
+		// If card number is -1, then the first available card is returned.
+		// If the result card number is -1, no more cards are available.
+
+		// snd_card_next return zero if success, otherwise a negative error
+		// 	code.
 		snd_card_next(&card);
 
 		while (card >= 0)
 		{
 			sprintf(name, "hw:%d", card);
-			result = snd_ctl_open(&chandle, name, SND_CTL_NONBLOCK);
-			snd_config_update_free_global();
 
-			if (result < 0)
+			if (int32_t result = snd_ctl_open(&chandle, name, SND_CTL_NONBLOCK); result < 0)
 			{
-				errorStream_ << "RtApiAlsa::probeDeviceOpen: control open, card = " << card << ", "
+				Levin::Error() << "Linux Alsa: control open, card = " << card << ", "
 							 << snd_strerror(result) << ".";
-				errorText_ = errorStream_.str();
-				return FAILURE;
+				return false;
 			}
+
+			snd_config_update_free_global();
 
 			std::int32_t subdevice = -1;
 
 			while (1)
 			{
 				// Feature C++17, If initialization
-				if (result = snd_ctl_pcm_next_device(chandle, &subdevice); result < 0) break;
+				if (std::int32_t result = snd_ctl_pcm_next_device(chandle, &subdevice); result < 0) break;
 
 				if (subdevice < 0) break;
 
@@ -303,6 +308,7 @@ bool LinuxAlsa::probeDeviceOpen( std::uint32_t device, StreamMode mode,
 				}
 				totalOfDevices++;
 			}
+
 			snd_ctl_close(chandle);
 			snd_card_next(&card);
 		}
@@ -344,10 +350,10 @@ foundDevice:
 
 	snd_pcm_t* phandle;
 	int openMode = SND_PCM_ASYNC;
-	result = snd_pcm_open(&phandle, name, stream, openMode);
+
 	snd_config_update_free_global();
 
-	if (result < 0)
+	if (std::int32_t result = snd_pcm_open(&phandle, name, stream, openMode); result < 0)
 	{
 		if (mode == StreamMode::OUTPUT)
 		{
@@ -364,8 +370,8 @@ foundDevice:
 	// Fill the parameter structure.
 	snd_pcm_hw_params_t* hw_params;
 	snd_pcm_hw_params_alloca(&hw_params);
-	result = snd_pcm_hw_params_any(phandle, hw_params);
-	if (result < 0)
+
+	if (std::int32_t result = snd_pcm_hw_params_any(phandle, hw_params); result < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error getting pcm device (" << name << ") parameters, "
@@ -449,8 +455,7 @@ foundDevice:
 		return false;
 	}
 
-	result = snd_pcm_hw_params_set_format(phandle, hw_params, deviceFormat);
-	if (result < 0)
+	if (std::int32_t result = snd_pcm_hw_params_set_format(phandle, hw_params, deviceFormat); result < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting pcm device (" << name << ") data format, "
@@ -507,8 +512,7 @@ foundDevice:
 		return FAILURE;
 	}
 
-	result = snd_pcm_hw_params_get_channels_min(hw_params, &value);
-	if (result < 0)
+	if (std::int32_t result = snd_pcm_hw_params_get_channels_min(hw_params, &value); result < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error getting minimum channels for device (" << name << "), "
@@ -522,8 +526,7 @@ foundDevice:
 	stream_.nDeviceChannels[index] = deviceChannels;
 
 	// Set the device channels.
-	result = snd_pcm_hw_params_set_channels(phandle, hw_params, deviceChannels);
-	if (result < 0)
+	if (std::int32_t result = snd_pcm_hw_params_set_channels(phandle, hw_params, deviceChannels); result < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting channels for device (" << name << "), "
@@ -535,8 +538,8 @@ foundDevice:
 	// Set the buffer (or period) size.
 	int dir = 0;
 	snd_pcm_uframes_t periodSize = getBufferFrames();
-	result = snd_pcm_hw_params_set_period_size_near(phandle, hw_params, &periodSize, &dir);
-	if (result < 0)
+
+	if (std::int32_t result = snd_pcm_hw_params_set_period_size_near(phandle, hw_params, &periodSize, &dir); result < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting period size for device (" << name << "), "
@@ -557,8 +560,8 @@ foundDevice:
 
 	if (periods < 2)
 	{ periods = 4; } // a fairly safe default value
-	result = snd_pcm_hw_params_set_periods_near(phandle, hw_params, &periods, &dir);
-	if (result < 0)
+
+	if (std::int32_t result = snd_pcm_hw_params_set_periods_near(phandle, hw_params, &periods, &dir); result < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting periods for device (" << name << "), "
@@ -580,8 +583,7 @@ foundDevice:
 	stream_.bufferSize = getBufferFrames();
 
 	// Install the hardware configuration
-	result = snd_pcm_hw_params(phandle, hw_params);
-	if (result < 0)
+	if (std::int32_t result = snd_pcm_hw_params(phandle, hw_params); result < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error installing hardware configuration on device (" << name
@@ -613,8 +615,7 @@ foundDevice:
 	snd_pcm_sw_params_get_boundary(sw_params, &val);
 	snd_pcm_sw_params_set_silence_size(phandle, sw_params, val);
 
-	result = snd_pcm_sw_params(phandle, sw_params);
-	if (result < 0)
+	if (std::int32_t result = snd_pcm_sw_params(phandle, sw_params); result < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error installing software configuration on device (" << name
