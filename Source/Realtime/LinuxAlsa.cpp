@@ -480,7 +480,8 @@ foundDevice:
 	stream_.doByteSwap[index] = false;
 	if (deviceFormat not_eq SND_PCM_FORMAT_S8)
 	{
-		result = snd_pcm_format_cpu_endian(deviceFormat);
+		const std::int32_t result = snd_pcm_format_cpu_endian(deviceFormat);
+
 		if (result == 0)
 		{
 			stream_.doByteSwap[index] = true;
@@ -500,7 +501,7 @@ foundDevice:
 	auto sampleRate = std::make_unique <unsigned int>(getSampleRate());
 
 	// Set the sample rate.
-	if (snd_pcm_hw_params_set_rate_near(phandle, hw_params, sampleRate.get(), nullptr) < 0)
+	if (std::int32_t result = snd_pcm_hw_params_set_rate_near(phandle, hw_params, sampleRate.get(), nullptr) < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting sample rate on device (" << name << "), "
