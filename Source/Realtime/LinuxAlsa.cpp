@@ -389,7 +389,7 @@ foundDevice:
 		if (_result < 0)
 		{
 			snd_pcm_close(phandle);
-			Levin::Error() << "RtApiAlsa::probeDeviceOpen: error setting pcm device (" << name
+			Levin::Error() << "Linux Alsa: error setting pcm device (" << name
 						   << ") access, " << snd_strerror(_result) << ".";
 
 			return false;
