@@ -242,7 +242,17 @@ bool LinuxAlsa::probeDeviceOpen( std::uint32_t device, StreamMode mode,
 #endif
 
 	// Convert the StreamMode enum to int for use in arrays
-	int index = (int)mode;
+	const std::int32_t index = std::invoke([&]{
+		if (mode == StreamMode::OUTPUT) {
+			return 0;
+		} else if (mode == StreamMode::INPUT) {
+			return 1;
+		} else if (mode == StreamMode::DUPLEX) {
+			return 2;
+		} else {
+			return -75;
+		}
+	});
 
 	// I'm not using the "plug" interface ... too much inconsistent behavior.
 
@@ -431,7 +441,8 @@ foundDevice:
 	if (deviceFormat == SND_PCM_FORMAT_UNKNOWN)
 	{
 		Levin::Severe() << "Linux Alsa: Data format not supported." << Levin::endl;
-		throw Exception("DataFormatNotSupportedException");
+
+		return false;
 	}
 
 	result = snd_pcm_hw_params_set_format(phandle, hw_params, deviceFormat);
@@ -654,7 +665,7 @@ foundDevice:
 	{
 		Levin::Error() << "Linux Alsa: probeDeviceOpen, The index is invalid." << Levin::endl;
 
-		throw Exception("IndexInvalidException");
+		return false;
 	}
 
 	if (stream_.doConvertBuffer[index])
