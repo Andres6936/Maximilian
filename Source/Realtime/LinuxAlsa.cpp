@@ -256,8 +256,9 @@ bool LinuxAlsa::probeDeviceOpen( std::uint32_t device, StreamMode mode,
 
 	// I'm not using the "plug" interface ... too much inconsistent behavior.
 
-	unsigned nDevices = 0;
-	int result, subdevice, card;
+	std::int32_t totalOfDevices = 0;
+
+	int result;
 	char name[64];
 	snd_ctl_t* chandle;
 
@@ -268,8 +269,9 @@ bool LinuxAlsa::probeDeviceOpen( std::uint32_t device, StreamMode mode,
 	else
 	{
 		// Count cards and devices
-		card = -1;
+		std::int32_t card = -1;
 		snd_card_next(&card);
+
 		while (card >= 0)
 		{
 			sprintf(name, "hw:%d", card);
@@ -283,38 +285,40 @@ bool LinuxAlsa::probeDeviceOpen( std::uint32_t device, StreamMode mode,
 				errorText_ = errorStream_.str();
 				return FAILURE;
 			}
-			subdevice = -1;
+
+			std::int32_t subdevice = -1;
+
 			while (1)
 			{
-				result = snd_ctl_pcm_next_device(chandle, &subdevice);
-				if (result < 0)
-				{ break; }
-				if (subdevice < 0)
-				{ break; }
-				if (nDevices == device)
+				// Feature C++17, If initialization
+				if (result = snd_ctl_pcm_next_device(chandle, &subdevice); result < 0) break;
+
+				if (subdevice < 0) break;
+
+				if (totalOfDevices == device)
 				{
 					sprintf(name, "hw:%d,%d", card, subdevice);
 					snd_ctl_close(chandle);
 					goto foundDevice;
 				}
-				nDevices++;
+				totalOfDevices++;
 			}
 			snd_ctl_close(chandle);
 			snd_card_next(&card);
 		}
 
-		if (nDevices == 0)
+		if (totalOfDevices == 0)
 		{
 			// This should not happen because a check is made before this function is called.
-			errorText_ = "RtApiAlsa::probeDeviceOpen: no devices found!";
-			return FAILURE;
+			Levin::Error() << "Linux Alsa: no devices found!" << Levin::endl;
+			return false;
 		}
 
-		if (device >= nDevices)
+		if (device >= totalOfDevices)
 		{
 			// This should not happen because a check is made before this function is called.
-			errorText_ = "RtApiAlsa::probeDeviceOpen: device ID is invalid!";
-			return FAILURE;
+			Levin::Error() << "Linux Alsa: device ID is invalid!" << Levin::endl;
+			return false;
 		}
 	}
 
