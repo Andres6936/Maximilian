@@ -338,15 +338,16 @@ foundDevice:
 		this->saveDeviceInfo();
 	}
 
-	snd_pcm_stream_t stream;
-	if (mode == StreamMode::OUTPUT)
-	{
-		stream = SND_PCM_STREAM_PLAYBACK;
-	}
-	else
-	{
-		stream = SND_PCM_STREAM_CAPTURE;
-	}
+	const snd_pcm_stream_t stream = std::invoke([&]{
+		if (mode == StreamMode::OUTPUT)
+		{
+			return SND_PCM_STREAM_PLAYBACK;
+		}
+		else
+		{
+			return SND_PCM_STREAM_CAPTURE;
+		}
+	});
 
 	snd_pcm_t* phandle;
 	int openMode = SND_PCM_ASYNC;
