@@ -5,13 +5,6 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 
-# Support to Coverage Metrics {gcov} only in
-# mode of Debug configuration
-IF (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    MESSAGE("Support to Coverage - ON")
-    SET(CMAKE_CXX_FLAGS "--coverage")
-ENDIF ()
-
 INCLUDE_DIRECTORIES(Include)
 INCLUDE_DIRECTORIES(Source/Realtime/PRIVATE)
 
