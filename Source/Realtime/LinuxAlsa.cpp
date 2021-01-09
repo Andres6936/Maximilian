@@ -243,13 +243,15 @@ bool LinuxAlsa::probeDeviceOpen( const std::uint32_t device, const StreamMode mo
 
 	// Convert the StreamMode enum to int for use in arrays
 	const std::int32_t index = std::invoke([&]{
-		if (mode == StreamMode::OUTPUT) {
+		switch (mode)
+		{
+		case StreamMode::OUTPUT:
 			return 0;
-		} else if (mode == StreamMode::INPUT) {
+		case StreamMode::INPUT:
 			return 1;
-		} else if (mode == StreamMode::DUPLEX) {
+		case StreamMode::DUPLEX:
 			return 2;
-		} else {
+		case StreamMode::UNINITIALIZED:
 			return -75;
 		}
 	});
