@@ -207,8 +207,8 @@ namespace Maximilian
 		  "warning" message is reported and FAILURE is returned. A
 		  successful probe is indicated by a return value of SUCCESS.
 		*/
-		virtual bool probeDeviceOpen( std::uint32_t device, StreamMode mode,
-				std::uint32_t channels, std::uint32_t firstChannel) noexcept = 0;
+		virtual bool probeDeviceOpen( const std::uint32_t device, const StreamMode mode,
+				const std::uint32_t channels, const std::uint32_t firstChannel) noexcept = 0;
 
 		//! A protected function used to increment the stream time.
 		void tickStreamTime();

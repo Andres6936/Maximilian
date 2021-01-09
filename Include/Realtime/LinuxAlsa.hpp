@@ -52,8 +52,8 @@ namespace Maximilian
 
 		std::vector <DeviceInfo> devices_;
 
-		bool probeDeviceOpen( std::uint32_t device, StreamMode mode,
-				std::uint32_t channels, std::uint32_t firstChannel) noexcept override;
+		bool probeDeviceOpen( const std::uint32_t device, const StreamMode mode,
+				const std::uint32_t channels, const std::uint32_t firstChannel) noexcept override;
 
 		void saveDeviceInfo();
 

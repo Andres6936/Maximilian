@@ -233,8 +233,8 @@ void LinuxAlsa::saveDeviceInfo()
 	}
 }
 
-bool LinuxAlsa::probeDeviceOpen( std::uint32_t device, StreamMode mode,
-		std::uint32_t channels, std::uint32_t firstChannel) noexcept
+bool LinuxAlsa::probeDeviceOpen( const std::uint32_t device, const StreamMode mode,
+		const std::uint32_t channels, const std::uint32_t firstChannel) noexcept
 {
 #if defined(__RTAUDIO_DEBUG__)
 	snd_output_t *out;
