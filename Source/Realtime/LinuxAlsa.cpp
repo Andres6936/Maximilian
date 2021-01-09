@@ -1,12 +1,14 @@
 #include "Realtime/LinuxAlsa.hpp"
 #include "PRIVATE/Linux/ALSA/AlsaHandle.hpp"
 
+#include <Levin/Levin.hpp>
 #include <alsa/asoundlib.h>
 
 #include <array>
 #include <climits>
 
 using namespace Maximilian;
+using namespace Levin;
 
 LinuxAlsa::~LinuxAlsa()
 {
@@ -70,8 +72,8 @@ DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	if (int e = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
 	{
 		snd_config_update_free_global();
-		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("
-					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+		Log::Warning("Linux Alsa: getDeviceInfo, snd_pcm_open error for device ({}), {}.",
+				name.data(), snd_strerror(e));
 
 		goto captureProbe;
 	}
@@ -83,8 +85,8 @@ DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	{
 		snd_pcm_close(phandle);
 
-		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_hw_params error for device ("
-					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+		Log::Warning("Linux Alsa: getDeviceInfo, snd_pcm_hw_params error for device ({}), {}.",
+				name.data(), snd_strerror(e));
 
 		goto captureProbe;
 	}
@@ -95,8 +97,8 @@ DeviceInfo LinuxAlsa::getDeviceInfo(int device)
 	{
 		snd_pcm_close(phandle);
 
-		Levin::Warn() << "Linux Alsa: getDeviceInfo, error getting device ("
-					  << name.data() << ") output channels, " << snd_strerror(e) << "." << Levin::endl;
+		Log::Warning("Linux Alsa: getDeviceInfo, error getting device ({}) output channels, {}.",
+				name.data(), snd_strerror(e));
 
 		goto captureProbe;
 	}
@@ -108,7 +110,7 @@ captureProbe:
 
 	if (not AlsaHandle::isAvailableForCapture(*handle, *pcminfo))
 	{
-		Levin::Debug() << "Not support for capture found in the device: " << name.data() << Levin::endl;
+		Log::Debug("Not support for capture found in the device: {}", name.data());
 		// Close the handle
 		snd_ctl_close(handle);
 
@@ -122,8 +124,9 @@ captureProbe:
 	if (int e = snd_pcm_open(&phandle, name.data(), SND_PCM_STREAM_CAPTURE, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
 	{
 		snd_config_update_free_global();
-		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("
-					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+
+		Log::Warning("Linux Alsa: getDeviceInfo, snd_pcm_open error for device ({}), {}.",
+				name.data(), snd_strerror(e));
 
 		if (info.outputChannels == 0) return info;
 		goto probeParameters;
@@ -136,8 +139,8 @@ captureProbe:
 	{
 		snd_pcm_close(phandle);
 
-		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_hw_params error for device ("
-					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+		Log::Warning("Linux Alsa: getDeviceInfo, snd_pcm_hw_params error for device ({}), {}.",
+				name.data(), snd_strerror(e));
 
 		if (info.outputChannels == 0)
 		{ return info; }
@@ -148,8 +151,8 @@ captureProbe:
 	{
 		snd_pcm_close(phandle);
 
-		Levin::Warn() << "Linux Alsa: getDeviceInfo, error getting device ("
-					  << name.data() << ") input channels, " << snd_strerror(e) << "." << Levin::endl;
+		Log::Warning("Linux Alsa: getDeviceInfo, error getting device ({}) input channels, {}.",
+				name.data(), snd_strerror(e));
 
 		if (info.outputChannels == 0)
 		{ return info; }

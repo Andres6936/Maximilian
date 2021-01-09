@@ -9,9 +9,7 @@ INCLUDE_DIRECTORIES(Include)
 INCLUDE_DIRECTORIES(Source/Realtime/PRIVATE)
 
 # Added the library Levin for purpose of log
-INCLUDE_DIRECTORIES(Library)
-# Here find the .a, .so, .dll, .lib
-LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/Library)
+ADD_SUBDIRECTORY(Library/Levin/)
 
 ADD_DEFINITIONS(-D__LINUX_ALSA__)
 
@@ -31,7 +29,7 @@ ADD_LIBRARY(Maximilian
 
 TARGET_LINK_LIBRARIES(Maximilian PRIVATE pthread asound)
 # Link to Maximilian the library Levin
-TARGET_LINK_LIBRARIES(Maximilian PRIVATE Levin)
+TARGET_LINK_LIBRARIES(Maximilian PRIVATE Levin::Framework)
 
 ADD_EXECUTABLE(ExampleMain player.cpp)
 TARGET_LINK_LIBRARIES(ExampleMain PRIVATE Maximilian)
