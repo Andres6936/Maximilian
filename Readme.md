@@ -1,6 +1,7 @@
 ## What's Maximilian?
 
-Maximilian is an audio synthesis and signal processing library written in C++. It's cross-platform compatible with MacOS, Windows, Linux and IOS systems.  The main features are:
+Maximilian is an audio synthesis and signal processing library written in C++. It's cross-platform compatible with
+MacOS, Windows, Linux and IOS systems. The main features are:
 
 - sample playback, recording and looping
 - read from WAV and OGG files.
@@ -14,20 +15,20 @@ Maximilian is an audio synthesis and signal processing library written in C++. I
 - realtime music information retrieval functions: spectrum analysis, spectral features, octave analysis, Bark scale analysis, and MFCCs
 - example projects for Windows and MacOS, using command line and OpenFrameworks environments
 
+### Basic Examples
 
-### BASIC EXAMPLES
+You can choose between using RTAudio and PortAudio drivers in player.h by uncommenting the appropriate line. To use
+PortAudio, you will need to compile the portAudio library from http://http://www.portaudio.com/ and link it with your
+executable.
 
-You can choose between using RTAudio and PortAudio drivers in player.h by uncommenting the appropriate line.  To use PortAudio, you will need to compile the portAudio library from http://http://www.portaudio.com/ and link it with your executable.
+Examples demonstrating different features can be found in the maximilian_examples folder. To try them, replace the
+contents of main.cpp with the contents of a tutorial file and compile.
 
-Examples demonstrating different features can be found in the maximilian_examples folder.  To try them, replace the contents of main.cpp with the contents of a tutorial file and compile.
-
-
-#### MAC OSX XCODE PROJECT
+#### MAC OSX XCode Project
 
 You can run the examples using the 'maximilianTest' XCode 3 project provided.
 
-
-#### WINDOWS VISUAL STUDIO 2010 PROJECT
+#### Windows Visual Studio 2010 Project
 
 This is in the maximilianTestWindowsVS2010 folder. You will need to install the DirectX SDK, so that the program can use DirectSound.
 
@@ -53,14 +54,3 @@ With Jack:
 then:
 > ./maximilian
 
-
-
-#### OPENFRAMEWORKS
-
-Maximilian works well with the OpenFrameworks C++ creative coding toolkit (http://www.openframeworks.cc).
-
-In the ofxMaxim directory you will find examples to run in Windows, OSX and iOS, including FFT analysis and granular synthesis.  
-
-You can install the ofxMaxim addon by copying the ofxMaxim/ofxMaxim folder into your openframeworks addons directory.
-
-Important: when using Maximilian on OSX, link against the Accelerate framework.
