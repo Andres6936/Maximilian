@@ -1,9 +1,10 @@
 #include <Exception.h>
 #include "AlsaHandle.hpp"
 
-#include "Levin/Log.h"
+#include <Levin/Log.hpp>
 
 using namespace Maximilian;
+using namespace Levin;
 
 AlsaHandle::AlsaHandle() noexcept
 {
@@ -11,8 +12,8 @@ AlsaHandle::AlsaHandle() noexcept
 
 	if (pthread_cond_init(&runnable_cv, nullptr))
 	{
-		Levin::Severe() << "Construct of Linux Alsa: ";
-		Levin::Severe() << "Error initializing pthread condition variable." << Levin::endl;
+		Log::Emergency("Construct of Linux Alsa: ");
+		Log::Emergency("Error initializing pthread condition variable.");
 	}
 }
 
@@ -96,9 +97,8 @@ void AlsaHandle::determineTheNumberOfDevices()
 
 		if (int e = snd_ctl_open(&handle, name.data(), 0) < 0)
 		{
-			Levin::Warn() << "Linux Alsa: getDeviceCount(): ";
-			Levin::Warn() << "Control open, card = " << card << ", ";
-			Levin::Warn() << snd_strerror(e) << "." << Levin::endl;
+			Log::Warning("Linux Alsa: getDeviceCount(): Control open, card = {}, {}.",
+					card, snd_strerror(e));
 
 			snd_ctl_close(handle);
 		}
@@ -109,9 +109,8 @@ void AlsaHandle::determineTheNumberOfDevices()
 		{
 			if (int e = snd_ctl_pcm_next_device(handle, &subDevice) < 0)
 			{
-				Levin::Warn() << "Linux Alsa: getDeviceCount(): ";
-				Levin::Warn() << "Control next device, card = " << card;
-				Levin::Warn() << ", " << snd_strerror(e) << "." << Levin::endl;
+				Log::Warning("Linux Alsa: getDeviceCount(): Control next device, card = {}, {}.",
+						card, snd_strerror(e));
 				break;
 			}
 
@@ -122,8 +121,8 @@ void AlsaHandle::determineTheNumberOfDevices()
 	}
 	else
 	{
-		Levin::Error() << "Linux Alsa: determineTheNumberOfDevices(): ";
-		Levin::Error() << "Can't determine the number of devices." << Levin::endl;
+		Log::Error(
+				"Linux Alsa: determineTheNumberOfDevices(): Can't determine the number of devices.");
 	}
 
 	if (handle not_eq nullptr)

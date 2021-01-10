@@ -507,13 +507,13 @@ namespace Maximilian
 		// return a printable summary of the wav file
 		void getSummary()
 		{
-			Levin::Info() << "Format: " << myFormat << Levin::endl;
-			Levin::Info() << "Channels: " << myChannels << Levin::endl;
-			Levin::Info() << "Data Size: " << myDataSize << Levin::endl;
-			Levin::Info() << "Byte Rate: " << myByteRate << Levin::endl;
-			Levin::Info() << "Block Align: " << myBlockAlign << Levin::endl;
-			Levin::Info() << "Sample Rate: " << mySampleRate << Levin::endl;
-			Levin::Info() << "Bits Per Sample: " << myBitsPerSample << Levin::endl;
+			Levin::Log::Informational("Format: {}", myFormat);
+			Levin::Log::Informational("Channels: {}", myChannels);
+			Levin::Log::Informational("Data Size: {}", myDataSize);
+			Levin::Log::Informational("Byte Rate: {}", myByteRate);
+			Levin::Log::Informational("Block Align: {}", myBlockAlign);
+			Levin::Log::Informational("Sample Rate: {}", mySampleRate);
+			Levin::Log::Informational("Bits Per Sample: {}", myBitsPerSample);
 		}
 
 		void normalise(float maxLevel = 0.99);  //0 < maxLevel < 1.0

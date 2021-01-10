@@ -187,8 +187,8 @@ probeParameters:
 
 	if (int e = snd_pcm_open(&phandle, name.data(), stream, SND_PCM_ASYNC | SND_PCM_NONBLOCK) < 0)
 	{
-		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_open error for device ("
-					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+		Log::Warning("Linux Alsa: getDeviceInfo, snd_pcm_open error for device ({}), {}.",
+				name.data(), snd_strerror(e));
 
 		return info;
 	}
@@ -198,8 +198,8 @@ probeParameters:
 	{
 		snd_pcm_close(phandle);
 
-		Levin::Warn() << "Linux Alsa: getDeviceInfo, snd_pcm_hw_params error for device ("
-					  << name.data() << "), " << snd_strerror(e) << "." << Levin::endl;
+		Log::Warning("Linux Alsa: getDeviceInfo, snd_pcm_hw_params error for device ({}), {}.",
+				name.data(), snd_strerror(e));
 
 		return info;
 	}
@@ -289,8 +289,7 @@ bool LinuxAlsa::probeDeviceOpen( const std::uint32_t device, const StreamMode mo
 
 			if (int32_t result = snd_ctl_open(&chandle, name, SND_CTL_NONBLOCK); result < 0)
 			{
-				Levin::Error() << "Linux Alsa: control open, card = " << card << ", "
-							 << snd_strerror(result) << ".";
+				Log::Error("Linux Alsa: control open, card = {}, {}.", card, snd_strerror(result));
 				return false;
 			}
 
@@ -321,14 +320,14 @@ bool LinuxAlsa::probeDeviceOpen( const std::uint32_t device, const StreamMode mo
 		if (totalOfDevices == 0)
 		{
 			// This should not happen because a check is made before this function is called.
-			Levin::Error() << "Linux Alsa: no devices found!" << Levin::endl;
+			Log::Error("Linux Alsa: no devices found!");
 			return false;
 		}
 
 		if (device >= totalOfDevices)
 		{
 			// This should not happen because a check is made before this function is called.
-			Levin::Error() << "Linux Alsa: device ID is invalid!" << Levin::endl;
+			Log::Error("Linux Alsa: device ID is invalid!");
 			return false;
 		}
 	}
@@ -395,9 +394,8 @@ foundDevice:
 		if (_result < 0)
 		{
 			snd_pcm_close(phandle);
-			Levin::Error() << "Linux Alsa: error setting pcm device (" << name
-						   << ") access, " << snd_strerror(_result) << ".";
-
+			Log::Error("Linux Alsa: error setting pcm device ({}) access, {}.",
+					name, snd_strerror(_result));
 			return false;
 		}
 
@@ -468,7 +466,7 @@ foundDevice:
 
 	if (deviceFormat == SND_PCM_FORMAT_UNKNOWN)
 	{
-		Levin::Severe() << "Linux Alsa: Data format not supported." << Levin::endl;
+		Log::Emergency("Linux Alsa: Data format not supported.");
 
 		return false;
 	}
@@ -689,7 +687,7 @@ foundDevice:
 	}
 	else
 	{
-		Levin::Error() << "Linux Alsa: probeDeviceOpen, The index is invalid." << Levin::endl;
+		Log::Error("Linux Alsa: probeDeviceOpen, The index is invalid.");
 
 		return false;
 	}
@@ -814,7 +812,7 @@ void LinuxAlsa::startStream() noexcept
 
 	if (stream_.state == StreamState::STREAM_RUNNING)
 	{
-		Levin::Warn() << "Linux Alsa: startStream(): the stream is already running." << Levin::endl;
+		Log::Warning("Linux Alsa: startStream(): the stream is already running.");
 		// Exit function
 		return;
 	}
@@ -844,8 +842,7 @@ void LinuxAlsa::prepareStateOfDevice(Device _device)
 	{
 		if (int e = snd_pcm_prepare(_device) < 0)
 		{
-			Levin::Error() << "Linux Alsa: error preparing pcm device, "
-						   << snd_strerror(e) << "." << Levin::endl;
+			Log::Error("Linux Alsa: error preparing pcm device, {}.", snd_strerror(e));
 
 			unlockMutexOfAPIHandle();
 
@@ -889,8 +886,8 @@ void LinuxAlsa::stopStream() noexcept
 
 		if (result < 0)
 		{
-			Levin::Error() << "Linux Alsa: stopStream, error draining output pcm device, "
-						   << snd_strerror(result) << "." << Levin::endl;
+			Log::Error("Linux Alsa: stopStream, error draining output pcm device, {}.",
+					snd_strerror(result));
 
 			pthread_mutex_unlock(&stream_.mutex);
 		}
@@ -910,7 +907,7 @@ void LinuxAlsa::abortStream() noexcept
 
 	if (stream_.state == StreamState::STREAM_STOPPED)
 	{
-		Levin::Warn() << "Linux Alsa: abortStream, the stream is already stopped." << Levin::endl;
+		Log::Warning("Linux Alsa: abortStream, the stream is already stopped.");
 		return;
 	}
 
@@ -935,8 +932,7 @@ void LinuxAlsa::dropHandle(Handle _handle)
 {
 	if (int e = snd_pcm_drop(_handle) < 0)
 	{
-		Levin::Error() << "Linux Alsa: error stopping stream in pcm device, "
-					   << snd_strerror(e) << "." << Levin::endl;
+		Log::Error("Linux Alsa: error stopping stream in pcm device, {}.", snd_strerror(e));
 
 		pthread_mutex_unlock(&stream_.mutex);
 		throw Exception("ErrorDropHandleException");
@@ -984,7 +980,7 @@ void LinuxAlsa::callbackEvent()
 
 	if (status not_eq AudioStreamStatus::None)
 	{
-		Levin::Error() << "An Underflow or Overflow has been produced." << Levin::endl;
+		Log::Error("An Underflow or Overflow has been produced.");
 
 		throw Exception("UnderflowOrOverflowException");
 	}
@@ -1161,19 +1157,19 @@ void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, int result)
 
 				if (int e = snd_pcm_prepare(_handle) < 0)
 				{
-					Levin::Error() << "Linux Alsa: error preparing device after overrun, "
-								   << snd_strerror(e) << "." << Levin::endl;
+					Log::Error("Linux Alsa: error preparing device after overrun, {}.",
+							snd_strerror(e));
 				}
 			}
 			else
 			{
-				Levin::Error() << "Linux Alsa: error, current state is " << snd_pcm_state_name(state)
-							   << ", " << snd_strerror(result) << "." << Levin::endl;
+				Log::Error("Linux Alsa: error, current state is {}, {}.",
+						snd_pcm_state_name(state), snd_strerror(result));
 			}
 		}
 		else
 		{
-			Levin::Error() << "Linux Alsa: audio write/read error, " << snd_strerror(result) << "." << Levin::endl;
+			Log::Error("Linux Alsa: audio write/read error, {}.", snd_strerror(result));
 		}
 	}
 }

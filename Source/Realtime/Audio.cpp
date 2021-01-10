@@ -48,14 +48,15 @@
 #include <iostream>
 #include <exception>
 
-#include <Levin/Log.h>
-#include <Levin/Logger.h>
+#include <Levin/Log.hpp>
+#include <Levin/ColoredLogger.hpp>
 
 using namespace Maximilian;
+using namespace Levin;
 
-std::vector <SupportedArchitectures> Audio::getArchitecturesCompiled() noexcept
+std::vector<SupportedArchitectures> Audio::getArchitecturesCompiled() noexcept
 {
-	std::vector <SupportedArchitectures> architectures;
+	std::vector<SupportedArchitectures> architectures;
 
 	// The order here will control the order of RtAudio's API search in
 	// the constructor.
@@ -131,29 +132,28 @@ void Audio::tryInitializeInstanceOfArchitecture(SupportedArchitectures _architec
 
 	// No compiled support for specified API value.  Issue a debug
 	// warning and continue as if no API was specified.
-	Levin::Warn() << "No compiled support for specified API argument." << Levin::endl;
+	Log::Warning("No compiled support for specified API argument.");
 }
 
 void Audio::assertThatAudioArchitectureHaveMinimumAnDevice() noexcept
 {
 	if (audioArchitecture == nullptr)
 	{
-		Levin::Error() << "No compiled API support found... Use of Dummy Audio (Not functional)."
-		<< Levin::endl;
+		Log::Error("No compiled API support found... Use of Dummy Audio (Not functional).");
 
 		audioArchitecture = std::make_unique<Architectures::Dummy>();
 	}
 
 	if (audioArchitecture->getDeviceCount() < 0)
 	{
-		Levin::Error() << "No Audio Devices Found" << Levin::endl;
+		Log::Error("No Audio Devices Found.");
 	}
 }
 
 Audio::Audio(SupportedArchitectures _architecture) noexcept
 {
 	// Initialize Levin for use of Log
-	Levin::LOGGER = std::make_unique <Levin::ColoredLogger>(std::wcout);
+	Log::SetNewLogger(std::make_unique<ColoredLogger>(std::wcout));
 
 	if (_architecture != SupportedArchitectures::Unspecified)
 	{

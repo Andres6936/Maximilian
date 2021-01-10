@@ -1,9 +1,10 @@
 #include "Realtime/IAudioArchitecture.hpp"
 
-#include <Levin/Log.h>
+#include <Levin/Log.hpp>
 #include <cstring>
 
 using namespace Maximilian;
+using namespace Levin;
 
 Maximilian::IAudioArchitecture::IAudioArchitecture() noexcept
 {
@@ -20,7 +21,7 @@ void IAudioArchitecture::assertThatStreamIsNotOpen() noexcept
 {
 	if (stream_.state != StreamState::STREAM_CLOSED)
 	{
-		Levin::Error() << "Assert: OpenStream, a stream is already open!" << Levin::endl;
+		Log::Error("Assert: OpenStream, a stream is already open!");
 
 		closeStream();
 	}
@@ -106,7 +107,7 @@ void IAudioArchitecture::error(Exception::Type type)
 	errorStream_.str(""); // clear the ostringstream
 	if (type == Exception::WARNING && showWarnings_ == true)
 	{
-		Levin::Warn() << errorText_ << Levin::endl;
+		Log::Warning(errorText_);
 	}
 	else if (type != Exception::WARNING)
 	{
@@ -118,7 +119,7 @@ void IAudioArchitecture::verifyStream()
 {
 	if (stream_.state == StreamState::STREAM_CLOSED)
 	{
-		Levin::Error() << "Audio Architecture: a stream is not open." << Levin::endl;
+		Log::Error("Audio Architecture: a stream is not open.");
 
 		throw Exception("StreamIsNotOpenException");
 	}

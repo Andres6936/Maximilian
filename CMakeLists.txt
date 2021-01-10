@@ -29,7 +29,7 @@ ADD_LIBRARY(Maximilian
 
 TARGET_LINK_LIBRARIES(Maximilian PRIVATE pthread asound)
 # Link to Maximilian the library Levin
-TARGET_LINK_LIBRARIES(Maximilian PRIVATE Levin::Framework)
+TARGET_LINK_LIBRARIES(Maximilian PUBLIC Levin::Framework)
 
 ADD_EXECUTABLE(ExampleMain player.cpp)
 TARGET_LINK_LIBRARIES(ExampleMain PRIVATE Maximilian)

@@ -15,7 +15,7 @@
 #include <exception>
 #include <string_view>
 
-#include <Levin/Log.h>
+#include <Levin/Log.hpp>
 
 class Exception : public std::exception
 {
@@ -53,7 +53,7 @@ public:
 
 	virtual void printMessage() const
 	{
-		Levin::Error() << "Exception: " << message.data() << Levin::endl;
+		Levin::Log::Error("Exception: {}", message.data());
 	}
 
 	//! Returns the thrown error message string.
