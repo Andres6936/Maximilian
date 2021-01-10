@@ -9,11 +9,6 @@
 namespace Maximilian
 {
 
-	/**
-	 * Range is from 0 to 255.
-	 */
-	using UInt8 = std::uint8_t;
-
 	// A structure to hold various information related to the ALSA API
 	// implementation.
 	class AlsaHandle
@@ -21,7 +16,7 @@ namespace Maximilian
 
 	private:
 
-		UInt8 numberOfDevices = 0;
+		std::uint8_t numberOfDevices = 0;
 
 		bool runnable = false;
 
@@ -51,7 +46,8 @@ namespace Maximilian
 		static void testSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params,
 				const std::array <unsigned int, 14>& rates, DeviceInfo& info);
 
-		static void setSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params, DeviceInfo& info);
+		static void
+		setSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params, DeviceInfo& info);
 
 		// Methods
 
@@ -61,7 +57,7 @@ namespace Maximilian
 
 		// Getters
 
-		[[nodiscard]] UInt8 getNumberOfDevices() const noexcept;
+		[[nodiscard]] std::uint8_t getNumberOfDevices() const noexcept;
 
 		[[nodiscard]] bool isRunnable() const;
 

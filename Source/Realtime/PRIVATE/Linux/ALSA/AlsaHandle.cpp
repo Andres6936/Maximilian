@@ -133,7 +133,7 @@ void AlsaHandle::determineTheNumberOfDevices()
 	}
 }
 
-UInt8 AlsaHandle::getNumberOfDevices() const noexcept
+std::uint8_t AlsaHandle::getNumberOfDevices() const noexcept
 {
 	return numberOfDevices;
 }
