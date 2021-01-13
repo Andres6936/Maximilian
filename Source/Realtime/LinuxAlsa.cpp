@@ -984,18 +984,6 @@ void LinuxAlsa::checkStreamLatencyOf(Handle _handle, int index)
 	}
 }
 
-LinuxAlsa& LinuxAlsa::allocateHW()
-{
-	snd_pcm_hw_params_alloca(&hw_params);
-
-#if defined(__RTAUDIO_DEBUG__)
-	fprintf( stderr, "\nRtApiAlsa: dump hardware params just after device open:\n\n" );
-  snd_pcm_hw_params_dump( hw_params, out );
-#endif
-
-	return *this;
-}
-
 LinuxAlsa& LinuxAlsa::getPCMDevice()
 {
 	if (const std::int32_t result = snd_pcm_hw_params_any(phandle, hw_params); result < 0)

@@ -59,8 +59,6 @@ namespace Maximilian
 
 		LinuxAlsa& buildHW();
 
-		LinuxAlsa& allocateHW();
-
 		LinuxAlsa& getPCMDevice();
 
 		LinuxAlsa& setHWSampleRate();
