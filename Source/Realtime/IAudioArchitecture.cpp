@@ -32,11 +32,7 @@ void IAudioArchitecture::openStream(void _functionUser(std::vector <double>&)) n
 {
 	assertThatStreamIsNotOpen();
 
-	bool result = probeDeviceOpen(
-			outputParameters.getDeviceId(),
-			StreamMode::OUTPUT,
-			outputParameters.getNChannels(),
-			outputParameters.getFirstChannel());
+	bool result = probeDeviceOpen(StreamMode::OUTPUT, outputParameters);
 
 	audioCallback = _functionUser;
 

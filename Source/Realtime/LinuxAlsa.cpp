@@ -236,8 +236,7 @@ void LinuxAlsa::saveDeviceInfo()
 	}
 }
 
-bool LinuxAlsa::probeDeviceOpen( const std::uint32_t device, const StreamMode mode,
-		const std::uint32_t channels, const std::uint32_t firstChannel) noexcept
+bool LinuxAlsa::probeDeviceOpen(const StreamMode mode, const StreamParameters& parameters) noexcept
 {
 #if defined(__RTAUDIO_DEBUG__)
 	snd_output_t *out;
@@ -245,7 +244,8 @@ bool LinuxAlsa::probeDeviceOpen( const std::uint32_t device, const StreamMode mo
 #endif
 
 	// Convert the StreamMode enum to int for use in arrays
-	const std::int32_t index = std::invoke([&]{
+	const std::int32_t index = std::invoke([&]
+	{
 		switch (mode)
 		{
 		case StreamMode::OUTPUT:
@@ -300,11 +300,13 @@ bool LinuxAlsa::probeDeviceOpen( const std::uint32_t device, const StreamMode mo
 			while (1)
 			{
 				// Feature C++17, If initialization
-				if (std::int32_t result = snd_ctl_pcm_next_device(chandle, &subdevice); result < 0) break;
+				if (std::int32_t result = snd_ctl_pcm_next_device(chandle, &subdevice); result <
+																						0)
+					break;
 
 				if (subdevice < 0) break;
 
-				if (totalOfDevices == device)
+				if (totalOfDevices == parameters.getDeviceId())
 				{
 					sprintf(name, "hw:%d,%d", card, subdevice);
 					snd_ctl_close(chandle);
@@ -324,7 +326,7 @@ bool LinuxAlsa::probeDeviceOpen( const std::uint32_t device, const StreamMode mo
 			return false;
 		}
 
-		if (device >= totalOfDevices)
+		if (parameters.getDeviceId() >= totalOfDevices)
 		{
 			// This should not happen because a check is made before this function is called.
 			Log::Error("Linux Alsa: device ID is invalid!");
@@ -508,7 +510,8 @@ foundDevice:
 	if (std::int32_t result = snd_pcm_hw_params_set_rate_near(phandle, hw_params, sampleRate.get(), nullptr) < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting sample rate on device (" << name << "), "
+		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting sample rate on device (" << name
+					 << "), "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		return FAILURE;
@@ -516,17 +519,19 @@ foundDevice:
 
 	// Determine the number of channels for this device.  We support a possible
 	// minimum device channel number > than the value requested by the user.
-	stream_.nUserChannels[index] = channels;
+	stream_.nUserChannels[index] = parameters.getNChannels();
 	unsigned int value;
 
 	const std::int32_t _result = snd_pcm_hw_params_get_channels_max(hw_params, &value);
 
 	unsigned int deviceChannels = value;
-	if (_result < 0 || deviceChannels < channels + firstChannel)
+	if (_result < 0 || deviceChannels < parameters.getNChannels() + parameters.getFirstChannel())
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: requested channel parameters not supported by device (" << name
-					 << "), " << snd_strerror(_result) << ".";
+		errorStream_
+				<< "RtApiAlsa::probeDeviceOpen: requested channel parameters not supported by device ("
+				<< name
+				<< "), " << snd_strerror(_result) << ".";
 		errorText_ = errorStream_.str();
 		return FAILURE;
 	}
@@ -534,21 +539,24 @@ foundDevice:
 	if (std::int32_t result = snd_pcm_hw_params_get_channels_min(hw_params, &value); result < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error getting minimum channels for device (" << name << "), "
+		errorStream_ << "RtApiAlsa::probeDeviceOpen: error getting minimum channels for device ("
+					 << name << "), "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		return FAILURE;
 	}
 	deviceChannels = value;
-	if (deviceChannels < channels + firstChannel)
-	{ deviceChannels = channels + firstChannel; }
+	if (deviceChannels < parameters.getNChannels() + parameters.getFirstChannel())
+	{ deviceChannels = parameters.getNChannels() + parameters.getFirstChannel(); }
 	stream_.nDeviceChannels[index] = deviceChannels;
 
 	// Set the device channels.
-	if (std::int32_t result = snd_pcm_hw_params_set_channels(phandle, hw_params, deviceChannels); result < 0)
+	if (std::int32_t result = snd_pcm_hw_params_set_channels(phandle, hw_params, deviceChannels);
+			result < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting channels for device (" << name << "), "
+		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting channels for device (" << name
+					 << "), "
 					 << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		return FAILURE;
@@ -718,12 +726,12 @@ foundDevice:
 
 	stream_.sampleRate = getSampleRate();
 	stream_.nBuffers = periods;
-	stream_.device[index] = device;
+	stream_.device[index] = parameters.getDeviceId();
 	stream_.state = StreamState::STREAM_STOPPED;
 
 	// Setup the buffer conversion information structure.
 	if (stream_.doConvertBuffer[index])
-	{ setConvertInfo(mode, firstChannel); }
+	{ setConvertInfo(mode, parameters.getFirstChannel()); }
 
 	// Setup thread if necessary.
 	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT)

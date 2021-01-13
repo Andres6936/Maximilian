@@ -50,10 +50,10 @@ namespace Maximilian
 
 	private:
 
-		std::vector <DeviceInfo> devices_;
+		std::vector<DeviceInfo> devices_;
 
-		bool probeDeviceOpen( const std::uint32_t device, const StreamMode mode,
-				const std::uint32_t channels, const std::uint32_t firstChannel) noexcept override;
+		bool probeDeviceOpen(const StreamMode mode,
+				const StreamParameters& parameters) noexcept override;
 
 		void saveDeviceInfo();
 
@@ -63,7 +63,7 @@ namespace Maximilian
 
 		void unlockMutexOfAPIHandle();
 
-		template <class Handle>
+		template<class Handle>
 		void dropHandle(Handle _handle);
 
 		template <class Handle>
