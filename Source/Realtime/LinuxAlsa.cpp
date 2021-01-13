@@ -446,7 +446,7 @@ foundDevice:
 	stream_.userFormat = getAudioFormat();
 	snd_pcm_format_t deviceFormat;
 
-	const std::vector <std::pair <snd_pcm_format_t, AudioFormat>> equivalentFormats = {
+	const std::vector<std::pair<snd_pcm_format_t, AudioFormat>> equivalentFormats = {
 
 			{ SND_PCM_FORMAT_FLOAT64, AudioFormat::Float64 },
 			{ SND_PCM_FORMAT_FLOAT,   AudioFormat::Float32 },
@@ -456,12 +456,12 @@ foundDevice:
 			{ SND_PCM_FORMAT_S8,      AudioFormat::SInt8 }
 	};
 
-	for (auto& format : equivalentFormats)
+	for (auto&[pcmFormat, audioFormat] : equivalentFormats)
 	{
-		if (snd_pcm_hw_params_test_format(phandle, hw_params, format.first) == 0)
+		if (snd_pcm_hw_params_test_format(phandle, hw_params, pcmFormat) == 0)
 		{
-			deviceFormat = format.first;
-			stream_.deviceFormat[index] = format.second;
+			deviceFormat = pcmFormat;
+			stream_.deviceFormat[index] = audioFormat;
 			break;
 		}
 	}
