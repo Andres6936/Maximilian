@@ -15,7 +15,7 @@ enum class TypeBuild
 	Debug,
 	Release,
 
-// This hack the see in the headers of standard library. std::endian C++20
+// I saw this hack in the headers of standard library. std::endian C++20
 #if defined(MAXIMILIAN_DEBUG)
 	// Set the value, with this is possible insert code in compilation time.
 	Current = Debug,
