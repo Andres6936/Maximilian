@@ -55,30 +55,30 @@ namespace Maximilian
 		bool probeDeviceOpen(const StreamMode mode,
 				const StreamParameters& parameters) noexcept override;
 
+		void unlockMutex();
+
 		void saveDeviceInfo();
 
 		void startCallbackFunction();
 
-		void unlockMutex();
-
 		void unlockMutexOfAPIHandle();
+
+		template<class Handle>
+		void tryInput(Handle _handle);
+
+		template<class Handle>
+		void tryOutput(Handle _handle);
 
 		template<class Handle>
 		void dropHandle(Handle _handle);
 
-		template <class Handle>
-		void checkStreamLatencyOf(Handle _handle, int index);
-
-		template <class Handle>
-		void tryInput(Handle _handle);
-
-		template <class Handle>
-		void tryOutput(Handle _handle);
-
-		template <class Device>
+		template<class Device>
 		void prepareStateOfDevice(Device _device);
 
-		template <class Handle>
+		template<class Handle>
+		void checkStreamLatencyOf(Handle _handle, int index);
+
+		template<class Handle>
 		void verifyUnderRunOrError(Handle _handle, int index, int result);
 	};
 }
