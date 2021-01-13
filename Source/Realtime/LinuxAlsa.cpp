@@ -7,6 +7,23 @@
 #include <array>
 #include <climits>
 
+/**
+ * Determine if this library was compiled in Debug or Release.
+ */
+enum class TypeBuild
+{
+	Debug,
+	Release,
+
+#if defined(__RTAUDIO_DEBUG__)
+	// Set the value, with this is possible insert code in compilation time.
+	Current = Debug,
+#else
+	// The value for defect of Current is Release.
+	Current = Release,
+#endif
+};
+
 using namespace Maximilian;
 using namespace Levin;
 
@@ -238,11 +255,6 @@ void LinuxAlsa::saveDeviceInfo()
 
 bool LinuxAlsa::probeDeviceOpen(const StreamMode mode, const StreamParameters& parameters) noexcept
 {
-#if defined(__RTAUDIO_DEBUG__)
-	snd_output_t *out;
-  snd_output_stdio_attach(&out, stderr, 0);
-#endif
-
 	// Convert the StreamMode enum to int for use in arrays
 	const std::int32_t index = std::invoke([&]
 	{
@@ -375,10 +387,20 @@ foundDevice:
 		return FAILURE;
 	}
 
+	snd_pcm_hw_params_alloca(&hw_params);
+
+	if constexpr (TypeBuild::Current == TypeBuild::Debug)
+	{
+		snd_output_t* out;
+		snd_output_stdio_attach(&out, stderr, 0);
+		snd_pcm_hw_params_dump(hw_params, out);
+
+		Log::Debug("Dump hardware params just after device open.");
+	}
+
 	try
 	{
-		allocateHW()
-				.getPCMDevice()
+		getPCMDevice()
 				.setHWInterleaved(index)
 				.setHWFormat(index)
 				.setHWSampleRate()
