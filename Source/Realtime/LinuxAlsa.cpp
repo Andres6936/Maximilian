@@ -355,7 +355,6 @@ foundDevice:
 		}
 	});
 
-	snd_pcm_t* phandle;
 	int openMode = SND_PCM_ASYNC;
 
 	snd_config_update_free_global();
