@@ -364,275 +364,35 @@ foundDevice:
 	{
 		if (mode == StreamMode::OUTPUT)
 		{
-			errorStream_ << "RtApiAlsa::probeDeviceOpen: pcm device (" << name << ") won't open for output.";
+			errorStream_ << "RtApiAlsa::probeDeviceOpen: pcm device (" << name
+						 << ") won't open for output.";
 		}
 		else
 		{
-			errorStream_ << "RtApiAlsa::probeDeviceOpen: pcm device (" << name << ") won't open for input.";
+			errorStream_ << "RtApiAlsa::probeDeviceOpen: pcm device (" << name
+						 << ") won't open for input.";
 		}
 		errorText_ = errorStream_.str();
 		return FAILURE;
 	}
 
-	// Fill the parameter structure.
-	snd_pcm_hw_params_t* hw_params;
-	snd_pcm_hw_params_alloca(&hw_params);
-
-	if (std::int32_t result = snd_pcm_hw_params_any(phandle, hw_params); result < 0)
+	try
+	{
+		allocateHW()
+				.getPCMDevice()
+				.setHWInterleaved(index)
+				.setHWFormat(index)
+				.setHWSampleRate()
+				.setHWChannels(parameters, index)
+				.setHWPeriodSize(mode)
+				.buildHW();
+	}
+	catch (const std::string& message)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error getting pcm device (" << name << ") parameters, "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		return FAILURE;
-	}
-
-#if defined(__RTAUDIO_DEBUG__)
-	fprintf( stderr, "\nRtApiAlsa: dump hardware params just after device open:\n\n" );
-  snd_pcm_hw_params_dump( hw_params, out );
-#endif
-
-	auto assertThatHardwareParametersHasBeenConfigured = [&](const std::int32_t _result){
-		if (_result < 0)
-		{
-			snd_pcm_close(phandle);
-			Log::Error("Linux Alsa: error setting pcm device ({}) access, {}.",
-					name, snd_strerror(_result));
-			return false;
-		}
-
-		return true;
-	};
-
-	// Set access ... check user preference.
-	if (getOptionsFlags() == AudioStreamFlags::Non_Interleaved)
-	{
-		stream_.userInterleaved = false;
-
-		if (std::int32_t result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_NONINTERLEAVED); result < 0)
-		{
-			result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
-
-			// Exit of function and clear the structures
-			if (assertThatHardwareParametersHasBeenConfigured(result) == false) return false;
-
-			stream_.deviceInterleaved[index] = true;
-		}
-		else
-		{
-			stream_.deviceInterleaved[index] = false;
-		}
-	}
-	else
-	{
-		stream_.userInterleaved = true;
-
-		if (std::int32_t result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED); result < 0)
-		{
-			result = snd_pcm_hw_params_set_access(phandle, hw_params, SND_PCM_ACCESS_RW_NONINTERLEAVED);
-
-			// Exit of function and clear the structures
-			if (assertThatHardwareParametersHasBeenConfigured(result) == false) return false;
-
-			stream_.deviceInterleaved[index] = false;
-		}
-		else
-		{
-			stream_.deviceInterleaved[index] = true;
-		}
-	}
-
-	// Determine how to set the device format.
-	stream_.userFormat = getAudioFormat();
-	snd_pcm_format_t deviceFormat;
-
-	const std::vector<std::pair<snd_pcm_format_t, AudioFormat>> equivalentFormats = {
-
-			{ SND_PCM_FORMAT_FLOAT64, AudioFormat::Float64 },
-			{ SND_PCM_FORMAT_FLOAT,   AudioFormat::Float32 },
-			{ SND_PCM_FORMAT_S32,     AudioFormat::SInt32 },
-			{ SND_PCM_FORMAT_S24,     AudioFormat::SInt24 },
-			{ SND_PCM_FORMAT_S16,     AudioFormat::SInt16 },
-			{ SND_PCM_FORMAT_S8,      AudioFormat::SInt8 }
-	};
-
-	for (auto&[pcmFormat, audioFormat] : equivalentFormats)
-	{
-		if (snd_pcm_hw_params_test_format(phandle, hw_params, pcmFormat) == 0)
-		{
-			deviceFormat = pcmFormat;
-			stream_.deviceFormat[index] = audioFormat;
-			break;
-		}
-	}
-
-	if (deviceFormat == SND_PCM_FORMAT_UNKNOWN)
-	{
-		Log::Emergency("Linux Alsa: Data format not supported.");
-
+		Log::Error(message);
 		return false;
 	}
-
-	if (std::int32_t result = snd_pcm_hw_params_set_format(phandle, hw_params, deviceFormat); result < 0)
-	{
-		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting pcm device (" << name << ") data format, "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		return FAILURE;
-	}
-
-	// Determine whether byte-swaping is necessary.
-	stream_.doByteSwap[index] = false;
-	if (deviceFormat not_eq SND_PCM_FORMAT_S8)
-	{
-		const std::int32_t result = snd_pcm_format_cpu_endian(deviceFormat);
-
-		if (result == 0)
-		{
-			stream_.doByteSwap[index] = true;
-		}
-		else if (result < 0)
-		{
-			snd_pcm_close(phandle);
-			errorStream_ << "RtApiAlsa::probeDeviceOpen: error getting pcm device (" << name << ") endian-ness, "
-						 << snd_strerror(result) << ".";
-			errorText_ = errorStream_.str();
-			return FAILURE;
-		}
-	}
-
-	// Is needed the pointer for pass for argument to
-	// function { snd_pcm_hw_params_set_rate_near }
-	auto sampleRate = std::make_unique<unsigned int>(getSampleRate());
-
-	// Set the sample rate.
-	// In the case of the sampling rate, sound hardware is not always able to
-	// support every sampling rate exactly. We use the function
-	// snd_pcm_hw_params_set_rate_near to request the nearest supported sampling
-	// rate to the requested value.
-	if (std::int32_t result =
-			snd_pcm_hw_params_set_rate_near(phandle, hw_params, sampleRate.get(), nullptr) < 0)
-	{
-		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting sample rate on device (" << name
-					 << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		return FAILURE;
-	}
-
-	// Determine the number of channels for this device.  We support a possible
-	// minimum device channel number > than the value requested by the user.
-	stream_.nUserChannels[index] = parameters.getNChannels();
-	unsigned int value;
-
-	const std::int32_t _result = snd_pcm_hw_params_get_channels_max(hw_params, &value);
-
-	unsigned int deviceChannels = value;
-	if (_result < 0 || deviceChannels < parameters.getNChannels() + parameters.getFirstChannel())
-	{
-		snd_pcm_close(phandle);
-		errorStream_
-				<< "RtApiAlsa::probeDeviceOpen: requested channel parameters not supported by device ("
-				<< name
-				<< "), " << snd_strerror(_result) << ".";
-		errorText_ = errorStream_.str();
-		return FAILURE;
-	}
-
-	if (std::int32_t result = snd_pcm_hw_params_get_channels_min(hw_params, &value); result < 0)
-	{
-		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error getting minimum channels for device ("
-					 << name << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		return FAILURE;
-	}
-	deviceChannels = value;
-	if (deviceChannels < parameters.getNChannels() + parameters.getFirstChannel())
-	{ deviceChannels = parameters.getNChannels() + parameters.getFirstChannel(); }
-	stream_.nDeviceChannels[index] = deviceChannels;
-
-	// Set the device channels.
-	if (std::int32_t result = snd_pcm_hw_params_set_channels(phandle, hw_params, deviceChannels);
-			result < 0)
-	{
-		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting channels for device (" << name
-					 << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		return FAILURE;
-	}
-
-	// Set the buffer (or period) size.
-	int dir = 0;
-	snd_pcm_uframes_t periodSize = getBufferFrames();
-
-	if (std::int32_t result = snd_pcm_hw_params_set_period_size_near(phandle, hw_params, &periodSize, &dir); result < 0)
-	{
-		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting period size for device (" << name << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		return FAILURE;
-	}
-
-	setBufferFrames(periodSize);
-
-	// Set the buffer number, which in ALSA is referred to as the "period".
-	unsigned int periods = 0;
-	if (getOptionsFlags() == AudioStreamFlags::Minimize_Latency)
-	{ periods = 2; }
-
-	if (getNumberOfBuffersOptions() > 0)
-	{ periods = getNumberOfBuffersOptions(); }
-
-	if (periods < 2)
-	{ periods = 4; } // a fairly safe default value
-
-	if (std::int32_t result = snd_pcm_hw_params_set_periods_near(phandle, hw_params, &periods, &dir); result < 0)
-	{
-		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting periods for device (" << name << "), "
-					 << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		return FAILURE;
-	}
-
-	// If attempting to setup a duplex stream, the bufferSize parameter
-	// MUST be the same in both directions!
-	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT && getBufferFrames() not_eq stream_.bufferSize)
-	{
-		errorStream_
-				<< "RtApiAlsa::probeDeviceOpen: system error setting buffer size for duplex stream on device ("
-				<< name << ").";
-		errorText_ = errorStream_.str();
-		return FAILURE;
-	}
-
-	stream_.bufferSize = getBufferFrames();
-
-	// Install the hardware configuration
-	// The hardware parameters are not actually made active until we call the
-	// function snd_pcm_hw_params.
-	if (std::int32_t result = snd_pcm_hw_params(phandle, hw_params); result < 0)
-	{
-		snd_pcm_close(phandle);
-		errorStream_
-				<< "RtApiAlsa::probeDeviceOpen: error installing hardware configuration on device ("
-				<< name
-				<< "), " << snd_strerror(result) << ".";
-		errorText_ = errorStream_.str();
-		return FAILURE;
-	}
-
-#if defined(__RTAUDIO_DEBUG__)
-	fprintf(stderr, "\nRtApiAlsa: dump hardware params after installation:\n\n");
-  snd_pcm_hw_params_dump( hw_params, out );
-#endif
 
 	// Set the software configuration to fill buffers with zeros and prevent device stopping on xruns.
 	snd_pcm_sw_params_t* sw_params = NULL;
@@ -735,7 +495,6 @@ foundDevice:
 	}
 
 	stream_.sampleRate = getSampleRate();
-	stream_.nBuffers = periods;
 	stream_.device[index] = parameters.getDeviceId();
 	stream_.state = StreamState::STREAM_STOPPED;
 
@@ -1202,4 +961,262 @@ void LinuxAlsa::checkStreamLatencyOf(Handle _handle, int index)
 	{
 		stream_.latency[index] = frames;
 	}
+}
+
+LinuxAlsa& LinuxAlsa::allocateHW()
+{
+	snd_pcm_hw_params_alloca(&hw_params);
+
+#if defined(__RTAUDIO_DEBUG__)
+	fprintf( stderr, "\nRtApiAlsa: dump hardware params just after device open:\n\n" );
+  snd_pcm_hw_params_dump( hw_params, out );
+#endif
+
+	return *this;
+}
+
+LinuxAlsa& LinuxAlsa::getPCMDevice()
+{
+	if (const std::int32_t result = snd_pcm_hw_params_any(phandle, hw_params); result < 0)
+	{
+		throw flossy::format("Error getting PCM device () parameters, {}.",
+				snd_strerror(result));
+	}
+
+	return *this;
+}
+
+LinuxAlsa& LinuxAlsa::setHWInterleaved(const std::int32_t index)
+{
+	// Set access ... check user preference.
+	if (getOptionsFlags() == AudioStreamFlags::Non_Interleaved)
+	{
+		stream_.userInterleaved = false;
+
+		if (std::int32_t result = snd_pcm_hw_params_set_access(phandle, hw_params,
+					SND_PCM_ACCESS_RW_NONINTERLEAVED); result < 0)
+		{
+			result = snd_pcm_hw_params_set_access(phandle, hw_params,
+					SND_PCM_ACCESS_RW_INTERLEAVED);
+
+			// Exit of function and clear the structures
+			if (result < 0)
+			{
+				throw flossy::format("Error setting PCM device () access, {}.",
+						snd_strerror(result));
+			}
+
+			stream_.deviceInterleaved[index] = true;
+		}
+		else
+		{
+			stream_.deviceInterleaved[index] = false;
+		}
+	}
+	else
+	{
+		stream_.userInterleaved = true;
+
+		if (std::int32_t result = snd_pcm_hw_params_set_access(phandle, hw_params,
+					SND_PCM_ACCESS_RW_INTERLEAVED); result < 0)
+		{
+			result = snd_pcm_hw_params_set_access(phandle, hw_params,
+					SND_PCM_ACCESS_RW_NONINTERLEAVED);
+
+			// Exit of function and clear the structures
+			if (result < 0)
+			{
+				throw flossy::format("Error setting PCM device () access, {}.",
+						snd_strerror(result));
+			}
+
+			stream_.deviceInterleaved[index] = false;
+		}
+		else
+		{
+			stream_.deviceInterleaved[index] = true;
+		}
+	}
+
+	return *this;
+}
+
+LinuxAlsa& LinuxAlsa::setHWFormat(const std::int32_t index)
+{
+	// Determine how to set the device format.
+	stream_.userFormat = getAudioFormat();
+	snd_pcm_format_t deviceFormat;
+
+	const std::vector<std::pair<snd_pcm_format_t, AudioFormat>> equivalentFormats = {
+
+			{ SND_PCM_FORMAT_FLOAT64, AudioFormat::Float64 },
+			{ SND_PCM_FORMAT_FLOAT,   AudioFormat::Float32 },
+			{ SND_PCM_FORMAT_S32,     AudioFormat::SInt32 },
+			{ SND_PCM_FORMAT_S24,     AudioFormat::SInt24 },
+			{ SND_PCM_FORMAT_S16,     AudioFormat::SInt16 },
+			{ SND_PCM_FORMAT_S8,      AudioFormat::SInt8 }
+	};
+
+	for (auto&[pcmFormat, audioFormat] : equivalentFormats)
+	{
+		if (snd_pcm_hw_params_test_format(phandle, hw_params, pcmFormat) == 0)
+		{
+			deviceFormat = pcmFormat;
+			stream_.deviceFormat[index] = audioFormat;
+			break;
+		}
+	}
+
+	if (deviceFormat == SND_PCM_FORMAT_UNKNOWN)
+	{
+		throw std::string{ "Linux Alsa: Data format not supported." };
+	}
+
+	if (std::int32_t result = snd_pcm_hw_params_set_format(phandle, hw_params, deviceFormat);
+			result < 0)
+	{
+		throw flossy::format("Error setting PCM device () data format, {}.", snd_strerror(result));
+	}
+
+	// Determine whether byte-swaping is necessary.
+	stream_.doByteSwap[index] = false;
+
+	if (deviceFormat not_eq SND_PCM_FORMAT_S8)
+	{
+		const std::int32_t result = snd_pcm_format_cpu_endian(deviceFormat);
+
+		if (result == 0)
+		{
+			stream_.doByteSwap[index] = true;
+		}
+		else if (result < 0)
+		{
+			throw flossy::format("Error getting PCM device () endian-ness, {}.",
+					snd_strerror(result));
+		}
+	}
+
+	return *this;
+}
+
+LinuxAlsa& LinuxAlsa::setHWSampleRate()
+{
+	// Is needed the pointer for pass for argument to
+	// function { snd_pcm_hw_params_set_rate_near }
+	auto sampleRate = std::make_unique<unsigned int>(getSampleRate());
+
+	// Set the sample rate.
+	// In the case of the sampling rate, sound hardware is not always able to
+	// support every sampling rate exactly. We use the function
+	// snd_pcm_hw_params_set_rate_near to request the nearest supported sampling
+	// rate to the requested value.
+	if (std::int32_t result =
+			snd_pcm_hw_params_set_rate_near(phandle, hw_params, sampleRate.get(), nullptr) < 0)
+	{
+		throw flossy::format("Error setting sample rate on device (), {}.", snd_strerror(result));
+	}
+
+	return *this;
+}
+
+LinuxAlsa& LinuxAlsa::setHWChannels(const StreamParameters& parameters, const std::int32_t index)
+{
+	// Determine the number of channels for this device.  We support a possible
+	// minimum device channel number > than the value requested by the user.
+	stream_.nUserChannels[index] = parameters.getNChannels();
+	unsigned int value;
+
+	const std::int32_t _result = snd_pcm_hw_params_get_channels_max(hw_params, &value);
+
+	unsigned int deviceChannels = value;
+
+	if (_result < 0 || deviceChannels < parameters.getNChannels() + parameters.getFirstChannel())
+	{
+		throw flossy::format("Requested channel parameters not supported by device (), {}.",
+				snd_strerror(_result));
+	}
+
+	if (std::int32_t result = snd_pcm_hw_params_get_channels_min(hw_params, &value); result < 0)
+	{
+		throw flossy::format("Error getting minimum channels for device (), {}.",
+				snd_strerror(result));
+	}
+
+	deviceChannels = value;
+	if (deviceChannels < parameters.getNChannels() + parameters.getFirstChannel())
+	{ deviceChannels = parameters.getNChannels() + parameters.getFirstChannel(); }
+	stream_.nDeviceChannels[index] = deviceChannels;
+
+	// Set the device channels.
+	if (std::int32_t result = snd_pcm_hw_params_set_channels(phandle, hw_params, deviceChannels);
+			result < 0)
+	{
+		throw flossy::format("Error setting channels for device (), {}.", snd_strerror(result));
+	}
+
+	return *this;
+}
+
+LinuxAlsa& LinuxAlsa::setHWPeriodSize(const StreamMode mode)
+{
+	// Set the buffer (or period) size.
+	int dir = 0;
+	snd_pcm_uframes_t periodSize = getBufferFrames();
+
+	if (std::int32_t result = snd_pcm_hw_params_set_period_size_near(phandle, hw_params,
+				&periodSize, &dir); result < 0)
+	{
+		throw flossy::format("Error setting period size for device (), {}.", snd_strerror(result));
+	}
+
+	setBufferFrames(periodSize);
+
+	// Set the buffer number, which in ALSA is referred to as the "period".
+	unsigned int periods = 0;
+	if (getOptionsFlags() == AudioStreamFlags::Minimize_Latency)
+	{ periods = 2; }
+
+	if (getNumberOfBuffersOptions() > 0)
+	{ periods = getNumberOfBuffersOptions(); }
+
+	if (periods < 2)
+	{ periods = 4; } // a fairly safe default value
+
+	if (std::int32_t result = snd_pcm_hw_params_set_periods_near(phandle, hw_params, &periods,
+				&dir); result < 0)
+	{
+		throw flossy::format("Error setting period for device (), {}.", snd_strerror(result));
+	}
+
+	// If attempting to setup a duplex stream, the bufferSize parameter
+	// MUST be the same in both directions!
+	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT &&
+		getBufferFrames() not_eq stream_.bufferSize)
+	{
+		throw std::string{ "system error setting buffer size for duplex stream on device ()." };
+	}
+
+	stream_.nBuffers = periods;
+	stream_.bufferSize = getBufferFrames();
+
+	return *this;
+}
+
+LinuxAlsa& LinuxAlsa::buildHW()
+{
+	// Install the hardware configuration
+	// The hardware parameters are not actually made active until we call the
+	// function snd_pcm_hw_params.
+	if (std::int32_t result = snd_pcm_hw_params(phandle, hw_params); result < 0)
+	{
+		throw flossy::format("Error installing hardware configuration on device (), {}.",
+				snd_strerror(result));
+	}
+
+#if defined(__RTAUDIO_DEBUG__)
+	fprintf(stderr, "\nRtApiAlsa: dump hardware params after installation:\n\n");
+  snd_pcm_hw_params_dump( hw_params, out );
+#endif
+
+	return *this;
 }

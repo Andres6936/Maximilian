@@ -7,6 +7,7 @@
 #include <vector>
 #include <thread>
 #include <atomic>
+#include <alsa/asoundlib.h>
 
 namespace Maximilian
 {
@@ -20,6 +21,10 @@ namespace Maximilian
 		std::vector<std::thread> threads;
 
 		std::atomic_bool isStreamRunning = false;
+
+		snd_pcm_t* phandle = nullptr;
+
+		snd_pcm_hw_params_t* hw_params = nullptr;
 
 	public:
 
@@ -51,6 +56,22 @@ namespace Maximilian
 		};
 
 	private:
+
+		LinuxAlsa& buildHW();
+
+		LinuxAlsa& allocateHW();
+
+		LinuxAlsa& getPCMDevice();
+
+		LinuxAlsa& setHWSampleRate();
+
+		LinuxAlsa& setHWFormat(const std::int32_t index);
+
+		LinuxAlsa& setHWPeriodSize(const StreamMode mode);
+
+		LinuxAlsa& setHWInterleaved(const std::int32_t index);
+
+		LinuxAlsa& setHWChannels(const StreamParameters& parameters, const std::int32_t index);
 
 		bool probeDeviceOpen(const StreamMode mode,
 				const StreamParameters& parameters) noexcept override;
