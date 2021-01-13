@@ -13,7 +13,7 @@ ADD_SUBDIRECTORY(Library/Levin/)
 
 ADD_DEFINITIONS(-D__LINUX_ALSA__)
 
-ADD_LIBRARY(Maximilian
+ADD_LIBRARY(Maximilian STATIC
         Source/main.cpp
         Source/Architectures/Dummy.cpp
         Source/maximilian.cpp
@@ -26,6 +26,9 @@ ADD_LIBRARY(Maximilian
         Source/Realtime/StreamParameters.cpp
         Source/Realtime/StreamOptions.cpp
         Source/Realtime/PRIVATE/Linux/ALSA/AlsaHandle.cpp)
+
+# Define a macro for use in 'if constexpr' for print debug messages.
+TARGET_COMPILE_DEFINITIONS(Maximilian PRIVATE $<$<CONFIG:DEBUG>:MAXIMILIAN_DEBUG>)
 
 TARGET_LINK_LIBRARIES(Maximilian PRIVATE pthread asound)
 # Link to Maximilian the library Levin
