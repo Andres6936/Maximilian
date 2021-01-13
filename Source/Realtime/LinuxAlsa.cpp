@@ -504,10 +504,15 @@ foundDevice:
 
 	// Is needed the pointer for pass for argument to
 	// function { snd_pcm_hw_params_set_rate_near }
-	auto sampleRate = std::make_unique <unsigned int>(getSampleRate());
+	auto sampleRate = std::make_unique<unsigned int>(getSampleRate());
 
 	// Set the sample rate.
-	if (std::int32_t result = snd_pcm_hw_params_set_rate_near(phandle, hw_params, sampleRate.get(), nullptr) < 0)
+	// In the case of the sampling rate, sound hardware is not always able to
+	// support every sampling rate exactly. We use the function
+	// snd_pcm_hw_params_set_rate_near to request the nearest supported sampling
+	// rate to the requested value.
+	if (std::int32_t result =
+			snd_pcm_hw_params_set_rate_near(phandle, hw_params, sampleRate.get(), nullptr) < 0)
 	{
 		snd_pcm_close(phandle);
 		errorStream_ << "RtApiAlsa::probeDeviceOpen: error setting sample rate on device (" << name
@@ -601,8 +606,9 @@ foundDevice:
 	// MUST be the same in both directions!
 	if (stream_.mode == StreamMode::OUTPUT && mode == StreamMode::INPUT && getBufferFrames() not_eq stream_.bufferSize)
 	{
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: system error setting buffer size for duplex stream on device ("
-					 << name << ").";
+		errorStream_
+				<< "RtApiAlsa::probeDeviceOpen: system error setting buffer size for duplex stream on device ("
+				<< name << ").";
 		errorText_ = errorStream_.str();
 		return FAILURE;
 	}
@@ -610,11 +616,15 @@ foundDevice:
 	stream_.bufferSize = getBufferFrames();
 
 	// Install the hardware configuration
+	// The hardware parameters are not actually made active until we call the
+	// function snd_pcm_hw_params.
 	if (std::int32_t result = snd_pcm_hw_params(phandle, hw_params); result < 0)
 	{
 		snd_pcm_close(phandle);
-		errorStream_ << "RtApiAlsa::probeDeviceOpen: error installing hardware configuration on device (" << name
-					 << "), " << snd_strerror(result) << ".";
+		errorStream_
+				<< "RtApiAlsa::probeDeviceOpen: error installing hardware configuration on device ("
+				<< name
+				<< "), " << snd_strerror(result) << ".";
 		errorText_ = errorStream_.str();
 		return FAILURE;
 	}
