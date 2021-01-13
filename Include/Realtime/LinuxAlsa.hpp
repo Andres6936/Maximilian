@@ -15,6 +15,8 @@ namespace Maximilian
 
 	private:
 
+		std::vector<DeviceInfo> devices_;
+
 		std::vector<std::thread> threads;
 
 		std::atomic_bool isStreamRunning = false;
@@ -49,8 +51,6 @@ namespace Maximilian
 		};
 
 	private:
-
-		std::vector<DeviceInfo> devices_;
 
 		bool probeDeviceOpen(const StreamMode mode,
 				const StreamParameters& parameters) noexcept override;
