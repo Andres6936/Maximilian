@@ -4,8 +4,8 @@
 
 using namespace Maximilian;
 
-bool Architectures::Dummy::probeDeviceOpen(std::uint32_t device, StreamMode mode, std::uint32_t channels,
-		std::uint32_t firstChannel) noexcept
+bool Architectures::Dummy::probeDeviceOpen(const StreamMode mode,
+		const StreamParameters& parameters) noexcept
 {
 	return false;
 }
