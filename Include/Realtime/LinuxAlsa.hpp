@@ -25,14 +25,11 @@ namespace Maximilian
 
 		~LinuxAlsa() override;
 
-		SupportedArchitectures getCurrentArchitecture() const noexcept override
-		{
-			return SupportedArchitectures::Linux_Alsa;
-		};
-
-		unsigned int getDeviceCount() const noexcept override;
-
-		DeviceInfo getDeviceInfo(int device) override;
+		// This function is intended for internal use only.  It must be
+		// public because it is called by the internal callback handler,
+		// which is not a member of RtAudio.  External use of this function
+		// will most likely produce highly undesireable results!
+		void callbackEvent();
 
 		void closeStream() noexcept override;
 
@@ -42,11 +39,14 @@ namespace Maximilian
 
 		void abortStream() noexcept override;
 
-		// This function is intended for internal use only.  It must be
-		// public because it is called by the internal callback handler,
-		// which is not a member of RtAudio.  External use of this function
-		// will most likely produce highly undesireable results!
-		void callbackEvent();
+		unsigned int getDeviceCount() const noexcept override;
+
+		DeviceInfo getDeviceInfo(int device) override;
+
+		SupportedArchitectures getCurrentArchitecture() const noexcept override
+		{
+			return SupportedArchitectures::Linux_Alsa;
+		};
 
 	private:
 
