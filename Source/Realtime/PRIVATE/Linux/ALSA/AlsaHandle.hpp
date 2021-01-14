@@ -33,7 +33,13 @@ namespace Maximilian
 
 		pthread_cond_t runnable_cv;
 
-		std::array <bool, 2> xrun{ false, false };
+		/**
+		 * An "xrun" can be either a buffer underrun or a buffer overrun.
+		 * In both cases an audio app was either not fast enough to deliver data
+		 * to the ALSA audio buffer or not fast enough to process data from the
+		 * ALSA audio buffer. Usually xruns are audible as crackles or pops.
+		 */
+		std::array<bool, 2> xrun{ false, false };
 
 		AlsaHandle() noexcept;
 
@@ -44,7 +50,7 @@ namespace Maximilian
 		static bool isAvailableForCapture(snd_ctl_t& handle, snd_pcm_info_t& info);
 
 		static void testSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params,
-				const std::array <unsigned int, 14>& rates, DeviceInfo& info);
+				const std::array<unsigned int, 14>& rates, DeviceInfo& info);
 
 		static void
 		setSupportedDateFormats(snd_pcm_t& handle, snd_pcm_hw_params_t& params, DeviceInfo& info);
