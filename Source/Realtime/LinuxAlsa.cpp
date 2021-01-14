@@ -928,7 +928,8 @@ void LinuxAlsa::tryOutput(Handle _handle)
 }
 
 template<class Handle>
-void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, const std::int64_t result)
+void
+LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, const std::int64_t totalFramesWritten)
 {
 	// A Buffer underrun is a common problem that occurs when burning data into
 	// a CD. It happens when the computer is not supplying data quickly enough
@@ -954,7 +955,7 @@ void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, const std::int6
 
 	// If NOT has occurred an buffer overrun exit of function.
 	// The negation of this condition, allow reduce the nesting of function
-	if (not(result < (std::int64_t)stream_.bufferSize))
+	if (not(totalFramesWritten < (std::int64_t)stream_.bufferSize))
 	{
 		return;
 	}
@@ -962,7 +963,7 @@ void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, const std::int6
 	// A buffer overrun detected. Continue the execution of function.
 
 	// Either an error or under-run occurred.
-	if (result == -EPIPE)
+	if (totalFramesWritten == -EPIPE)
 	{
 		snd_pcm_state_t state = snd_pcm_state(_handle);
 
@@ -986,12 +987,12 @@ void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, const std::int6
 		else
 		{
 			Log::Error("Linux Alsa: error, current state is {}, {}.",
-					snd_pcm_state_name(state), snd_strerror(result));
+					snd_pcm_state_name(state), snd_strerror(totalFramesWritten));
 		}
 	}
 	else
 	{
-		Log::Error("Linux Alsa: audio write/read error, {}.", snd_strerror(result));
+		Log::Error("Linux Alsa: audio write/read error, {}.", snd_strerror(totalFramesWritten));
 	}
 }
 

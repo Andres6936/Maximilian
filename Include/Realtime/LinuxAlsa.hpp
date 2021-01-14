@@ -180,10 +180,11 @@ namespace Maximilian
 		 * @tparam Handle Type allow: snd_pcm_t
 		 * @param _handle Handle for the PCM device.
 		 * @param index Value 0 for Playback, any other value for Record.
-		 * @param result Number of frames actually written in the PCM device.
+		 * @param totalFramesWritten Number of frames actually written in the PCM device.
 		 */
 		template<class Handle>
-		void verifyUnderRunOrError(Handle _handle, int index, const std::int64_t result);
+		void
+		verifyUnderRunOrError(Handle _handle, int index, const std::int64_t totalFramesWritten);
 	};
 }
 
