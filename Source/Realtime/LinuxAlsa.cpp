@@ -930,6 +930,27 @@ void LinuxAlsa::tryOutput(Handle _handle)
 template<class Handle>
 void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, const std::int64_t result)
 {
+	// A Buffer underrun is a common problem that occurs when burning data into
+	// a CD. It happens when the computer is not supplying data quickly enough
+	// to the CD writer for it to record the data properly. Recording data to a
+	// CD-R is a real-time process that must run nonstop without interruption of
+	// the signal. A computer will typically transfer the data to the CD-R
+	// faster than it is needed. The CD-R drive stores the incoming data in a
+	// buffer as a reserve of data waiting to be written so that minor
+	// interruptions or slowdowns in the data flow will not interrupt the
+	// writing process. The larger the buffer, the greater the chances of a
+	// successful transfer. A buffer underrun error occurs when the flow of data
+	// from the original source, such as a hard drive or a CD-ROM drive, was
+	// interrupted long enough for the recorder’s buffer to empty. The writing
+	// action is stopped when this happens, and the recordable disc may be
+	// ruined during a write operation.
+
+	// For verify the buffer underrun needed determine:
+	// 	1. The total of frames written in the PCM device.
+	// 	2. The size of buffer size (frames).
+	// With this two variables, the operation for determine if a buffer underrun
+	// has occurred is that the total of frames written in the PCM device will
+	// be minor than the buffer size (frames).
 	if (result < (int)stream_.bufferSize)
 	{
 		// Either an error or under-run occurred.
