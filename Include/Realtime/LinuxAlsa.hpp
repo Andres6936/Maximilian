@@ -174,6 +174,14 @@ namespace Maximilian
 		template<class Handle>
 		void checkStreamLatencyOf(Handle _handle, int index);
 
+		/**
+		 * Verify condition of buffer underrun or overrun.
+		 *
+		 * @tparam Handle Type allow: snd_pcm_t
+		 * @param _handle Handle for the PCM device.
+		 * @param index Value 0 for Playback, any other value for Record.
+		 * @param result Number of frames actually writen in the PCM device.
+		 */
 		template<class Handle>
 		void verifyUnderRunOrError(Handle _handle, int index, int result);
 	};

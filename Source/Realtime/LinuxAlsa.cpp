@@ -916,6 +916,8 @@ void LinuxAlsa::tryOutput(Handle _handle)
 	// Write samples to device in interleaved/non-interleaved format.
 	if (stream_.deviceInterleaved[0])
 	{
+		// Write bufferSize frames from buffer data to the PCM device pointed to
+		// by pcm_handle. Returns the number of frames actually written.
 		result = snd_pcm_writei(_handle, buffer.data(), stream_.bufferSize);
 	}
 
