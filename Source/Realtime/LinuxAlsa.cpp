@@ -987,11 +987,7 @@ void LinuxAlsa::checkStreamLatencyOf(Handle _handle, int index)
 
 void LinuxAlsa::getPCMDevice()
 {
-	// Verify the precondition. See docs of this method in the header.
-	if (phandle == nullptr or hw_params == nullptr)
-	{
-		throw std::string{ "Precondition not satisfied." };
-	}
+	verifyGeneralPrecondition();
 
 	if (const std::int32_t result = snd_pcm_hw_params_any(phandle, hw_params); result < 0)
 	{
@@ -1002,11 +998,7 @@ void LinuxAlsa::getPCMDevice()
 
 void LinuxAlsa::setHWInterleaved(const std::int32_t index)
 {
-	// Verify the precondition. See docs of this method in the header.
-	if (phandle == nullptr or hw_params == nullptr)
-	{
-		throw std::string{ "Precondition not satisfied." };
-	}
+	verifyGeneralPrecondition();
 
 	// Set access ... check user preference.
 	if (getOptionsFlags() == AudioStreamFlags::Non_Interleaved)
@@ -1061,11 +1053,7 @@ void LinuxAlsa::setHWInterleaved(const std::int32_t index)
 
 void LinuxAlsa::setHWFormat(const std::int32_t index)
 {
-	// Verify the precondition. See docs of this method in the header.
-	if (phandle == nullptr or hw_params == nullptr)
-	{
-		throw std::string{ "Precondition not satisfied." };
-	}
+	verifyGeneralPrecondition();
 
 	// Determine how to set the device format.
 	stream_.userFormat = getAudioFormat();
@@ -1123,11 +1111,7 @@ void LinuxAlsa::setHWFormat(const std::int32_t index)
 
 void LinuxAlsa::setHWSampleRate()
 {
-	// Verify the precondition. See docs of this method in the header.
-	if (phandle == nullptr or hw_params == nullptr)
-	{
-		throw std::string{ "Precondition not satisfied." };
-	}
+	verifyGeneralPrecondition();
 
 	// Is needed the pointer for pass for argument to
 	// function { snd_pcm_hw_params_set_rate_near }
@@ -1147,11 +1131,7 @@ void LinuxAlsa::setHWSampleRate()
 
 void LinuxAlsa::setHWChannels(const StreamParameters& parameters, const std::int32_t index)
 {
-	// Verify the precondition. See docs of this method in the header.
-	if (phandle == nullptr or hw_params == nullptr)
-	{
-		throw std::string{ "Precondition not satisfied." };
-	}
+	verifyGeneralPrecondition();
 
 	// Determine the number of channels for this device.  We support a possible
 	// minimum device channel number > than the value requested by the user.
@@ -1189,11 +1169,7 @@ void LinuxAlsa::setHWChannels(const StreamParameters& parameters, const std::int
 
 void LinuxAlsa::setHWPeriodSize(const StreamMode mode)
 {
-	// Verify the precondition. See docs of this method in the header.
-	if (phandle == nullptr or hw_params == nullptr)
-	{
-		throw std::string{ "Precondition not satisfied." };
-	}
+	verifyGeneralPrecondition();
 
 	// Set the buffer (or period) size.
 	int dir = 0;
@@ -1238,11 +1214,7 @@ void LinuxAlsa::setHWPeriodSize(const StreamMode mode)
 
 void LinuxAlsa::buildHW()
 {
-	// Verify the precondition. See docs of this method in the header.
-	if (phandle == nullptr or hw_params == nullptr)
-	{
-		throw std::string{ "Precondition not satisfied." };
-	}
+	verifyGeneralPrecondition();
 
 	// Install the hardware configuration
 	// The hardware parameters are not actually made active until we call the
@@ -1257,4 +1229,18 @@ void LinuxAlsa::buildHW()
 	fprintf(stderr, "\nRtApiAlsa: dump hardware params after installation:\n\n");
   snd_pcm_hw_params_dump( hw_params, out );
 #endif
+}
+
+void LinuxAlsa::verifyGeneralPrecondition()
+{
+	// The code inside of this block is executed only if the the type of build
+	// is Debug, otherwise is skip.
+	if constexpr (TypeBuild::Current == TypeBuild::Debug)
+	{
+		// Verify the precondition. See docs of this method in the header.
+		if (phandle == nullptr or hw_params == nullptr)
+		{
+			throw std::string{ "Precondition not satisfied." };
+		}
+	}
 }

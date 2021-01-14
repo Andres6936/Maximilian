@@ -58,6 +58,15 @@ namespace Maximilian
 	private:
 
 		/**
+		 * Verify the precondition general for several methods.
+		 *
+		 * This set of preconditions are:
+		 * 	1. The PCM device has been initialized.
+		 * 	2. The Hardware parameters has been initialized.
+		 */
+		void verifyGeneralPrecondition();
+
+		/**
 		 * Install the hardware configuration.
 		 *
 		 * The hardware parameters are not actually made active until the call to this function.
