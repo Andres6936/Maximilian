@@ -951,39 +951,47 @@ void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, const std::int6
 	// With this two variables, the operation for determine if a buffer underrun
 	// has occurred is that the total of frames written in the PCM device will
 	// be minor than the buffer size (frames).
-	if (result < (int)stream_.bufferSize)
-	{
-		// Either an error or under-run occurred.
-		if (result == -EPIPE)
-		{
-			snd_pcm_state_t state = snd_pcm_state(_handle);
-			if (state == SND_PCM_STATE_XRUN)
-			{
-				if (index == 0)
-				{
-					alsaHandle.setXRunPlayback(true);
-				}
-				else
-				{
-					alsaHandle.setXRunRecord(true);
-				}
 
-				if (int e = snd_pcm_prepare(_handle) < 0)
-				{
-					Log::Error("Linux Alsa: error preparing device after overrun, {}.",
-							snd_strerror(e));
-				}
+	// If NOT has occurred an buffer overrun exit of function.
+	// The negation of this condition, allow reduce the nesting of function
+	if (not(result < (std::int64_t)stream_.bufferSize))
+	{
+		return;
+	}
+
+	// A buffer overrun detected. Continue the execution of function.
+
+	// Either an error or under-run occurred.
+	if (result == -EPIPE)
+	{
+		snd_pcm_state_t state = snd_pcm_state(_handle);
+
+		if (state == SND_PCM_STATE_XRUN)
+		{
+			if (index == 0)
+			{
+				alsaHandle.setXRunPlayback(true);
 			}
 			else
 			{
-				Log::Error("Linux Alsa: error, current state is {}, {}.",
-						snd_pcm_state_name(state), snd_strerror(result));
+				alsaHandle.setXRunRecord(true);
+			}
+
+			if (int e = snd_pcm_prepare(_handle) < 0)
+			{
+				Log::Error("Linux Alsa: error preparing device after overrun, {}.",
+						snd_strerror(e));
 			}
 		}
 		else
 		{
-			Log::Error("Linux Alsa: audio write/read error, {}.", snd_strerror(result));
+			Log::Error("Linux Alsa: error, current state is {}, {}.",
+					snd_pcm_state_name(state), snd_strerror(result));
 		}
+	}
+	else
+	{
+		Log::Error("Linux Alsa: audio write/read error, {}.", snd_strerror(result));
 	}
 }
 
