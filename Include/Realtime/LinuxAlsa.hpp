@@ -61,21 +61,37 @@ namespace Maximilian
 		 * Install the hardware configuration.
 		 *
 		 * The hardware parameters are not actually made active until the call to this function.
+		 *
+		 * Precondition:
+		 * 	1. The PCM device has been initialized.
+		 * 	2. The Hardware parameters has been initialized.
 		 */
 		void buildHW();
 
 		/**
 		 * Fill the Hardware parameters with default values.
+		 *
+		 * Precondition:
+		 * 	1. The PCM device has been initialized.
+		 * 	2. The Hardware parameters has been initialized.
 		 */
 		void getPCMDevice();
 
 		/**
 		 * Set the sample data rate. Default 44100 bits/second sampling rate (CD quality).
+		 *
+		 * Precondition:
+		 * 	1. The PCM device has been initialized.
+		 * 	2. The Hardware parameters has been initialized.
 		 */
 		void setHWSampleRate();
 
 		/**
 		 * Set the sample data format. Default Float (64 bits).
+		 *
+		 * Precondition:
+		 * 	1. The PCM device has been initialized.
+		 * 	2. The Hardware parameters has been initialized.
 		 *
 		 * @param index Value 0 for OUTPUT, value 1 for INPUT, value 2 for DUPLEX.
 		 */
@@ -84,6 +100,10 @@ namespace Maximilian
 		/**
 		 * Set the period size or buffer size. For default the period size is 1,024.
 		 *
+		 * Precondition:
+		 * 	1. The PCM device has been initialized.
+		 * 	2. The Hardware parameters has been initialized.
+		 *
 		 * @param mode Possibles values: OUTPUT, INPUT and DUPLEX.
 		 */
 		void setHWPeriodSize(const StreamMode mode);
@@ -91,12 +111,20 @@ namespace Maximilian
 		/**
 		 * Set the Interleaved mode.
 		 *
+		 * Precondition:
+		 * 	1. The PCM device has been initialized.
+		 * 	2. The Hardware parameters has been initialized.
+		 *
 		 * @param index Value 0 for OUTPUT, value 1 for INPUT, value 2 for DUPLEX.
 		 */
 		void setHWInterleaved(const std::int32_t index);
 
 		/**
 		 * Set the channel. For default Two channels (stereo).
+		 *
+		 * Precondition:
+		 * 	1. The PCM device has been initialized.
+		 * 	2. The Hardware parameters has been initialized.
 		 *
 		 * @param parameters Stream parameters. Determine the channels for the
 		 *  stream and the first channel.
