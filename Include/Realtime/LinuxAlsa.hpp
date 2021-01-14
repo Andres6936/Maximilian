@@ -22,8 +22,15 @@ namespace Maximilian
 
 		std::atomic_bool isStreamRunning = false;
 
+		/**
+		 * Handle for the PCM device.
+		 */
 		snd_pcm_t* phandle = nullptr;
 
+		/**
+		 * This structure contains information about the hardware and can be
+		 * used to specify the configuration to be used for the PCM stream.
+		 */
 		snd_pcm_hw_params_t* hw_params = nullptr;
 
 	public:
