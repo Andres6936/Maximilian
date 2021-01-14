@@ -840,10 +840,10 @@ template <class Device>
 void LinuxAlsa::tryInput(Device _handle)
 {
 	int channels = 0;
-	int result = 0;
+	std::int64_t result = 0;
 
 	AudioFormat format;
-	std::vector <char> buffer;
+	std::vector<char> buffer;
 
 	// Setup parameters.
 	if (stream_.doConvertBuffer[1])
@@ -887,10 +887,10 @@ template <class Handle>
 void LinuxAlsa::tryOutput(Handle _handle)
 {
 	int channels = 0;
-	int result = 0;
+	std::int64_t result = 0;
 
 	AudioFormat format;
-	std::vector <char> buffer;
+	std::vector<char> buffer;
 
 	// Setup parameters and do buffer conversion if necessary.
 	if (stream_.doConvertBuffer[0])
@@ -927,8 +927,8 @@ void LinuxAlsa::tryOutput(Handle _handle)
 	checkStreamLatencyOf(_handle, 0);
 }
 
-template <class Handle>
-void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, int result)
+template<class Handle>
+void LinuxAlsa::verifyUnderRunOrError(Handle _handle, int index, const std::int64_t result)
 {
 	if (result < (int)stream_.bufferSize)
 	{

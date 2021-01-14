@@ -183,7 +183,7 @@ namespace Maximilian
 		 * @param result Number of frames actually writen in the PCM device.
 		 */
 		template<class Handle>
-		void verifyUnderRunOrError(Handle _handle, int index, int result);
+		void verifyUnderRunOrError(Handle _handle, int index, const std::int64_t result);
 	};
 }
 
