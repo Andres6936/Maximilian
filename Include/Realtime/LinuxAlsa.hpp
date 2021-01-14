@@ -57,18 +57,51 @@ namespace Maximilian
 
 	private:
 
+		/**
+		 * Install the hardware configuration.
+		 *
+		 * The hardware parameters are not actually made active until the call to this function.
+		 */
 		void buildHW();
 
+		/**
+		 * Fill the Hardware parameters with default values.
+		 */
 		void getPCMDevice();
 
+		/**
+		 * Set the sample data rate. Default 44100 bits/second sampling rate (CD quality).
+		 */
 		void setHWSampleRate();
 
+		/**
+		 * Set the sample data format. Default Float (64 bits).
+		 *
+		 * @param index Value 0 for OUTPUT, value 1 for INPUT, value 2 for DUPLEX.
+		 */
 		void setHWFormat(const std::int32_t index);
 
+		/**
+		 * Set the period size or buffer size. For default the period size is 1,024.
+		 *
+		 * @param mode Possibles values: OUTPUT, INPUT and DUPLEX.
+		 */
 		void setHWPeriodSize(const StreamMode mode);
 
+		/**
+		 * Set the Interleaved mode.
+		 *
+		 * @param index Value 0 for OUTPUT, value 1 for INPUT, value 2 for DUPLEX.
+		 */
 		void setHWInterleaved(const std::int32_t index);
 
+		/**
+		 * Set the channel. For default Two channels (stereo).
+		 *
+		 * @param parameters Stream parameters. Determine the channels for the
+		 *  stream and the first channel.
+		 * @param index Value 0 for OUTPUT, value 1 for INPUT, value 2 for DUPLEX.
+		 */
 		void setHWChannels(const StreamParameters& parameters, const std::int32_t index);
 
 		bool probeDeviceOpen(const StreamMode mode,

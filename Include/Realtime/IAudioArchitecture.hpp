@@ -31,6 +31,7 @@ namespace Maximilian
 
 		/**
 		 * The desired sample rate (sample frames per second).
+		 * For default, 44,100 bits/second sampling rate (CD quality).
 		 */
 		unsigned int sampleRate = 44'100;
 
