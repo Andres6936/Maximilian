@@ -390,15 +390,6 @@ foundDevice:
 
 	snd_pcm_hw_params_alloca(&hw_params);
 
-	if constexpr (TypeBuild::Current == TypeBuild::Debug)
-	{
-		snd_output_t* out;
-		snd_output_stdio_attach(&out, stderr, 0);
-		snd_pcm_hw_params_dump(hw_params, out);
-
-		Log::Debug("Dump hardware params just after device open.");
-	}
-
 	try
 	{
 		getPCMDevice();
