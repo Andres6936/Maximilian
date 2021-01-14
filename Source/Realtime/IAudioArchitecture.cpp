@@ -282,14 +282,14 @@ void IAudioArchitecture::formatBufferAccordToTypesOfDate(T _type, O* outBuffer, 
 	if (info.inFormat == AudioFormat::SInt8)
 	{
 		auto* in = (signed char*)inBuffer;
-		T scale = 1.0 / 127.5;
+		T scale = 1.0 / (INT8_MAX + 0.5f);
 
 		formatBufferToScale(scale, out, in, info);
 	}
 	else if (info.inFormat == AudioFormat::SInt16)
 	{
 		auto* in = (Int16*)inBuffer;
-		T scale = 1.0 / 32767.5;
+		T scale = 1.0 / (INT16_MAX + 0.5f);
 
 		formatBufferToScale(scale, out, in, info);
 	}
