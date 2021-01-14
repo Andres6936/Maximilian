@@ -57,19 +57,19 @@ namespace Maximilian
 
 	private:
 
-		LinuxAlsa& buildHW();
+		void buildHW();
 
-		LinuxAlsa& getPCMDevice();
+		void getPCMDevice();
 
-		LinuxAlsa& setHWSampleRate();
+		void setHWSampleRate();
 
-		LinuxAlsa& setHWFormat(const std::int32_t index);
+		void setHWFormat(const std::int32_t index);
 
-		LinuxAlsa& setHWPeriodSize(const StreamMode mode);
+		void setHWPeriodSize(const StreamMode mode);
 
-		LinuxAlsa& setHWInterleaved(const std::int32_t index);
+		void setHWInterleaved(const std::int32_t index);
 
-		LinuxAlsa& setHWChannels(const StreamParameters& parameters, const std::int32_t index);
+		void setHWChannels(const StreamParameters& parameters, const std::int32_t index);
 
 		bool probeDeviceOpen(const StreamMode mode,
 				const StreamParameters& parameters) noexcept override;

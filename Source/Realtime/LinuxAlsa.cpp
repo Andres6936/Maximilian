@@ -401,13 +401,13 @@ foundDevice:
 
 	try
 	{
-		getPCMDevice()
-				.setHWInterleaved(index)
-				.setHWFormat(index)
-				.setHWSampleRate()
-				.setHWChannels(parameters, index)
-				.setHWPeriodSize(mode)
-				.buildHW();
+		getPCMDevice();
+		setHWInterleaved(index);
+		setHWFormat(index);
+		setHWSampleRate();
+		setHWChannels(parameters, index);
+		setHWPeriodSize(mode);
+		buildHW();
 	}
 	catch (const std::string& message)
 	{
@@ -985,18 +985,16 @@ void LinuxAlsa::checkStreamLatencyOf(Handle _handle, int index)
 	}
 }
 
-LinuxAlsa& LinuxAlsa::getPCMDevice()
+void LinuxAlsa::getPCMDevice()
 {
 	if (const std::int32_t result = snd_pcm_hw_params_any(phandle, hw_params); result < 0)
 	{
 		throw flossy::format("Error getting PCM device () parameters, {}.",
 				snd_strerror(result));
 	}
-
-	return *this;
 }
 
-LinuxAlsa& LinuxAlsa::setHWInterleaved(const std::int32_t index)
+void LinuxAlsa::setHWInterleaved(const std::int32_t index)
 {
 	// Set access ... check user preference.
 	if (getOptionsFlags() == AudioStreamFlags::Non_Interleaved)
@@ -1047,11 +1045,9 @@ LinuxAlsa& LinuxAlsa::setHWInterleaved(const std::int32_t index)
 			stream_.deviceInterleaved[index] = true;
 		}
 	}
-
-	return *this;
 }
 
-LinuxAlsa& LinuxAlsa::setHWFormat(const std::int32_t index)
+void LinuxAlsa::setHWFormat(const std::int32_t index)
 {
 	// Determine how to set the device format.
 	stream_.userFormat = getAudioFormat();
@@ -1105,11 +1101,9 @@ LinuxAlsa& LinuxAlsa::setHWFormat(const std::int32_t index)
 					snd_strerror(result));
 		}
 	}
-
-	return *this;
 }
 
-LinuxAlsa& LinuxAlsa::setHWSampleRate()
+void LinuxAlsa::setHWSampleRate()
 {
 	// Is needed the pointer for pass for argument to
 	// function { snd_pcm_hw_params_set_rate_near }
@@ -1125,11 +1119,9 @@ LinuxAlsa& LinuxAlsa::setHWSampleRate()
 	{
 		throw flossy::format("Error setting sample rate on device (), {}.", snd_strerror(result));
 	}
-
-	return *this;
 }
 
-LinuxAlsa& LinuxAlsa::setHWChannels(const StreamParameters& parameters, const std::int32_t index)
+void LinuxAlsa::setHWChannels(const StreamParameters& parameters, const std::int32_t index)
 {
 	// Determine the number of channels for this device.  We support a possible
 	// minimum device channel number > than the value requested by the user.
@@ -1163,11 +1155,9 @@ LinuxAlsa& LinuxAlsa::setHWChannels(const StreamParameters& parameters, const st
 	{
 		throw flossy::format("Error setting channels for device (), {}.", snd_strerror(result));
 	}
-
-	return *this;
 }
 
-LinuxAlsa& LinuxAlsa::setHWPeriodSize(const StreamMode mode)
+void LinuxAlsa::setHWPeriodSize(const StreamMode mode)
 {
 	// Set the buffer (or period) size.
 	int dir = 0;
@@ -1208,11 +1198,9 @@ LinuxAlsa& LinuxAlsa::setHWPeriodSize(const StreamMode mode)
 
 	stream_.nBuffers = periods;
 	stream_.bufferSize = getBufferFrames();
-
-	return *this;
 }
 
-LinuxAlsa& LinuxAlsa::buildHW()
+void LinuxAlsa::buildHW()
 {
 	// Install the hardware configuration
 	// The hardware parameters are not actually made active until we call the
@@ -1227,6 +1215,4 @@ LinuxAlsa& LinuxAlsa::buildHW()
 	fprintf(stderr, "\nRtApiAlsa: dump hardware params after installation:\n\n");
   snd_pcm_hw_params_dump( hw_params, out );
 #endif
-
-	return *this;
 }
